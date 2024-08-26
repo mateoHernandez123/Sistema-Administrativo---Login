@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import './style.css'; // Asegúrate de que el archivo style.css esté en la misma carpeta o ajusta la ruta según corresponda
 import Swal from 'sweetalert2'; //Libreria de alertas y popups personalizadas
 const Toast = Swal.mixin({
-  toast: true,
-  position: "top-end",
+  toast: false,
+  position: "center",
   showConfirmButton: false,
   timer: 3000,
   timerProgressBar: true,
