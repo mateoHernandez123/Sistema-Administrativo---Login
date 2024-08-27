@@ -2,6 +2,7 @@
   "name": "login",
   "version": "1.0.0",
   "main": "index.js",
+  "homepage": "https://mateohernandez123.github.io/Sistema-Administrativo---Login/build",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
