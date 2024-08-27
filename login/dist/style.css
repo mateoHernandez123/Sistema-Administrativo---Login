@@ -9,11 +9,9 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-image: url('fondo-inicio.jpg');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('fondo-inicio.jpg') no-repeat center/cover;
 }
+
 
 .fondo {
   width: 420px;
