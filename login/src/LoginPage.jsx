@@ -1,9 +1,9 @@
 // eslint-disable-next-line no-unused-vars
-import React, { useState } from 'react';
-import './style.css'; // Asegúrate de que el archivo style.css esté en la misma carpeta o ajusta la ruta según corresponda
+import React, { useState } from "react";
+import "./style.css"; // Asegúrate de que el archivo style.css esté en la misma carpeta o ajusta la ruta según corresponda
 
 const LoginPage = () => {
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
 
   const handleSubmit = (event) => {
@@ -24,11 +24,7 @@ const LoginPage = () => {
         <h1>Sistema Contable</h1>
 
         <div className="input-box">
-          <input
-            type="text"
-            placeholder="Nombre de Usuario"
-            required
-          />
+          <input type="text" placeholder="Nombre de Usuario" required />
           <i className="bx bxs-user"></i>
         </div>
 
@@ -50,7 +46,9 @@ const LoginPage = () => {
           </div>
         )}
 
-        <button type="submit" className="btn">Iniciar Sección</button>
+        <button type="submit" className="btn">
+          Iniciar Sesión
+        </button>
       </form>
     </div>
   );
