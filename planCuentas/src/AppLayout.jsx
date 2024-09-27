@@ -1,6 +1,7 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemText, Box, CssBaseline } from '@mui/material';
 import { Link } from 'react-router-dom'; // Importamos Link para manejar las rutas
+import motoImage from './image/fondo.jpg';
 
 const usuario = "Franco Liciaga";
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box } from '@mui/material';
+import motoImage from './image/fondo.jpg';
 
 const Home = () => {
   return (
@@ -14,11 +15,11 @@ const Home = () => {
     >
       {/* Imagen de una moto */}
       <img
-        src="https://motos.espirituracer.com/archivos/2019/11/honda-cbr-600-rr-2004-4.jpg" // Reemplaza con la URL de tu imagen
+        src={motoImage} // Reemplaza con la URL de tu imagen
         alt="Moto"
         style={{
-          maxWidth: '80%',
-          maxHeight: '80%',
+          maxWidth: '100%',
+          maxHeight: '100%',
         }}
       />
     </Box>
