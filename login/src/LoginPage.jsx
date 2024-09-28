@@ -119,7 +119,7 @@ const LoginPage = () => {
           </div>
         )}
 
-        <button type="submit" className="btn">Iniciar Sección</button>
+        <button type="submit" className="btn">Iniciar Sesión</button>
       </form>
     </div>
   );
