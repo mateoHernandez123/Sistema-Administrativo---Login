@@ -87,12 +87,12 @@ const LoginPage = () => {
     <div className="login-container">
       <div className="fondo">
         <form onSubmit={handleSubmit}>
-          <h1>Sistema Contable</h1>
+          <h1>Abel Hernandez motos🏍️</h1>
 
           <div className="input-box">
             <input
               type="email" //Tipo "email", no "text" para poder revisar si contiene "@"
-              placeholder="Nombre de Usuario"
+              placeholder="Email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}

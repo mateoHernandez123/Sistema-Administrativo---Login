@@ -10,19 +10,19 @@
   align-items: center;
   min-height: 100vh;
   width: 380%;
-  background: url("image/fondo-inicio.jpg") repeat; /* Repite la imagen */
-  /* background-size: 0%; Ajusta según sea necesario */
+  background: url("image/Fondo.jpg") no-repeat center;
+  background-size: cover;
 }
 
 .fondo {
   width: 420px;
-  padding: 30px 40px;
+  padding: 20px 30px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(15px);
   box-shadow: 0 0 13px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
   color: #fff;
-  z-index: 1; /* Asegura que el fondo esté detrás del contenedor de formulario */
+  z-index: 1;
 }
 
 .fondo h1 {
