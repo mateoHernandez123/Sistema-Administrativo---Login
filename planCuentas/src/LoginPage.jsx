@@ -1,14 +1,14 @@
-// eslint-disable-next-line no-unused-vars
 import React, { useState } from "react";
 import "./loginpage.css"; // Asegúrate de que el archivo style.css esté en la misma carpeta o ajusta la ruta según corresponda
-import Swal from "sweetalert2"; //Libreria de alertas y popups personalizadas
+import Swal from "sweetalert2"; // Libreria de alertas y popups personalizadas
 import CryptoJS from "crypto-js";
+import { useNavigate } from "react-router-dom";
 
 const ip = "localhost:5000";
 
 const Toast = Swal.mixin({
   toast: true,
-  position: "top-end",
+  position: "bottom-end",
   showConfirmButton: false,
   timer: 3000,
   timerProgressBar: true,
@@ -16,7 +16,7 @@ const Toast = Swal.mixin({
     toast.onmouseenter = Swal.stopTimer;
     toast.onmouseleave = Swal.resumeTimer;
   },
-}); //seteo de la alerta que aparece en el login
+}); // seteo de la alerta que aparece en el login
 
 function encriptar(password) {
   const hash = CryptoJS.SHA256(password);
@@ -28,6 +28,7 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
+  const navigate = useNavigate(); // Hook para redirigir
 
   async function login(mail, clave) {
     const hashClave = encriptar(clave);
@@ -43,19 +44,22 @@ const LoginPage = () => {
     });
 
     fetchLogin = await fetchLogin.json();
-
     return fetchLogin;
   }
 
   const handleSubmit = (e) => {
     e.preventDefault(); // Evita el envío del formulario
 
-    // Aquí podrías manejar el envío del formulario, como hacer una petición a un servidor
     login(email, password)
       .then((resultadoLogin) => {
         if (resultadoLogin.ERROR) {
-          setError(false);
+          setError(true);
           console.log(resultadoLogin.MENSAJE);
+          Toast.fire({
+            icon: "error",
+            title: "Error de credenciales",
+            text: resultadoLogin.MENSAJE,
+          });
         } else {
           if (resultadoLogin.ESTADO) {
             setError(false);
@@ -63,14 +67,16 @@ const LoginPage = () => {
               icon: "success",
               title: "Sesión iniciada",
               text: resultadoLogin.MENSAJE,
-            }); //Disparo de la alerta login exitoso
+            });
+            // Redirigir a la página principal
+            navigate("/");
           } else {
             setError(true);
             Toast.fire({
               icon: "error",
               title: "Error de credenciales",
               text: resultadoLogin.MENSAJE,
-            }); //Disparo de la alerta login exitoso
+            });
           }
         }
       })
@@ -78,7 +84,7 @@ const LoginPage = () => {
         console.log(err);
         Toast.fire({
           icon: "error",
-          title: "Error inseperado.",
+          title: "Error inesperado.",
         });
       });
   };
@@ -91,7 +97,7 @@ const LoginPage = () => {
 
           <div className="input-box">
             <input
-              type="email" //Tipo "email", no "text" para poder revisar si contiene "@"
+              type="email" // Tipo "email", no "text" para poder revisar si contiene "@"
               placeholder="Email"
               required
               value={email}
@@ -119,7 +125,7 @@ const LoginPage = () => {
           )}
 
           <button type="submit" className="btn">
-            Iniciar Sección
+            Iniciar Sesión
           </button>
         </form>
       </div>
