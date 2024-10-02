@@ -12,7 +12,7 @@ import {
 import { Link } from "react-router-dom"; // Importamos Link para manejar las rutas
 //import motoImage from './image/fondo.jpg';
 
-const usuario = "Franco Liciaga";
+const usuario = "Mateo Hernandez";
 
 const opcionesMenu = [
   { text: "Cuentas", path: "/cuentas" },
