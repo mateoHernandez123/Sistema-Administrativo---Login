@@ -1,20 +1,34 @@
-import React, { useState } from 'react';
-import { TextField, Button, FormControl, Select, MenuItem, InputLabel, Checkbox, FormControlLabel, Typography, Box } from '@mui/material';
+import { useState } from "react";
+import {
+  TextField,
+  Button,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
+  Checkbox,
+  FormControlLabel,
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  Grid,
+} from "@mui/material";
 
 const FormularioCuenta = () => {
   const [cuentas, setCuentas] = useState([]);
   const [formData, setFormData] = useState({
-    codigo: '',
-    nombre: '',
-    descripcion: '',
-    monto: '',
-    tipo: '',
-    habilitada: true
+    codigo: "",
+    nombre: "",
+    descripcion: "",
+    monto: "",
+    tipo: "",
+    habilitada: true,
   });
 
   const [errors, setErrors] = useState({
     codigo: false,
-    monto: false
+    monto: false,
   });
 
   const handleInputChange = (e) => {
@@ -40,15 +54,20 @@ const FormularioCuenta = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!errors.codigo && !errors.monto && formData.codigo !== '' && formData.monto !== '') {
+    if (
+      !errors.codigo &&
+      !errors.monto &&
+      formData.codigo !== "" &&
+      formData.monto !== ""
+    ) {
       setCuentas([...cuentas, formData]);
       setFormData({
-        codigo: '',
-        nombre: '',
-        descripcion: '',
-        monto: '',
-        tipo: '',
-        habilitada: true
+        codigo: "",
+        nombre: "",
+        descripcion: "",
+        monto: "",
+        tipo: "",
+        habilitada: true,
       });
     }
   };
@@ -56,12 +75,12 @@ const FormularioCuenta = () => {
   return (
     <Box
       sx={{
-        backgroundColor: '#ffeb3b',
-        color: 'black',
+        backgroundColor: "#ffeb3b",
+        color: "black",
         padding: 4,
         borderRadius: 2,
-        maxWidth: '600px',
-        margin: 'auto'
+        maxWidth: "600px",
+        margin: "auto",
       }}
     >
       <Typography variant="h4" sx={{ marginBottom: 2 }}>
@@ -106,7 +125,11 @@ const FormularioCuenta = () => {
           sx={{ marginBottom: 2 }}
           required
           error={errors.monto}
-          helperText={errors.monto ? "Debe ser un número decimal válido con hasta 2 decimales" : ""}
+          helperText={
+            errors.monto
+              ? "Debe ser un número decimal válido con hasta 2 decimales"
+              : ""
+          }
         />
         <FormControl fullWidth sx={{ marginBottom: 2 }}>
           <InputLabel>Tipo</InputLabel>
@@ -132,14 +155,14 @@ const FormularioCuenta = () => {
               color="primary"
             />
           }
-          label={formData.habilitada ? 'Habilitada' : 'Deshabilitada'}
+          label={formData.habilitada ? "Habilitada" : "Deshabilitada"}
         />
 
         <Button
           variant="contained"
           type="submit"
           fullWidth
-          sx={{ backgroundColor: 'black', color: 'yellow', marginTop: 2 }}
+          sx={{ backgroundColor: "#3b3a31", color: "white", marginTop: 2 }}
           disabled={errors.codigo || errors.monto}
         >
           Agregar Cuenta
@@ -150,14 +173,32 @@ const FormularioCuenta = () => {
         Cuentas Agregadas:
       </Typography>
       {cuentas.length > 0 ? (
-        <ul>
+        <Grid container spacing={2} sx={{ marginTop: 2 }}>
           {cuentas.map((cuenta, index) => (
-            <li key={index}>
-              {cuenta.codigo} - {cuenta.nombre} - {cuenta.tipo} - {cuenta.monto} -{' '}
-              {cuenta.habilitada ? 'Habilitada' : 'Deshabilitada'}
-            </li>
+            <Grid item xs={12} key={index}>
+              <Card
+                sx={{
+                  backgroundColor: "#3b3a31",
+                  color: "#fff",
+                  border: "2px solid #ffeb3b",
+                }}
+              >
+                <CardContent>
+                  <Typography variant="h6" sx={{ textAlign: "center" }}>
+                    {cuenta.nombre} - {cuenta.codigo}
+                  </Typography>
+                  <Typography variant="body1">Tipo: {cuenta.tipo}</Typography>
+                  <Typography variant="body1">
+                    Monto: ${cuenta.monto}
+                  </Typography>
+                  <Typography variant="body1">
+                    {cuenta.habilitada ? "Habilitada" : "Deshabilitada"}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
           ))}
-        </ul>
+        </Grid>
       ) : (
         <Typography>No hay cuentas agregadas.</Typography>
       )}

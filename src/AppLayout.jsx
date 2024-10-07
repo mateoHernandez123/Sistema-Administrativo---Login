@@ -9,18 +9,44 @@ import {
   Box,
   CssBaseline,
 } from "@mui/material";
-import { Link } from "react-router-dom"; // Importamos Link para manejar las rutas
-//import motoImage from './image/fondo.jpg';
+import { Link } from "react-router-dom";
 
 const usuario = "Mateo Hernandez";
+const rolUsuario = "admin"; 
+// Rol del usuario, puede cambiar según quién esté logueado
 
 const opcionesMenu = [
   { text: "Cuentas", path: "/cuentas" },
   { text: "Asientos", path: "/asientos" },
+  { text: "Diarios", path: "/diarios"},
   { text: "Mayores", path: "/mayores" },
   { text: "Resultados", path: "/resultados" },
   { text: "Usuarios", path: "/usuarios" },
 ];
+
+const rolesPermisos = {
+  admin: {
+    Cuentas: true,
+    Asientos: true,
+    Diarios: true,
+    Mayores: true,
+    Resultados: true,
+    Usuarios: true,
+  },
+  usuario: {
+    Cuentas: true,
+    Asientos: true,
+    Diarios: true,
+    Mayores: true,
+    Resultados: false,
+    Usuarios: false,
+  },
+};
+
+// Filtrar opciones del menú según el rol del usuario
+const opcionesMenuFiltradas = opcionesMenu.filter(
+  (item) => rolesPermisos[rolUsuario][item.text]
+);
 
 const drawerWidth = 240;
 
@@ -29,7 +55,6 @@ const AppLayout = ({ children }) => {
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
 
-      {/* Cabecera */}
       <AppBar
         position="fixed"
         sx={{
@@ -46,7 +71,6 @@ const AppLayout = ({ children }) => {
         </Toolbar>
       </AppBar>
 
-      {/* Barra lateral */}
       <Drawer
         variant="permanent"
         sx={{
@@ -60,11 +84,10 @@ const AppLayout = ({ children }) => {
           },
         }}
       >
-        {/* Botón de Home (Logo de la moto) */}
         <Link to="/" style={{ textDecoration: "none" }}>
           <Box
             sx={{
-              backgroundColor: "yellow", // Fondo amarillo
+              backgroundColor: "yellow",
               padding: 2,
               display: "flex",
               justifyContent: "center",
@@ -75,7 +98,7 @@ const AppLayout = ({ children }) => {
             <Typography
               sx={{
                 fontSize: 30,
-                color: "black", // Moto en negro
+                color: "black",
               }}
             >
               🏍️
@@ -83,22 +106,18 @@ const AppLayout = ({ children }) => {
           </Box>
         </Link>
 
-        {/* Lista de opciones del menú */}
+        {/* Renderizar el menú filtrado según los permisos */}
         <Box sx={{ overflow: "auto" }}>
           <List>
-            {opcionesMenu.map((item, index) => (
+            {opcionesMenuFiltradas.map((item, index) => (
               <ListItem button component={Link} to={item.path} key={index}>
-                <ListItemText
-                  primary={item.text}
-                  sx={{ color: "yellow" }} /* Color de la tipografía */
-                />
+                <ListItemText primary={item.text} sx={{ color: "yellow" }} />
               </ListItem>
             ))}
           </List>
         </Box>
       </Drawer>
 
-      {/* Contenido principal */}
       <Box
         component="main"
         sx={{

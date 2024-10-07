@@ -7,6 +7,7 @@ import ListaResultados from "./ListaResultados";
 import ListaUsuarios from "./ListaUsuarios";
 import Home from "./Home";
 import LoginPage from "./LoginPage";
+import ListaLibroDiario from "./ListaLibroDiario";
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
               <Routes>
                 <Route path="/cuentas" element={<FormularioCuenta />} />
                 <Route path="/asientos" element={<FormularioAsiento />} />
+                <Route path="/diarios" element={<ListaLibroDiario />} />
                 <Route path="/mayores" element={<ListaMayores />} />
                 <Route path="/resultados" element={<ListaResultados />} />
                 <Route path="/usuarios" element={<ListaUsuarios />} />

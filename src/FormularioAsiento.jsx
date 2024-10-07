@@ -1,33 +1,43 @@
-import React, { useState } from 'react';
-import { TextField, Button, Box, Typography, Grid } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { useState } from "react";
+import {
+  TextField,
+  Button,
+  Box,
+  Typography,
+  Grid,
+  IconButton,
+  Alert,
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const FormularioAsiento = () => {
   const [filas, setFilas] = useState([
-    { cuenta: '', debe: '', haber: '' } // Una fila inicial
+    { cuenta: "", debe: "", haber: "" }, // Una fila inicial
   ]);
-  
-  const [fecha, setFecha] = useState('');
+
+  const [fecha, setFecha] = useState("");
+  const [error, setError] = useState(""); // Estado para manejar el error de sumatoria
 
   // Manejar el cambio en los campos de una fila
   const handleFilaChange = (index, event) => {
     const { name, value } = event.target;
     const nuevasFilas = [...filas];
-    
+
     // Si cambia el campo "Debe", poner "Haber" en 0
-    if (name === 'debe') {
+    if (name === "debe") {
       nuevasFilas[index].debe = value;
-      nuevasFilas[index].haber = '0'; // Establecer "Haber" en 0 cuando "Debe" cambia
+      nuevasFilas[index].haber = "0"; // Establecer "Haber" en 0 cuando "Debe" cambia
     }
-    
+
     // Si cambia el campo "Haber", poner "Debe" en 0
-    if (name === 'haber') {
+    if (name === "haber") {
       nuevasFilas[index].haber = value;
-      nuevasFilas[index].debe = '0'; // Establecer "Debe" en 0 cuando "Haber" cambia
+      nuevasFilas[index].debe = "0"; // Establecer "Debe" en 0 cuando "Haber" cambia
     }
 
     // Para cambiar el valor de "Cuenta" normalmente
-    if (name === 'cuenta') {
+    if (name === "cuenta") {
       nuevasFilas[index].cuenta = value;
     }
 
@@ -36,27 +46,58 @@ const FormularioAsiento = () => {
 
   // Agregar una nueva fila
   const agregarFila = () => {
-    setFilas([...filas, { cuenta: '', debe: '', haber: '' }]);
+    setFilas([...filas, { cuenta: "", debe: "", haber: "" }]);
+  };
+
+  // Eliminar una fila
+  const eliminarFila = (index) => {
+    const nuevasFilas = filas.filter((_, i) => i !== index);
+    setFilas(nuevasFilas);
+  };
+
+  // Calcular la sumatoria de las columnas "Debe" y "Haber"
+  const calcularSumatorias = () => {
+    const totalDebe = filas.reduce(
+      (sum, fila) => sum + parseFloat(fila.debe || 0),
+      0
+    );
+    const totalHaber = filas.reduce(
+      (sum, fila) => sum + parseFloat(fila.haber || 0),
+      0
+    );
+    return { totalDebe, totalHaber };
   };
 
   // Manejar el envío del formulario
   const crearAsiento = (event) => {
     event.preventDefault();
-    console.log('Fecha:', fecha);
-    console.log('Filas:', filas);
+
+    const { totalDebe, totalHaber } = calcularSumatorias();
+
+    if (totalDebe !== totalHaber) {
+      setError(
+        `La sumatoria del Debe (${totalDebe}) debe ser igual a la del Haber (${totalHaber}).`
+      );
+      return; // No permitir el envío del formulario
+    }
+
+    setError(""); // Limpiar el error si todo está bien
+    console.log("Fecha:", fecha);
+    console.log("Filas:", filas);
+    console.log("Asiento creado correctamente");
     // Aquí puedes manejar el envío de datos al backend o la lógica que necesites
   };
 
   return (
     <Box
       sx={{
-        backgroundColor: '#ffeb3b',
-        color: 'black',
+        backgroundColor: "#ffeb3b",
+        color: "black",
         padding: 4,
         borderRadius: 2,
-        width: '100%',          
-        maxWidth: 'none',
-        margin: 'auto',
+        width: "100%",
+        maxWidth: "none",
+        margin: "auto",
       }}
     >
       <Typography variant="h4" sx={{ marginBottom: 2 }}>
@@ -79,10 +120,10 @@ const FormularioAsiento = () => {
           required
         />
 
-        {/* Fila con los campos de cuenta, debe y haber */}
+        {/* Fila con los campos de cuenta, debe, haber, y eliminar */}
         {filas.map((fila, index) => (
           <Grid container spacing={2} key={index} sx={{ marginBottom: 2 }}>
-            <Grid item xs={6}>
+            <Grid item xs={5}>
               <TextField
                 label="Cuenta"
                 name="cuenta"
@@ -99,7 +140,10 @@ const FormularioAsiento = () => {
                 value={fila.debe}
                 onChange={(event) => handleFilaChange(index, event)}
                 fullWidth
-                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*([.][0-9]{0,2})?' }}
+                inputProps={{
+                  inputMode: "numeric",
+                  pattern: "[0-9]*([.][0-9]{0,2})?",
+                }}
                 required
               />
             </Grid>
@@ -110,19 +154,42 @@ const FormularioAsiento = () => {
                 value={fila.haber}
                 onChange={(event) => handleFilaChange(index, event)}
                 fullWidth
-                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*([.][0-9]{0,2})?' }}
+                inputProps={{
+                  inputMode: "numeric",
+                  pattern: "[0-9]*([.][0-9]{0,2})?",
+                }}
                 required
               />
             </Grid>
+            <Grid
+              item
+              xs={1}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <IconButton onClick={() => eliminarFila(index)} color="error">
+                <DeleteIcon />
+              </IconButton>
+            </Grid>
           </Grid>
         ))}
+
+        {/* Mostrar el mensaje de error si la sumatoria no es igual */}
+        {error && (
+          <Alert severity="error" sx={{ marginBottom: 2 }}>
+            {error}
+          </Alert>
+        )}
 
         {/* Botón para agregar una fila nueva */}
         <Button
           variant="outlined"
           onClick={agregarFila}
           fullWidth
-          sx={{ color: 'black', borderColor: 'black', marginBottom: 2 }}
+          sx={{ color: "black", borderColor: "black", marginBottom: 2 }}
           startIcon={<AddIcon />}
         >
           Agregar Fila
@@ -133,7 +200,7 @@ const FormularioAsiento = () => {
           variant="contained"
           type="submit"
           fullWidth
-          sx={{ backgroundColor: 'black', color: 'yellow', marginTop: 2 }}
+          sx={{ backgroundColor: "#3b3a31", color: "white", marginTop: 2 }}
         >
           Crear Asiento
         </Button>
