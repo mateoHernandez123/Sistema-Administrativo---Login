@@ -38,7 +38,7 @@ const ListaResultados = () => {
 
   return (
     <Box sx={{ padding: 4 }}>
-      <Typography variant="h4" sx={{ fontSize: "2rem" }}>
+      <Typography variant="h4" sx={{ fontSize: "2rem", textAlign: "center" }}>
         Lista de Resultados
       </Typography>
 
@@ -55,7 +55,10 @@ const ListaResultados = () => {
       />
 
       {/* Estado de Resultados */}
-      <Typography variant="h5" sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
+      <Typography
+        variant="h5"
+        sx={{ textAlign: "center", fontWeight: "bold", fontSize: "1.5rem" }}
+      >
         Estado de Resultados
       </Typography>
       <TableContainer component={Paper} sx={{ backgroundColor: "#ffeb3b" }}>

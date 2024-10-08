@@ -15,7 +15,12 @@ const PatrimonioNeto = ({ datos, titulo }) => {
     <>
       <Typography
         variant="h5"
-        sx={{ fontWeight: "bold", fontSize: "1.5rem", marginTop: 3 }}
+        sx={{
+          fontWeight: "bold",
+          fontSize: "1.5rem",
+          marginTop: 3,
+          textAlign: "center",
+        }}
       >
         {titulo}
       </Typography>

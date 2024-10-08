@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./loginpage.css"; // Asegúrate de que el archivo style.css esté en la misma carpeta o ajusta la ruta según corresponda
 import Swal from "sweetalert2"; // Libreria de alertas y popups personalizadas
 import CryptoJS from "crypto-js";
 import { useNavigate } from "react-router-dom";
+import EmailIcon from "@mui/icons-material/Email";
+import LockIcon from "@mui/icons-material/Lock";
 
 const ip = "localhost:5000";
 
@@ -103,7 +105,15 @@ const LoginPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <i className="bx bxs-user"></i>
+            <EmailIcon
+              sx={{
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "#fff",
+              }}
+            />
           </div>
 
           <div className="input-box">
@@ -115,7 +125,15 @@ const LoginPage = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <i className="bx bxs-lock-alt"></i>
+            <LockIcon
+              sx={{
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "#fff",
+              }}
+            />
           </div>
 
           {error && (

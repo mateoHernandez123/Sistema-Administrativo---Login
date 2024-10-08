@@ -6,22 +6,29 @@ import {
   List,
   ListItem,
   ListItemText,
+  ListItemIcon,
   Box,
   CssBaseline,
 } from "@mui/material";
 import { Link } from "react-router-dom";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+import BookIcon from "@mui/icons-material/Book";
+import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import PieChartIcon from "@mui/icons-material/PieChart";
+import GroupIcon from "@mui/icons-material/Group";
 
 const usuario = "Mateo Hernandez";
 const rolUsuario = "admin";
 // Rol del usuario, puede cambiar según quién esté logueado
 
 const opcionesMenu = [
-  { text: "Cuentas", path: "/cuentas" },
-  { text: "Asientos", path: "/asientos" },
-  { text: "Diarios", path: "/diarios" },
-  { text: "Mayores", path: "/mayores" },
-  { text: "Resultados", path: "/resultados" },
-  { text: "Usuarios", path: "/usuarios" },
+  { text: "Cuentas", path: "/cuentas", icon: <AccountBalanceIcon /> },
+  { text: "Asientos", path: "/asientos", icon: <ReceiptIcon /> },
+  { text: "Diarios", path: "/diarios", icon: <BookIcon /> },
+  { text: "Mayores", path: "/mayores", icon: <FolderOpenIcon /> },
+  { text: "Resultados", path: "/resultados", icon: <PieChartIcon /> },
+  { text: "Usuarios", path: "/usuarios", icon: <GroupIcon /> },
 ];
 
 const rolesPermisos = {
@@ -111,6 +118,9 @@ const AppLayout = ({ children }) => {
           <List>
             {opcionesMenuFiltradas.map((item, index) => (
               <ListItem button component={Link} to={item.path} key={index}>
+                <ListItemIcon sx={{ color: "yellow" }}>
+                  {item.icon}
+                </ListItemIcon>
                 <ListItemText primary={item.text} sx={{ color: "yellow" }} />
               </ListItem>
             ))}
