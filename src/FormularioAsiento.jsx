@@ -121,6 +121,10 @@ const FormularioAsiento = () => {
           InputLabelProps={{
             shrink: true,
           }}
+          // Establecer el máximo como la fecha actual
+          inputProps={{
+            max: formattedDate,
+          }}
           required
         />
 
