@@ -19,7 +19,10 @@ const TablaMayor = ({ tipoMayor, datosMayor }) => {
       </Typography>
 
       {/* Tabla del mayor */}
-      <TableContainer component={Paper} sx={{ marginBottom: 4 }}>
+      <TableContainer
+        component={Paper}
+        sx={{ backgroundColor: "#ffeb3b", marginBottom: 4 }}
+      >
         <Table
           sx={{ minWidth: 700, fontSize: "1.4rem" }}
           aria-label="tabla mayor"

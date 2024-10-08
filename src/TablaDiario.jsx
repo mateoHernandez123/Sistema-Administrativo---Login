@@ -40,7 +40,10 @@ const TablaDiario = ({ datosLibro }) => {
         Lista de Libro Diario
       </Typography>
 
-      <TableContainer component={Paper} sx={{ marginBottom: 4 }}>
+      <TableContainer
+        component={Paper}
+        sx={{ backgroundColor: "#ffeb3b", marginBottom: 4 }}
+      >
         <Table
           sx={{ minWidth: 700, fontSize: "1.4rem" }}
           aria-label="tabla libro diario"

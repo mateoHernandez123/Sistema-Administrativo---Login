@@ -13,9 +13,9 @@ import {
 const ListaUsuarios = () => {
   // Datos de Usuarios
   const usuarios = [
-    { email: "mateo@hernandez.com", nombre: "Mateo Hernandez", rol: "admin" },
-    { email: "ana@lopez.com", nombre: "Ana Lopez", rol: "usuario" },
-    { email: "juan@perez.com", nombre: "Juan Perez", rol: "usuario" },
+    { email: "mateo@hernandez", nombre: "Mateo Hernandez", rol: "admin" },
+    { email: "ana@lopez", nombre: "Ana Lopez", rol: "usuario" },
+    { email: "juan@perez", nombre: "Juan Perez", rol: "usuario" },
   ];
 
   return (
@@ -24,7 +24,10 @@ const ListaUsuarios = () => {
         Lista de Usuarios
       </Typography>
 
-      <TableContainer component={Paper} sx={{ marginTop: 3 }}>
+      <TableContainer
+        component={Paper}
+        sx={{ backgroundColor: "#ffeb3b", marginTop: 3 }}
+      >
         <Table>
           <TableHead>
             <TableRow>

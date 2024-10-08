@@ -12,13 +12,13 @@ import {
 import { Link } from "react-router-dom";
 
 const usuario = "Mateo Hernandez";
-const rolUsuario = "admin"; 
+const rolUsuario = "admin";
 // Rol del usuario, puede cambiar según quién esté logueado
 
 const opcionesMenu = [
   { text: "Cuentas", path: "/cuentas" },
   { text: "Asientos", path: "/asientos" },
-  { text: "Diarios", path: "/diarios"},
+  { text: "Diarios", path: "/diarios" },
   { text: "Mayores", path: "/mayores" },
   { text: "Resultados", path: "/resultados" },
   { text: "Usuarios", path: "/usuarios" },
@@ -87,7 +87,7 @@ const AppLayout = ({ children }) => {
         <Link to="/" style={{ textDecoration: "none" }}>
           <Box
             sx={{
-              backgroundColor: "yellow",
+              backgroundColor: "#ffeb3b",
               padding: 2,
               display: "flex",
               justifyContent: "center",

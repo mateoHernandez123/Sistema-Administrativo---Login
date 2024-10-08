@@ -9,6 +9,7 @@ import {
   TableRow,
   Paper,
 } from "@mui/material";
+import PatrimonioNeto from "./PatrimonioNeto"; // Asegúrate de que la ruta sea correcta
 
 const ListaResultados = () => {
   // Datos de Patrimonio Neto
@@ -42,87 +43,22 @@ const ListaResultados = () => {
       </Typography>
 
       {/* Tabla de Patrimonio Neto al Inicio */}
-      <Typography
-        variant="h5"
-        sx={{ fontWeight: "bold", marginTop: 3, fontSize: "1.5rem" }}
-      >
-        Patrimonio Neto al Inicio
-      </Typography>
-      <TableContainer component={Paper} sx={{ marginBottom: 4 }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: "bold", fontSize: "1.2rem" }}>
-                Activos
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", fontSize: "1.2rem" }}>
-                Pasivos
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", fontSize: "1.2rem" }}>
-                Patrimonio Neto
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {datosPNInicio.map((fila, index) => (
-              <TableRow key={index}>
-                <TableCell sx={{ fontSize: "1.1rem" }}>
-                  {fila.activos}
-                </TableCell>
-                <TableCell sx={{ fontSize: "1.1rem" }}>
-                  {fila.pasivos}
-                </TableCell>
-                <TableCell sx={{ fontSize: "1.1rem" }}>
-                  {fila.patrimonioNeto}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <PatrimonioNeto
+        datos={datosPNInicio}
+        titulo="Patrimonio Neto al Inicio"
+      />
 
       {/* Tabla de Patrimonio Neto al Cierre */}
-      <Typography variant="h5" sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
-        Patrimonio Neto al Cierre
-      </Typography>
-      <TableContainer component={Paper} sx={{ marginBottom: 4 }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: "bold", fontSize: "1.2rem" }}>
-                Activos
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", fontSize: "1.2rem" }}>
-                Pasivos
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", fontSize: "1.2rem" }}>
-                Patrimonio Neto
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {datosPNCierre.map((fila, index) => (
-              <TableRow key={index}>
-                <TableCell sx={{ fontSize: "1.1rem" }}>
-                  {fila.activos}
-                </TableCell>
-                <TableCell sx={{ fontSize: "1.1rem" }}>
-                  {fila.pasivos}
-                </TableCell>
-                <TableCell sx={{ fontSize: "1.1rem" }}>
-                  {fila.patrimonioNeto}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <PatrimonioNeto
+        datos={datosPNCierre}
+        titulo="Patrimonio Neto al Cierre"
+      />
 
       {/* Estado de Resultados */}
       <Typography variant="h5" sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
         Estado de Resultados
       </Typography>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ backgroundColor: "#ffeb3b" }}>
         <Table>
           <TableHead>
             <TableRow>
@@ -140,7 +76,7 @@ const ListaResultados = () => {
                 <TableCell sx={{ fontSize: "1.1rem" }}>
                   {fila.descripcion}
                 </TableCell>
-                <TableCell sx={{ fontSize: "1.1rem" }}>
+                <TableCell sx={{ fontSize: "1.1rem", textAlign: "center" }}>
                   {fila.cantidad}
                 </TableCell>
               </TableRow>

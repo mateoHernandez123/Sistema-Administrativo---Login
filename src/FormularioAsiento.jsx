@@ -16,7 +16,11 @@ const FormularioAsiento = () => {
     { cuenta: "", debe: "", haber: "" }, // Una fila inicial
   ]);
 
-  const [fecha, setFecha] = useState("");
+  // Establecer la fecha actual en el estado
+  const today = new Date();
+  const formattedDate = today.toISOString().split("T")[0]; // Formato YYYY-MM-DD
+  const [fecha, setFecha] = useState(formattedDate);
+
   const [error, setError] = useState(""); // Estado para manejar el error de sumatoria
 
   // Manejar el cambio en los campos de una fila
