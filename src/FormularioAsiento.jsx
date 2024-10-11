@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   TextField,
   Button,
@@ -10,6 +10,8 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { Context } from "./context/Context";
+import { useNavigate } from "react-router-dom";
 
 const FormularioAsiento = () => {
   const [filas, setFilas] = useState([
@@ -91,6 +93,17 @@ const FormularioAsiento = () => {
     console.log("Asiento creado correctamente");
     // Aquí puedes manejar el envío de datos al backend o la lógica que necesites
   };
+
+
+
+  const { usuarioAutenticado, deslogear} = useContext(Context)
+  const navigate = useNavigate();
+  useEffect(()=>{
+    if(!JSON.parse(localStorage.getItem('UsuarioAutenticado'))){
+      deslogear();
+      navigate('/login', {replace: true})
+    }
+  },[usuarioAutenticado, navigate]);
 
   return (
     <Box

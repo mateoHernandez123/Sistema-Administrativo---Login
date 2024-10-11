@@ -180,7 +180,7 @@ const datosEjemplo = [
   },
 ];
 
-
+  
   return (
     <div>
       <TablaDiario datosLibro={datosEjemplo} />

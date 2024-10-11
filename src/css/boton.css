@@ -1,0 +1,46 @@
+.btn-outline-primary {
+  color: yellow;
+  border-color: yellow;
+}
+
+.btn-outline-primary:hover {
+  color: black;
+  background-color: #ffeb3b;
+  border-color: #ffeb3b;
+}
+
+.btn-outline-primary:focus, .btn-outline-primary.focus {
+  box-shadow: 0 0 0 0.2rem rgba(255, 235, 59, .8);
+}
+
+.btn-outline-primary.disabled, .btn-outline-primary:disabled {
+  color: #007bff;
+  background-color: transparent;
+}
+
+.btn-outline-primary:not(:disabled):not(.disabled):active, .btn-outline-primary:not(:disabled):not(.disabled).active,
+.show > .btn-outline-primary.dropdown-toggle {
+  color: #fff;
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-outline-primary:not(:disabled):not(.disabled):active:focus, .btn-outline-primary:not(:disabled):not(.disabled).active:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
+}
+
+.contenedor-usuarioSesion{
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  padding: 10px ;
+  height: auto;
+  width: 240px;
+  position: fixed;
+  bottom: 0;
+  .btn{
+    text-align: center;
+    width: 100%;
+    font-size: 1.2rem;
+  }
+}

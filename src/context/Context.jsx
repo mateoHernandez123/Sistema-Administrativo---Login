@@ -2,17 +2,18 @@ import { createContext, useEffect, useState } from "react";
 
 export const Context = createContext();
 
-const estadoUsuario =
-  JSON.parse(localStorage.getItem("UsuarioAutenticado")) || false;
+const estadoUsuario = JSON.parse(localStorage.getItem("UsuarioAutenticado")) || false;
 
 export const ContextProvider = ({ children }) => {
   
   const [usuarioAutenticado, setUsuarioAutenticado] = useState(estadoUsuario);
 
-  const logear = (user, token) => {
+  const logear = (user, token, permisos) => {
     localStorage.setItem("accessToken", JSON.stringify(token));
     localStorage.setItem("Usuario", JSON.stringify(user));
+    localStorage.setItem('Permisos', JSON.stringify(permisos));
     setUsuarioAutenticado(true);
+    return true;
   };
 
   const deslogear = () => {
@@ -25,7 +26,7 @@ export const ContextProvider = ({ children }) => {
       icon:'warning',
       title: 'Atención!',
       text: mensaje+'. Debe volver a registrarse.'
-    })*/ //Aca hay que definirle algun popup para mostrar que hubo un error
+    })*/ // Aca hay que definirle algun popup para mostrar que hubo un error
     deslogear();
   };
 
@@ -35,9 +36,16 @@ export const ContextProvider = ({ children }) => {
       JSON.stringify(usuarioAutenticado)
     );
   }, [usuarioAutenticado]);
+
+
   return (
     <Context.Provider
-      value={{ usuarioAutenticado, logear, deslogear, tokenError }}
+      value={{ 
+        usuarioAutenticado, 
+        logear, 
+        deslogear, 
+        tokenError 
+      }}
     >
       {children}
     </Context.Provider>

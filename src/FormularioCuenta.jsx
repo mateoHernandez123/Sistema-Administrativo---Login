@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   TextField,
   Button,
@@ -14,6 +14,8 @@ import {
   CardContent,
   Grid,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { Context } from "./context/Context";
 
 const FormularioCuenta = () => {
   const [cuentas, setCuentas] = useState([]);
@@ -71,6 +73,16 @@ const FormularioCuenta = () => {
       });
     }
   };
+
+
+  const { usuarioAutenticado, deslogear} = useContext(Context)
+  const navigate = useNavigate();
+  useEffect(()=>{
+    if(!JSON.parse(localStorage.getItem('UsuarioAutenticado'))){
+      deslogear();
+      navigate('/login', {replace: true})
+    }
+  },[usuarioAutenticado, navigate]);
 
   return (
     <Box

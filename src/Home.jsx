@@ -1,7 +1,19 @@
 import { Box } from "@mui/material";
 import motoImage from "./image/fondo.jpg";
-
+import { useContext, useEffect } from "react";
+import {Context} from './context/Context';
+import { useNavigate, replace } from "react-router-dom";
 const Home = () => {
+
+  const { usuarioAutenticado, deslogear} = useContext(Context)
+  const navigate = useNavigate();
+  useEffect(()=>{
+    if(!JSON.parse(localStorage.getItem('UsuarioAutenticado'))){
+      deslogear();
+      navigate('/login', {replace: true})
+    }
+  },[usuarioAutenticado, navigate])
+
   return (
     <Box
       sx={{

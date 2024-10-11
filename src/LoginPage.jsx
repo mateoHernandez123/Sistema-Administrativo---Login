@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import "./loginpage.css"; // Asegúrate de que el archivo style.css esté en la misma carpeta o ajusta la ruta según corresponda
 import Swal from "sweetalert2"; // Libreria de alertas y popups personalizadas
 import CryptoJS from "crypto-js";
@@ -6,7 +6,9 @@ import { useNavigate } from "react-router-dom";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
 
-const ip = "localhost:5000";
+import { Context } from "./context/Context";
+
+const ip = "localhost:3002";
 
 const Toast = Swal.mixin({
   toast: true,
@@ -27,6 +29,9 @@ function encriptar(password) {
 }
 
 const LoginPage = () => {
+
+  const { usuarioAutenticado, logear} = useContext(Context)
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
@@ -45,7 +50,10 @@ const LoginPage = () => {
       }),
     });
 
-    fetchLogin = await fetchLogin.json();
+    fetchLogin = await fetchLogin.json(); //AUTHErr (True o false) indica si hubo un error con el token,
+                                          //ERROR (true o false)
+                                          //ESTADO (true o false) indica si hubo error en el servidor,
+                                          //MENSAJE (String que muesta el resultado en palabras), 
     return fetchLogin;
   }
 
@@ -64,14 +72,15 @@ const LoginPage = () => {
           });
         } else {
           if (resultadoLogin.ESTADO) {
+            
+            // Redirigir a la página principal
+            logear(resultadoLogin.MENSAJE, resultadoLogin.token, resultadoLogin.permisos)
             setError(false);
             Toast.fire({
               icon: "success",
               title: "Sesión iniciada",
               text: resultadoLogin.MENSAJE,
             });
-            // Redirigir a la página principal
-            navigate("/");
           } else {
             setError(true);
             Toast.fire({
@@ -90,6 +99,12 @@ const LoginPage = () => {
         });
       });
   };
+
+  useEffect(()=>{
+    if(usuarioAutenticado){
+      navigate('/', {replace: true});
+    }
+  },[usuarioAutenticado, navigate])
 
   return (
     <div className="login-container">
