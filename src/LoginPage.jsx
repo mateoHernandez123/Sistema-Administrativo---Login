@@ -29,8 +29,7 @@ function encriptar(password) {
 }
 
 const LoginPage = () => {
-
-  const { usuarioAutenticado, logear} = useContext(Context)
+  const { usuarioAutenticado, logear } = useContext(Context);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,9 +50,9 @@ const LoginPage = () => {
     });
 
     fetchLogin = await fetchLogin.json(); //AUTHErr (True o false) indica si hubo un error con el token,
-                                          //ERROR (true o false)
-                                          //ESTADO (true o false) indica si hubo error en el servidor,
-                                          //MENSAJE (String que muesta el resultado en palabras), 
+    //ERROR (true o false)
+    //ESTADO (true o false) indica si hubo error en el servidor,
+    //MENSAJE (String que muesta el resultado en palabras),
     return fetchLogin;
   }
 
@@ -71,24 +70,18 @@ const LoginPage = () => {
             text: resultadoLogin.MENSAJE,
           });
         } else {
-          if (resultadoLogin.ESTADO) {
-            
-            // Redirigir a la página principal
-            logear(resultadoLogin.MENSAJE, resultadoLogin.token, resultadoLogin.permisos)
-            setError(false);
-            Toast.fire({
-              icon: "success",
-              title: "Sesión iniciada",
-              text: resultadoLogin.MENSAJE,
-            });
-          } else {
-            setError(true);
-            Toast.fire({
-              icon: "error",
-              title: "Error de credenciales",
-              text: resultadoLogin.MENSAJE,
-            });
-          }
+          // Redirigir a la página principal
+          logear(
+            resultadoLogin.MENSAJE,
+            resultadoLogin.token,
+            resultadoLogin.permisos
+          );
+          setError(false);
+          Toast.fire({
+            icon: "success",
+            title: "Sesión iniciada",
+            text: resultadoLogin.MENSAJE,
+          });
         }
       })
       .catch((err) => {
@@ -100,11 +93,11 @@ const LoginPage = () => {
       });
   };
 
-  useEffect(()=>{
-    if(usuarioAutenticado){
-      navigate('/', {replace: true});
+  useEffect(() => {
+    if (usuarioAutenticado) {
+      navigate("/", { replace: true });
     }
-  },[usuarioAutenticado, navigate])
+  }, [usuarioAutenticado, navigate]);
 
   return (
     <div className="login-container">
