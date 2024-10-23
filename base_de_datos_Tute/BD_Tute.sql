@@ -1,0 +1,166 @@
+rolescreate database SSAA2;
+use SSAA2;
+
+-- Tabla Roles:
+create table roles
+(
+	idrol int not null auto_increment primary key,
+    tipo varchar(45) not null
+);
+ALTER TABLE roles
+ADD CONSTRAINT tipo_uniquetipo UNIQUE (tipo);
+
+
+-- Tabla usuarios: 
+create table usuarios
+(
+	idusuarios INT NOT NULL AUTO_INCREMENT primary key,
+    email varchar(45) not null unique,
+	nombre_usuario VARCHAR(45) NOT NULL,
+	contrasenia VARCHAR(100) NOT NULL,
+	roles_idrol INT NOT NULL,
+    constraint `fk_usuarios_roles`
+    foreign key (`roles_idrol`)
+    references`roles`(`idrol`)
+);
+
+SELECT * FROM usuarios;
+use SSAA2;
+
+-- Tabla de permisos: 
+
+create table permisos(
+idpermiso int auto_increment primary key,
+nombre varchar(50) unique not null
+);
+SELECT * FROM permisos;
+-- Tabla Roles Permisos: 
+create table roles_permisos(
+	rol_id int not null,
+    permiso_id int not null,
+    valor boolean not null,
+    constraint `fk_rp_roles` foreign key (rol_id) references roles(idrol),
+    constraint `fk_rp_permisos` foreign key (permiso_id) references permisos (idpermiso),
+    primary key (rol_id, permiso_id)
+);
+SELECT * FROM roles_permisos;
+
+-- Tabla Cuentas: 
+CREATE TABLE cuentas (
+  idcuentas INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) UNIQUE NOT NULL,
+  tipo ENUM('A', 'P', 'PN', 'R+', 'R-') NOT NULL,
+  recibe_saldo boolean not null,
+  codigo varchar(20) not null,
+  descripcion varchar(255) not null,
+  activa boolean not null,
+  padre_id INT,
+  FOREIGN KEY (padre_id) REFERENCES cuentas(idcuentas)
+);
+
+Alter table cuentas add column monto_actual double(10,2) not null default 0;
+SELECT * FROM cuentas;
+
+INSERT INTO roles(tipo)
+VALUES ("admin");
+
+UPDATE roles
+SET tipo = 'basico' -- Lo tenia como admin antes
+WHERE idrol = 2;
+SELECT * FROM roles;
+
+INSERT INTO usuarios (mail, nombre_usuario, contrasenia, roles_idrol)
+VALUES ('mateo@hernandez', 'mateo', '173af653133d964edfc16cafe0aba33c8f500a07f3ba3f81943916910c257705', 1);
+
+
+UPDATE usuarios  set contrasenia = '173af653133d964edfc16cafe0aba33c8f500a07f3ba3f81943916910c257705' where mail = 'mateo@hernandez'; 
+
+insert into permisos(nombre)
+values('Cuentas'), ('Asientos'), ('Diarios'), ('Mayores'), ('Resultados'), ('Usuarios');
+
+insert into roles_permisos(rol_id, permiso_id, valor)
+values
+(
+	(select idrol from roles where tipo = 'admin' ),
+    (select idpermiso from permisos where nombre = 'Cuentas' ),
+    1
+),
+(
+	(select idrol from roles where tipo = 'admin' ),
+    (select idpermiso from permisos where nombre = 'Asientos' ),
+    1
+),
+(
+	(select idrol from roles where tipo = 'admin' ),
+    (select idpermiso from permisos where nombre = 'Diarios' ),
+    1
+),
+(
+	(select idrol from roles where tipo = 'admin' ),
+    (select idpermiso from permisos where nombre = 'Mayores' ),
+    1
+),
+(
+	(select idrol from roles where tipo = 'admin' ),
+    (select idpermiso from permisos where nombre = 'Resultados' ),
+    1
+),
+(
+	(select idrol from roles where tipo = 'admin' ),
+    (select idpermiso from permisos where nombre = 'Usuarios' ),
+    1
+),
+(
+	(select idrol from roles where tipo = 'basico' ),
+    (select idpermiso from permisos where nombre = 'Cuentas' ),
+    0
+),
+(
+	(select idrol from roles where tipo = 'basico' ),
+    (select idpermiso from permisos where nombre = 'Asientos' ),
+    1
+),
+(
+	(select idrol from roles where tipo = 'basico' ),
+    (select idpermiso from permisos where nombre = 'Diarios' ),
+    0
+),
+(
+	(select idrol from roles where tipo = 'basico' ),
+    (select idpermiso from permisos where nombre = 'Mayores' ),
+    0
+),
+(
+	(select idrol from roles where tipo = 'basico' ),
+    (select idpermiso from permisos where nombre = 'Resultados' ),
+    0
+),
+(
+	(select idrol from roles where tipo = 'basico' ),
+    (select idpermiso from permisos where nombre = 'Usuarios' ),
+    0
+);
+
+
+insert into cuentas(nombre, tipo, recibe_saldo, codigo, descripcion, activa)
+values
+('Activo', 'A', 0, '1', 'Cuenta padre de los Activos', 1),
+('Pasivo', 'P', 0, '2', 'Cuenta padre de los Pasivos', 1), 
+('Patrimonio Neto', 'PN', 0, '3', 'Cuenta padre de Patrimonio Neto', 1),
+('Resultados Positivos', 'R+', 0, '4', 'Cuenta padre de los Resultados Positivos', 1),
+('Resultados Negativos', 'R-', 0, '5', 'Cuenta padre de los Resultados Negativos', 1);
+
+
+insert into cuentas(nombre, tipo, recibe_saldo, codigo, descripcion, activa, padre_id)
+values('Cajas y Bancos', 'A', 0, '1.1', 'Subcategoria de Activo que engloba caja y banco', 1, (select c.idcuentas from cuentas as c where c.nombre = 'Activo'));
+
+/*---------------------- SELECT ------------------------*/
+
+-- Obtener los permisos de un usuario mediante el mail
+select  p.nombre, rp.valor  
+from roles as r inner join roles_permisos as rp on rp.rol_id = r.idrol 
+    inner join permisos as p 
+        on rp.permiso_id = p.idpermiso 
+where r.idrol= (select u.roles_idrol 
+                from usuarios as u 
+                    where mail = 'email');
