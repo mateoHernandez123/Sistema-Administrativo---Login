@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { Context } from "./context/Context";
+import Swal from "sweetalert2";
 
 const FormularioCuenta = () => {
   const [cuentas, setCuentas] = useState([]);
@@ -29,7 +30,7 @@ const FormularioCuenta = () => {
   });
   const [grupos, setGrupos] = useState([]); // Opciones de grupos dinámicas
   const [loadingGrupos, setLoadingGrupos] = useState(false); // Para manejar el estado de carga
-
+  const [cuentasRaices, setCuentasRaices] = useState([]);
   // Función para manejar los cambios en el campo "Tipo"
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
@@ -85,6 +86,223 @@ const FormularioCuenta = () => {
   };
 */
 
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "bottom-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    },
+  });
+
+  const { usuarioAutenticado, deslogear, IP, tokenError } = useContext(Context);
+  const navigate = useNavigate();
+  useEffect(() => {
+    const Toast = Swal.mixin({
+      toast: true,
+      position: "bottom-end",
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+      },
+    });
+
+    const verificarUsuario = async () => {
+      if (!JSON.parse(localStorage.getItem("UsuarioAutenticado"))) {
+        deslogear();
+        navigate("/login", { replace: true });
+      } else {
+        try {
+          const token = JSON.parse(localStorage.getItem("accessToken"));
+          let resultado = await fetch(`${IP}/api/cuentas/obtenerraices`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`, //Esto hay que hacerlo con todos, filtra las entradas
+            },
+          });
+          resultado = await resultado.json(); // Aquí estaba `.JSON()`, debe ser `.json()`
+
+          if (resultado.AuhtErr) {
+            tokenError(resultado.MENSAJE);
+          } else if (resultado.ServErr) {
+            Toast.fire({
+              title: "Error",
+              icon: "error",
+              text: resultado.MENSAJE,
+            });
+          } else {
+            if (resultado.ERROR) {
+              Toast.fire({
+                icon: "warning",
+                title: "Atención",
+                text: resultado.MENSAJE,
+              });
+            }
+            setCuentasRaices(resultado.Raices);
+          }
+        } catch (err) {
+          console.log(err);
+          Toast.fire({
+            title: "Error en la carga de datos. Recargar la pagina",
+            icon: "warning",
+          });
+        }
+      }
+    };
+
+    verificarUsuario(); // Llama a la función asíncrona
+  }, [usuarioAutenticado, deslogear, navigate, IP, Swal]); // Asegúrate de agregar todas las dependencias necesarias
+
+  const listarHijos = async (nombre) => {
+    try {
+      const token = JSON.parse(localStorage.getItem("accessToken"));
+      let resultado = await fetch(`${IP}/api/cuentas/obtenerhijos`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`, //Esto hay que hacerlo con todos, filtra las entradas
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          Nombre: nombre,
+        }),
+      });
+      resultado = await resultado.json(); // Aquí estaba `.JSON()`, debe ser `.json()`
+
+      if (resultado.AuhtErr) {
+        tokenError(resultado.MENSAJE);
+      } else if (resultado.ServErr) {
+        Toast.fire({
+          title: "Error",
+          icon: "error",
+          text: resultado.MENSAJE,
+        });
+      } else {
+        if (resultado.ERROR) {
+          Toast.fire({
+            icon: "warning",
+            title: "Atención",
+            text: resultado.MENSAJE,
+          });
+        }
+        //Me trae un array de objetos
+        //console.log(resultado.Raices);
+        //setCuentasRaices(resultado.Raices);
+      }
+    } catch (err) {
+      console.log(err);
+      Toast.fire({
+        title: "Error en la carga de datos. Recargar la pagina",
+        icon: "warning",
+      });
+    }
+  };
+
+  const agregarCuenta = async (
+    Nombre,
+    Tipo,
+    recibe_saldo,
+    Descripcion,
+    Padre
+  ) => {
+    try {
+      const token = JSON.parse(localStorage.getItem("accessToken"));
+      let resultado = await fetch(`${IP}/api/cuentas/abmcuentas`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`, //Esto hay que hacerlo con todos, filtra las entradas
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          Nodo: {
+            nombre: Nombre,
+            tipo: Tipo,
+            recibeSaldo: recibe_saldo,
+            descripcion: Descripcion,
+            padre: Padre,
+          },
+        }),
+      });
+      resultado = await resultado.json(); // Aquí estaba `.JSON()`, debe ser `.json()`
+
+      if (resultado.AuhtErr) {
+        tokenError(resultado.MENSAJE);
+      } else if (resultado.ServErr) {
+        Toast.fire({
+          title: "Error",
+          icon: "error",
+          text: resultado.MENSAJE,
+        });
+      } else {
+        if (resultado.ERROR) {
+          Toast.fire({
+            icon: "warning",
+            title: "Atención",
+            text: resultado.MENSAJE,
+          });
+        }
+        //Me trae un objeto cuenta
+        console.log(resultado.Cuenta);
+      }
+    } catch (err) {
+      console.log(err);
+      Toast.fire({
+        title: "Error en la carga de datos. Recargar la pagina",
+        icon: "warning",
+      });
+    }
+  };
+
+  const desactivarCuenta = async (
+    Nombre
+  ) => {
+    try {
+      const token = JSON.parse(localStorage.getItem("accessToken"));
+      let resultado = await fetch(`${IP}/api/cuentas/abmcuentas`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`, //Esto hay que hacerlo con todos, filtra las entradas
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nombre: Nombre,
+        }),
+      });
+      resultado = await resultado.json(); // Aquí estaba `.JSON()`, debe ser `.json()`
+
+      if (resultado.AuhtErr) {
+        tokenError(resultado.MENSAJE);
+      } else if (resultado.ServErr) {
+        Toast.fire({
+          title: "Error",
+          icon: "error",
+          text: resultado.MENSAJE,
+        });
+      } else {
+        if (resultado.ERROR) {
+          Toast.fire({
+            icon: "warning",
+            title: "Atención",
+            text: resultado.MENSAJE,
+          });
+        }
+        //Me trae un objeto cuenta
+        console.log(resultado.Cuenta);
+      }
+    } catch (err) {
+      console.log(err);
+      Toast.fire({
+        title: "Error en la carga de datos. Recargar la pagina",
+        icon: "warning",
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.nombre !== "" && formData.tipo !== "") {
@@ -97,15 +315,6 @@ const FormularioCuenta = () => {
       });
     }
   };
-
-  const { usuarioAutenticado, deslogear } = useContext(Context);
-  const navigate = useNavigate();
-  useEffect(() => {
-    if (!JSON.parse(localStorage.getItem("UsuarioAutenticado"))) {
-      deslogear();
-      navigate("/login", { replace: true });
-    }
-  }, [usuarioAutenticado, navigate]);
 
   return (
     <Box

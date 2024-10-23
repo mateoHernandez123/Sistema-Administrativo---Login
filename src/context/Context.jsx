@@ -2,16 +2,16 @@ import { createContext, useEffect, useState } from "react";
 
 export const Context = createContext();
 
-const estadoUsuario = JSON.parse(localStorage.getItem("UsuarioAutenticado")) || false;
+const estadoUsuario =
+  JSON.parse(localStorage.getItem("UsuarioAutenticado")) || false;
 
 export const ContextProvider = ({ children }) => {
-  
   const [usuarioAutenticado, setUsuarioAutenticado] = useState(estadoUsuario);
 
   const logear = (user, token, permisos) => {
     localStorage.setItem("accessToken", JSON.stringify(token));
     localStorage.setItem("Usuario", JSON.stringify(user));
-    localStorage.setItem('Permisos', JSON.stringify(permisos));
+    localStorage.setItem("Permisos", JSON.stringify(permisos));
     setUsuarioAutenticado(true);
     return true;
   };
@@ -37,14 +37,15 @@ export const ContextProvider = ({ children }) => {
     );
   }, [usuarioAutenticado]);
 
-
+  const IP = "http://localhost:3002";
   return (
     <Context.Provider
-      value={{ 
-        usuarioAutenticado, 
-        logear, 
-        deslogear, 
-        tokenError 
+      value={{
+        usuarioAutenticado,
+        logear,
+        deslogear,
+        tokenError,
+        IP,
       }}
     >
       {children}

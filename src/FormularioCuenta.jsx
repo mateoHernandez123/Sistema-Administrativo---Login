@@ -12,11 +12,14 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import { Context } from "./context/Context";
+import Swal from "sweetalert2";
 
 const FormularioCuenta = () => {
   const [cuentas, setCuentas] = useState([]);
 
   const [loading, setLoading] = useState(false);
+
+  const [cuentasRaices, setCuentasRaices] = useState([]);
 
   const handleAgregarCuenta = () => {
     navigate("/alta-cuentas");
@@ -67,14 +70,122 @@ const FormularioCuenta = () => {
     }, 1000); // Simula un retraso de 1 segundo
   };
 
-  const { usuarioAutenticado, deslogear } = useContext(Context);
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "bottom-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    },
+  });
+
+  const { usuarioAutenticado, deslogear, IP, tokenError } = useContext(Context);
   const navigate = useNavigate();
   useEffect(() => {
-    if (!JSON.parse(localStorage.getItem("UsuarioAutenticado"))) {
-      deslogear();
-      navigate("/login", { replace: true });
+    const Toast = Swal.mixin({
+      toast: true,
+      position: "bottom-end",
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+      },
+    });
+
+    const verificarUsuario = async () => {
+      if (!JSON.parse(localStorage.getItem("UsuarioAutenticado"))) {
+        deslogear();
+        navigate("/login", { replace: true });
+      } else {
+        try {
+          const token = JSON.parse(localStorage.getItem("accessToken"));
+          let resultado = await fetch(`${IP}/api/cuentas/obtenerraices`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`, //Esto hay que hacerlo con todos, filtra las entradas
+            },
+          });
+          resultado = await resultado.json(); // Aquí estaba `.JSON()`, debe ser `.json()`
+
+          if (resultado.AuhtErr) {
+            tokenError(resultado.MENSAJE);
+          } else if (resultado.ServErr) {
+            Toast.fire({
+              title: "Error",
+              icon: "error",
+              text: resultado.MENSAJE,
+            });
+          } else {
+            if (resultado.ERROR) {
+              Toast.fire({
+                icon: "warning",
+                title: "Atención",
+                text: resultado.MENSAJE,
+              });
+            }
+            setCuentasRaices(resultado.Raices);
+          }
+        } catch (err) {
+          console.log(err);
+          Toast.fire({
+            title: "Error en la carga de datos. Recargar la pagina",
+            icon: "warning",
+          });
+        }
+      }
+    };
+
+    verificarUsuario(); // Llama a la función asíncrona
+  }, [usuarioAutenticado, deslogear, navigate, IP, Swal]); // Asegúrate de agregar todas las dependencias necesarias
+
+  const listarHijos = async (nombre) => {
+    try {
+      const token = JSON.parse(localStorage.getItem("accessToken"));
+      let resultado = await fetch(`${IP}/api/cuentas/obtenerraices`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`, //Esto hay que hacerlo con todos, filtra las entradas
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          Nombre: nombre,
+        }),
+      });
+      resultado = await resultado.json(); // Aquí estaba `.JSON()`, debe ser `.json()`
+
+      if (resultado.AuhtErr) {
+        tokenError(resultado.MENSAJE);
+      } else if (resultado.ServErr) {
+        Toast.fire({
+          title: "Error",
+          icon: "error",
+          text: resultado.MENSAJE,
+        });
+      } else {
+        if (resultado.ERROR) {
+          Toast.fire({
+            icon: "warning",
+            title: "Atención",
+            text: resultado.MENSAJE,
+          });
+        }
+        //Me trae un array de objetos
+        //console.log(resultado.Raices);
+        //setCuentasRaices(resultado.Raices);
+      }
+    } catch (err) {
+      console.log(err);
+      Toast.fire({
+        title: "Error en la carga de datos. Recargar la pagina",
+        icon: "warning",
+      });
     }
-  }, [usuarioAutenticado, navigate]);
+  };
 
   return (
     <Box
@@ -103,7 +214,9 @@ const FormularioCuenta = () => {
           <AddIcon />
         </IconButton>
       </Box>
-
+      {/* Hacer validacion con condicional, si el 
+          array de cuentaRaices es mayor a 0, mostraria los siguientes
+          botones de listado:  */}
       {/* Botones para listar categorías */}
       <Button
         variant="contained"
