@@ -15,14 +15,6 @@ import { Context } from "./context/Context";
 
 const FormularioCuenta = () => {
   const [cuentas, setCuentas] = useState([]);
-  const [formData, setFormData] = useState({
-    codigo: "",
-    nombre: "",
-    descripcion: "",
-    monto: "",
-    tipo: "",
-    habilitada: true,
-  });
 
   const [loading, setLoading] = useState(false);
 
