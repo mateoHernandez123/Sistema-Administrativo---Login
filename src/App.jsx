@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import {ContextProvider} from './context/Context.jsx'
 import AppLayout from "./AppLayout";
+import AltaCuenta from "./AltaCuenta";
 import FormularioCuenta from "./FormularioCuenta";
 import FormularioAsiento from "./FormularioAsiento";
 import ListaMayores from "./ListaMayores";
@@ -24,6 +25,7 @@ const App = () => {
               <AppLayout>
                 <Routes>
                   <Route path="/cuentas" element={<FormularioCuenta />} />
+                  <Route path="/alta-cuentas" element={<AltaCuenta />} />
                   <Route path="/asientos" element={<FormularioAsiento />} />
                   <Route path="/diarios" element={<ListaLibroDiario />} />
                   <Route path="/mayores" element={<ListaMayores />} />

@@ -21,30 +21,95 @@ const FormularioAsiento = () => {
   // Establecer la fecha actual en el estado
   const today = new Date();
   const formattedDate = today.toISOString().split("T")[0]; // Formato YYYY-MM-DD
-  const [fecha, setFecha] = useState(formattedDate);
+  const formattedTime = today.toTimeString().split(" ")[0].slice(0, 5); // HH:MM
 
+  // Estados iniciales
+  const [fecha, setFecha] = useState(formattedDate);
+  const [hora, setHora] = useState(formattedTime);
   const [error, setError] = useState(""); // Estado para manejar el error de sumatoria
+  const [fechaUltimoAsiento, setFechaUltimoAsiento] = useState("");
+  const [horaUltimoAsiento, setHoraUltimoAsiento] = useState("");
+
+  // Actualizar la hora actual cada minuto
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const currentTime = new Date();
+      setHora(currentTime.toTimeString().split(" ")[0].slice(0, 5)); // Actualizar a HH:MM
+    }, 60000); // Actualiza cada minuto
+
+    return () => clearInterval(timer); // Limpiar intervalo al desmontar el componente
+  }, []);
+
+  // Simular la petición para obtener la fecha del último asiento
+  useEffect(() => {
+    const fetchUltimoAsiento = async () => {
+      // Simulación de la fecha y hora del último asiento
+      const ultimoAsiento = "2024-10-10T12:45"; // Ejemplo de respuesta simulada
+      setFechaUltimoAsiento(ultimoAsiento.split("T")[0]); // Fecha en formato YYYY-MM-DD
+      setHoraUltimoAsiento(ultimoAsiento.split("T")[1].slice(0, 5)); // Hora en formato HH:MM
+    };
+
+    fetchUltimoAsiento();
+  }, []);
+
+  // Manejar el cambio en el campo de fecha
+  const handleFechaChange = (e) => {
+    const selectedDate = e.target.value;
+
+    // Validar que la fecha seleccionada esté dentro del rango permitido
+    if (selectedDate >= fechaUltimoAsiento && selectedDate <= formattedDate) {
+      setFecha(selectedDate);
+      setError("");
+    } else {
+      setError("La fecha seleccionada no es válida.");
+    }
+  };
+
+  // Manejar el cambio en el campo de hora
+  const handleHoraChange = (e) => {
+    const selectedTime = e.target.value;
+
+    // Validar la hora dependiendo de la fecha seleccionada
+    if (fecha === fechaUltimoAsiento && selectedTime < horaUltimoAsiento) {
+      setError("La hora seleccionada es anterior al último asiento.");
+    } else if (fecha === formattedDate && selectedTime > formattedTime) {
+      setError("La hora seleccionada es en el futuro.");
+    } else {
+      setHora(selectedTime);
+      setError(""); // Limpiar error
+    }
+  };
 
   // Manejar el cambio en los campos de una fila
-  const handleFilaChange = (index, event) => {
+  const handleFilaChange = async (index, event) => {
     const { name, value } = event.target;
     const nuevasFilas = [...filas];
 
-    // Si cambia el campo "Debe", poner "Haber" en 0
+    if (name === "codigo" || name === "cuenta") {
+      nuevasFilas[index][name] = value;
+
+      // Simulación de petición al servidor para completar el otro campo
+      const cuentaSimulada = {
+        codigo: "1.01",
+        cuenta: "Caja",
+      };
+      // Si se ingresa el código, completar el nombre de la cuenta
+      if (name === "codigo") {
+        nuevasFilas[index].cuenta = cuentaSimulada.cuenta;
+      } else {
+        // Si se ingresa el nombre, completar el código
+        nuevasFilas[index].codigo = cuentaSimulada.codigo;
+      }
+    }
+
     if (name === "debe") {
       nuevasFilas[index].debe = value;
-      nuevasFilas[index].haber = "0"; // Establecer "Haber" en 0 cuando "Debe" cambia
+      nuevasFilas[index].haber = "0";
     }
 
-    // Si cambia el campo "Haber", poner "Debe" en 0
     if (name === "haber") {
       nuevasFilas[index].haber = value;
-      nuevasFilas[index].debe = "0"; // Establecer "Debe" en 0 cuando "Haber" cambia
-    }
-
-    // Para cambiar el valor de "Cuenta" normalmente
-    if (name === "cuenta") {
-      nuevasFilas[index].cuenta = value;
+      nuevasFilas[index].debe = "0";
     }
 
     setFilas(nuevasFilas);
@@ -88,22 +153,16 @@ const FormularioAsiento = () => {
     }
 
     setError(""); // Limpiar el error si todo está bien
-    console.log("Fecha:", fecha);
-    console.log("Filas:", filas);
-    console.log("Asiento creado correctamente");
-    // Aquí puedes manejar el envío de datos al backend o la lógica que necesites
   };
 
-
-
-  const { usuarioAutenticado, deslogear} = useContext(Context)
+  const { usuarioAutenticado, deslogear } = useContext(Context);
   const navigate = useNavigate();
-  useEffect(()=>{
-    if(!JSON.parse(localStorage.getItem('UsuarioAutenticado'))){
+  useEffect(() => {
+    if (!JSON.parse(localStorage.getItem("UsuarioAutenticado"))) {
       deslogear();
-      navigate('/login', {replace: true})
+      navigate("/login", { replace: true });
     }
-  },[usuarioAutenticado, navigate]);
+  }, [usuarioAutenticado, navigate]);
 
   return (
     <Box
@@ -128,7 +187,7 @@ const FormularioAsiento = () => {
           type="date"
           name="fecha"
           value={fecha}
-          onChange={(e) => setFecha(e.target.value)}
+          onChange={handleFechaChange}
           fullWidth
           sx={{ marginBottom: 2 }}
           InputLabelProps={{
@@ -136,7 +195,27 @@ const FormularioAsiento = () => {
           }}
           // Establecer el máximo como la fecha actual
           inputProps={{
-            max: formattedDate,
+            min: fechaUltimoAsiento, // Limitar la fecha mínima
+            max: formattedDate, // Limitar la fecha máxima
+          }}
+          required
+        />
+        {/* Campo de hora */}
+        <TextField
+          label="Hora"
+          type="time"
+          name="hora"
+          value={hora}
+          onChange={handleHoraChange}
+          fullWidth
+          sx={{ marginBottom: 2 }}
+          InputLabelProps={{
+            shrink: true,
+          }}
+          // Establecer el máximo como la hora actual
+          inputProps={{
+            min: fecha === fechaUltimoAsiento ? horaUltimoAsiento : undefined, // Limitar la hora mínima si es la fecha del último asiento
+            max: fecha === formattedDate ? formattedTime : undefined, // Limitar la hora máxima si es la fecha actual
           }}
           required
         />
@@ -144,7 +223,16 @@ const FormularioAsiento = () => {
         {/* Fila con los campos de cuenta, debe, haber, y eliminar */}
         {filas.map((fila, index) => (
           <Grid container spacing={2} key={index} sx={{ marginBottom: 2 }}>
-            <Grid item xs={5}>
+            <Grid item xs={2}>
+              <TextField
+                label="Código"
+                name="codigo"
+                value={fila.codigo}
+                onChange={(event) => handleFilaChange(index, event)}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={3}>
               <TextField
                 label="Cuenta"
                 name="cuenta"
@@ -210,7 +298,7 @@ const FormularioAsiento = () => {
           variant="outlined"
           onClick={agregarFila}
           fullWidth
-          sx={{ color: "black", borderColor: "black", marginBottom: 2 }}
+          sx={{ color: "#3b3a31", borderColor: "#3b3a31", marginBottom: 2 }}
           startIcon={<AddIcon />}
         >
           Agregar Fila
@@ -221,7 +309,7 @@ const FormularioAsiento = () => {
           variant="contained"
           type="submit"
           fullWidth
-          sx={{ backgroundColor: "#3b3a31", color: "white", marginTop: 2 }}
+          sx={{ backgroundColor: "#3b3a31", color: "#ffff", marginTop: 2 }}
         >
           Crear Asiento
         </Button>

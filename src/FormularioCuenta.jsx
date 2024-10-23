@@ -1,19 +1,15 @@
 import { useContext, useEffect, useState } from "react";
 import {
-  TextField,
   Button,
-  FormControl,
-  Select,
-  MenuItem,
-  InputLabel,
   Checkbox,
-  FormControlLabel,
   Typography,
   Box,
-  Card,
-  CardContent,
-  Grid,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import { Context } from "./context/Context";
 
@@ -28,191 +24,192 @@ const FormularioCuenta = () => {
     habilitada: true,
   });
 
-  const [errors, setErrors] = useState({
-    codigo: false,
-    monto: false,
-  });
+  const [loading, setLoading] = useState(false);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-
-    if (name === "codigo") {
-      const isNumeric = /^\d*$/.test(value); // Validación de solo números enteros
-      setErrors({ ...errors, codigo: !isNumeric });
-    }
-
-    if (name === "monto") {
-      const isValidMonto = /^\d+(\.\d{0,2})?$/.test(value); // Validación de hasta 2 decimales
-      setErrors({ ...errors, monto: !isValidMonto });
-    }
-
-    setFormData({ ...formData, [name]: value });
+  const handleAgregarCuenta = () => {
+    navigate("/alta-cuentas");
   };
 
-  const handleCheckboxChange = () => {
-    setFormData({ ...formData, habilitada: !formData.habilitada });
+  // Función para listar la categoría seleccionada
+  const handleListarCategoria = (categoria) => {
+    setLoading(true);
+    setTimeout(() => {
+      // Simular la respuesta del servidor según la categoría seleccionada
+      if (categoria === "activos") {
+        const activos = [
+          {
+            codigo: "1.01",
+            nombre: "Caja",
+            descripcion: "Dinero en efectivo",
+            habilitada: true,
+          },
+          {
+            codigo: "1.02",
+            nombre: "Banco",
+            descripcion: "Cuentas bancarias",
+            habilitada: true,
+          },
+          {
+            codigo: "1.03",
+            nombre: "Inversiones",
+            descripcion: "Inversiones a corto plazo",
+            habilitada: false,
+          },
+          {
+            codigo: "1.04",
+            nombre: "Cuentas por Cobrar",
+            descripcion: "Créditos a clientes",
+            habilitada: true,
+          },
+          {
+            codigo: "1.05",
+            nombre: "Inventarios",
+            descripcion: "Mercaderías disponibles para la venta",
+            habilitada: true,
+          },
+        ];
+        setCuentas(activos);
+      }
+      // Puedes agregar simulaciones para otras categorías como "pasivos", "patrimonio-neto", etc.
+      setLoading(false);
+    }, 1000); // Simula un retraso de 1 segundo
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (
-      !errors.codigo &&
-      !errors.monto &&
-      formData.codigo !== "" &&
-      formData.monto !== ""
-    ) {
-      setCuentas([...cuentas, formData]);
-      setFormData({
-        codigo: "",
-        nombre: "",
-        descripcion: "",
-        monto: "",
-        tipo: "",
-        habilitada: true,
-      });
-    }
-  };
-
-
-  const { usuarioAutenticado, deslogear} = useContext(Context)
+  const { usuarioAutenticado, deslogear } = useContext(Context);
   const navigate = useNavigate();
-  useEffect(()=>{
-    if(!JSON.parse(localStorage.getItem('UsuarioAutenticado'))){
+  useEffect(() => {
+    if (!JSON.parse(localStorage.getItem("UsuarioAutenticado"))) {
       deslogear();
-      navigate('/login', {replace: true})
+      navigate("/login", { replace: true });
     }
-  },[usuarioAutenticado, navigate]);
+  }, [usuarioAutenticado, navigate]);
 
   return (
     <Box
       sx={{
-        backgroundColor: "#ffeb3b",
-        color: "black",
-        padding: 4,
-        borderRadius: 2,
-        maxWidth: "600px",
+        p: 3,
+        backgroundColor: "#f5f5f5",
+        borderRadius: "8px",
+        maxWidth: "500px", // Ajuste para hacer el formulario más estrecho
         margin: "auto",
+        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", // Añadir una sombra suave
       }}
     >
-      <Typography variant="h4" sx={{ marginBottom: 2 }}>
-        Alta de Cuenta Contable
-      </Typography>
-
-      <form onSubmit={handleSubmit}>
-        <TextField
-          label="Código"
-          name="codigo"
-          value={formData.codigo}
-          onChange={handleInputChange}
-          fullWidth
-          sx={{ marginBottom: 2 }}
-          required
-          error={errors.codigo}
-          helperText={errors.codigo ? "Debe ser un número válido" : ""}
-        />
-        <TextField
-          label="Nombre"
-          name="nombre"
-          value={formData.nombre}
-          onChange={handleInputChange}
-          fullWidth
-          sx={{ marginBottom: 2 }}
-          required
-        />
-        <TextField
-          label="Descripción"
-          name="descripcion"
-          value={formData.descripcion}
-          onChange={handleInputChange}
-          fullWidth
-          sx={{ marginBottom: 2 }}
-        />
-        <TextField
-          label="Monto"
-          name="monto"
-          value={formData.monto}
-          onChange={handleInputChange}
-          fullWidth
-          sx={{ marginBottom: 2 }}
-          required
-          error={errors.monto}
-          helperText={
-            errors.monto
-              ? "Debe ser un número decimal válido con hasta 2 decimales"
-              : ""
-          }
-        />
-        <FormControl fullWidth sx={{ marginBottom: 2 }}>
-          <InputLabel>Tipo</InputLabel>
-          <Select
-            name="tipo"
-            value={formData.tipo}
-            onChange={handleInputChange}
-            required
-          >
-            <MenuItem value="Activo">Activo</MenuItem>
-            <MenuItem value="Pasivo">Pasivo</MenuItem>
-            <MenuItem value="Patrimonio Neto">Patrimonio Neto</MenuItem>
-            <MenuItem value="Resultado Positivo">Resultado Positivo</MenuItem>
-            <MenuItem value="Resultado Negativo">Resultado Negativo</MenuItem>
-          </Select>
-        </FormControl>
-
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={formData.habilitada}
-              onChange={handleCheckboxChange}
-              color="primary"
-            />
-          }
-          label={formData.habilitada ? "Habilitada" : "Deshabilitada"}
-        />
-
-        <Button
-          variant="contained"
-          type="submit"
-          fullWidth
-          sx={{ backgroundColor: "#3b3a31", color: "white", marginTop: 2 }}
-          disabled={errors.codigo || errors.monto}
+      {/* Título y botón "+" */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        <Typography variant="h5" sx={{ color: "#333" }}>
+          Gestión de Cuentas
+        </Typography>
+        <IconButton
+          onClick={handleAgregarCuenta}
+          sx={{
+            backgroundColor: "#ffeb3b",
+            "&:hover": { backgroundColor: "#fdd835" },
+            color: "#333",
+          }}
         >
-          Agregar Cuenta
-        </Button>
-      </form>
+          <AddIcon />
+        </IconButton>
+      </Box>
 
-      <Typography variant="h5" sx={{ marginTop: 4 }}>
-        Cuentas Agregadas:
+      {/* Botones para listar categorías */}
+      <Button
+        variant="contained"
+        fullWidth
+        sx={{
+          backgroundColor: "#333",
+          color: "#ffeb3b",
+          mb: 2,
+          "&:hover": {
+            backgroundColor: "#555",
+          },
+        }}
+        onClick={() => handleListarCategoria("activos")}
+      >
+        Listar Activos
+      </Button>
+      <Button
+        variant="contained"
+        fullWidth
+        sx={{
+          backgroundColor: "#333",
+          color: "#ffeb3b",
+          mb: 2,
+          "&:hover": {
+            backgroundColor: "#555",
+          },
+        }}
+        onClick={() => handleListarCategoria("pasivos")}
+      >
+        Listar Pasivos
+      </Button>
+      <Button
+        variant="contained"
+        fullWidth
+        sx={{
+          backgroundColor: "#333",
+          color: "#ffeb3b",
+          mb: 2,
+          "&:hover": {
+            backgroundColor: "#555",
+          },
+        }}
+        onClick={() => handleListarCategoria("patrimonio-neto")}
+      >
+        Listar Patrimonio Neto
+      </Button>
+      <Button
+        variant="contained"
+        fullWidth
+        sx={{
+          backgroundColor: "#333",
+          color: "#ffeb3b",
+          mb: 2,
+          "&:hover": {
+            backgroundColor: "#555",
+          },
+        }}
+        onClick={() => handleListarCategoria("resultado-positivo")}
+      >
+        Listar Resultado Positivo
+      </Button>
+      <Button
+        variant="contained"
+        fullWidth
+        sx={{
+          backgroundColor: "#333",
+          color: "#ffeb3b",
+          mb: 2,
+          "&:hover": {
+            backgroundColor: "#555",
+          },
+        }}
+        onClick={() => handleListarCategoria("resultado-negativo")}
+      >
+        Listar Resultado Negativo
+      </Button>
+
+      {/* Mostrar el listado de cuentas */}
+      <Typography variant="h6" sx={{ mt: 4 }}>
+        Listado de Cuentas
       </Typography>
-      {cuentas.length > 0 ? (
-        <Grid container spacing={2} sx={{ marginTop: 2 }}>
-          {cuentas.map((cuenta, index) => (
-            <Grid item xs={12} key={index}>
-              <Card
-                sx={{
-                  backgroundColor: "#3b3a31",
-                  color: "#fff",
-                  border: "2px solid #ffeb3b",
-                }}
-              >
-                <CardContent>
-                  <Typography variant="h6" sx={{ textAlign: "center" }}>
-                    {cuenta.nombre} - {cuenta.codigo}
-                  </Typography>
-                  <Typography variant="body1">Tipo: {cuenta.tipo}</Typography>
-                  <Typography variant="body1">
-                    Monto: ${cuenta.monto}
-                  </Typography>
-                  <Typography variant="body1">
-                    {cuenta.habilitada ? "Habilitada" : "Deshabilitada"}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+      {loading ? (
+        <Typography>Cargando cuentas...</Typography>
       ) : (
-        <Typography>No hay cuentas agregadas.</Typography>
+        <List>
+          {cuentas.map((cuenta) => (
+            <ListItem
+              key={cuenta.codigo}
+              sx={{ backgroundColor: "#fff", mb: 1, borderRadius: 1 }}
+            >
+              <ListItemText
+                primary={`${cuenta.codigo} - ${cuenta.nombre}`}
+                secondary={cuenta.descripcion}
+              />
+              <Checkbox checked={cuenta.habilitada} />
+            </ListItem>
+          ))}
+        </List>
       )}
     </Box>
   );
