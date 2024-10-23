@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Box,
   Typography,
@@ -8,13 +9,47 @@ import {
   TableHead,
   TableRow,
   Paper,
+  TextField,
+  Button,
 } from "@mui/material";
 
 const TablaDiario = ({ datosLibro }) => {
+  const today = new Date();
+  const formattedDate = today.toISOString().split("T")[0];
+  const [fechaDesde, setFechaDesde] = useState("");
+  const [fechaHasta, setFechaHasta] = useState(formattedDate);
+  const [filtradoDatos, setFiltradoDatos] = useState(datosLibro);
+
+  const handleFechaDesdeChange = (e) => {
+    setFechaDesde(e.target.value);
+  };
+
+  const handleFechaHastaChange = (e) => {
+    setFechaHasta(e.target.value);
+  };
+
+  const handleFiltrar = () => {
+    const datosFiltrados = datosLibro.filter((fila) => {
+      const fechaFila = new Date(fila.fecha.split("/").reverse().join("-"));
+      const desde = fechaDesde ? new Date(fechaDesde) : null;
+      const hasta = fechaHasta ? new Date(fechaHasta) : null;
+
+      return (!desde || fechaFila >= desde) && (!hasta || fechaFila <= hasta);
+    });
+    setFiltradoDatos(datosFiltrados);
+  };
+
+  // Función para limpiar las fechas
+  const handleLimpiarFechas = () => {
+    setFechaDesde("");
+    setFechaHasta(formattedDate); // Resetea fechaHasta al valor actual
+    setFiltradoDatos(datosLibro); // Restablece los datos sin filtrar
+  };
+
   // Agrupar operaciones por número, fecha y tipo
   const operacionesAgrupadas = {};
 
-  datosLibro.forEach((fila) => {
+  filtradoDatos.forEach((fila) => {
     const clave = `${fila.numero}-${fila.fecha}-${fila.tipo}`;
     if (!operacionesAgrupadas[clave]) {
       operacionesAgrupadas[clave] = {
@@ -31,8 +66,8 @@ const TablaDiario = ({ datosLibro }) => {
   const grupos = Object.values(operacionesAgrupadas);
 
   // Calcular la sumatoria de Debe y Haber
-  const totalDebe = datosLibro.reduce((acc, fila) => acc + fila.debe, 0);
-  const totalHaber = datosLibro.reduce((acc, fila) => acc + fila.haber, 0);
+  const totalDebe = filtradoDatos.reduce((acc, fila) => acc + fila.debe, 0);
+  const totalHaber = filtradoDatos.reduce((acc, fila) => acc + fila.haber, 0);
 
   return (
     <Box sx={{ padding: 4 }}>
@@ -40,6 +75,57 @@ const TablaDiario = ({ datosLibro }) => {
         Lista de Libro Diario
       </Typography>
 
+      {/* Inputs para Fecha Desde y Fecha Hasta */}
+      <Box display="flex" justifyContent="space-between" mb={2}>
+        <TextField
+          label="Fecha Desde"
+          type="date"
+          value={fechaDesde}
+          onChange={handleFechaDesdeChange}
+          InputLabelProps={{
+            shrink: true,
+          }}
+          sx={{ marginRight: 2 }}
+        />
+
+        <TextField
+          label="Fecha Hasta"
+          type="date"
+          value={fechaHasta}
+          onChange={handleFechaHastaChange}
+          InputLabelProps={{
+            shrink: true,
+          }}
+          sx={{ marginRight: 2 }}
+        />
+
+        <Button
+          variant="contained"
+          onClick={handleFiltrar}
+          sx={{
+            backgroundColor: "#ffeb3b",
+            color: "black",
+            borderRadius: "1.2rem",
+          }}
+        >
+          Filtrar
+        </Button>
+
+        {/* Botón para limpiar las fechas */}
+        <Button
+          variant="outlined"
+          onClick={handleLimpiarFechas}
+          sx={{
+            backgroundColor: "#ffeb3b",
+            color: "black",
+            borderRadius: "1.2rem",
+          }}
+        >
+          Limpiar
+        </Button>
+      </Box>
+
+      {/* Tabla de Datos */}
       <TableContainer
         component={Paper}
         sx={{ backgroundColor: "#ffeb3b", marginBottom: 4 }}
