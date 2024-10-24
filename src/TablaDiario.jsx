@@ -16,7 +16,11 @@ import {
 const TablaDiario = ({ datosLibro }) => {
   const today = new Date();
   const formattedDate = today.toISOString().split("T")[0];
-  const [fechaDesde, setFechaDesde] = useState("");
+  // Calcular fecha 30 días atrás
+  const pastDate = new Date(today);
+  pastDate.setDate(today.getDate() - 30); // Restar 30 días
+  const formattedPastDate = pastDate.toISOString().split("T")[0];
+  const [fechaDesde, setFechaDesde] = useState(formattedPastDate);
   const [fechaHasta, setFechaHasta] = useState(formattedDate);
   const [filtradoDatos, setFiltradoDatos] = useState(datosLibro);
 
@@ -41,9 +45,9 @@ const TablaDiario = ({ datosLibro }) => {
 
   // Función para limpiar las fechas
   const handleLimpiarFechas = () => {
-    setFechaDesde("");
+    setFechaDesde(formattedPastDate);
     setFechaHasta(formattedDate); // Resetea fechaHasta al valor actual
-    setFiltradoDatos(datosLibro); // Restablece los datos sin filtrar
+    handleFiltrar(); // Restablece los datos
   };
 
   // Agrupar operaciones por número, fecha y tipo
