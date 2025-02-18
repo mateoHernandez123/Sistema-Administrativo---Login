@@ -12,7 +12,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
-import { Context } from "../context/Context";
+import { Context } from "../../context/Context";
 
 const TablaMayor = ({ tipoMayor, datosMayor }) => {
   const today = new Date();

@@ -13,7 +13,7 @@ import {
   Button,
 } from "@mui/material";
 import Swal from "sweetalert2";
-import { Context } from "../context/Context";
+import { Context } from "../../context/Context";
 
 const TablaDiario = () => {
   const today = new Date();
