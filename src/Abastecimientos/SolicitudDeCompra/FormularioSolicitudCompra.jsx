@@ -37,10 +37,14 @@ const FormularioSolicitudCompra = () => {
   }, [usuarioAutenticado, navigate, deslogear]);
 
   const today = new Date().toISOString().split("T")[0];
-  const [numeroSolicitud, setNumeroSolicitud] = useState("SC-2024-001");
+  const añoActual = new Date().getFullYear();
+  const prefijo = `SC-${añoActual}-`;
+  const [numero, setNumero] = useState("");
+  const [numeroSolicitud, setNumeroSolicitud] = useState(prefijo);
   const [fechaSolicitud, setFechaSolicitud] = useState(today);
   const [solicitante, setSolicitante] = useState("");
   const [departamento, setDepartamento] = useState("");
+  const [proveedor, setProveedor] = useState("");
   const [productos, setProductos] = useState([
     { codigo: "", descripcion: "", cantidad: "", unidad: "" },
   ]);
@@ -48,13 +52,19 @@ const FormularioSolicitudCompra = () => {
   const [error, setError] = useState("");
 
   // Opciones para los Select
-  const departamentos = ["Recursos Humanos", "IT", "Compras", "Ventas"];
+  const departamentos = [
+    "Taller mecanico",
+    "Administracion",
+    "Compras",
+    "Ventas",
+  ];
+  const proveedores = ["Gilera", "Honda", "Yamaha"];
   const productosDisponibles = [
-    "Laptop",
-    "Teclado",
-    "Mouse",
-    "Monitor",
-    "Impresora",
+    "Cubiertas",
+    "Indumentaria",
+    "Cascos",
+    "Guantes",
+    "Accesorios",
   ];
   const unidades = ["Unidad", "Caja", "Paquete", "Litro"];
 
@@ -64,6 +74,17 @@ const FormularioSolicitudCompra = () => {
       ...productos,
       { codigo: "", descripcion: "", cantidad: "", unidad: "" },
     ]);
+  };
+
+  useEffect(() => {
+    setNumeroSolicitud(prefijo + numero);
+  }, [numero, prefijo]); // Se actualiza cada vez que cambian numero o prefijo
+
+  const handleChange = (event) => {
+    const nuevoValor = event.target.value
+      .replace(prefijo, "")
+      .replace(/\D/g, ""); // Solo números
+    setNumero(nuevoValor);
   };
 
   // Eliminar un producto
@@ -115,6 +136,7 @@ const FormularioSolicitudCompra = () => {
     // Reiniciar campos
     setSolicitante("");
     setDepartamento("");
+    setNumero("");
     setProductos([{ codigo: "", descripcion: "", cantidad: "", unidad: "" }]);
     setJustificacion("");
   };
@@ -140,8 +162,8 @@ const FormularioSolicitudCompra = () => {
         <Grid item xs={12} sm={6}>
           <TextField
             label="Número de Solicitud"
-            value={numeroSolicitud}
-            InputProps={{ readOnly: true }}
+            value={prefijo + numero}
+            onChange={handleChange}
             fullWidth
           />
         </Grid>
@@ -172,6 +194,21 @@ const FormularioSolicitudCompra = () => {
               {departamentos.map((dep, index) => (
                 <MenuItem key={index} value={dep}>
                   {dep}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <FormControl fullWidth>
+            <InputLabel>Proveedor</InputLabel>
+            <Select
+              value={proveedor}
+              onChange={(e) => setProveedor(e.target.value)}
+            >
+              {proveedores.map((pro, index) => (
+                <MenuItem key={index} value={pro}>
+                  {pro}
                 </MenuItem>
               ))}
             </Select>

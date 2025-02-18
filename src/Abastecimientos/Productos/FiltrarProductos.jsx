@@ -25,7 +25,6 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
-
 const FiltrarProductos = () => {
   const { usuarioAutenticado, deslogear } = useContext(Context);
   const navigate = useNavigate();
@@ -40,12 +39,15 @@ const FiltrarProductos = () => {
   const [categorias, setCategorias] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
   const [productos, setProductos] = useState([]);
+  const [filtroTexto, setFiltroTexto] = useState("");
 
   const [anchorEl, setAnchorEl] = useState(null); // Estado del Popover
   const [selectedColumns, setSelectedColumns] = useState([
     "Código",
     "Nombre",
     "Categoría",
+    "Stock Actual",
+    "Punto de Reposición",
     "Precio de Venta",
   ]);
 
@@ -126,6 +128,14 @@ const FiltrarProductos = () => {
       prev.includes(column)
         ? prev.filter((col) => col !== column)
         : [...prev, column]
+    );
+  };
+
+  const filtrarProductos = () => {
+    return productos.filter((producto) =>
+      Object.values(producto).some((valor) =>
+        valor?.toString().toLowerCase().includes(filtroTexto.toLowerCase())
+      )
     );
   };
 
@@ -227,26 +237,22 @@ const FiltrarProductos = () => {
                   backgroundColor: "#e0e0e0",
                 }}
               >
-               <Button
-                variant="contained"
-                color="primary"
-                onClick={() =>
-                  navigate(`/editar-producto/${row.codigo}`)
-                }
-                sx={{
-                  marginRight: 1,
-                }}
-              >
-                <EditIcon />
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() =>
-                  navigate(`/visualizar-producto/${row.codigo}`)
-                }
-              >
-                <VisibilityIcon />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => navigate(`/editar-producto/${row.codigo}`)}
+                  sx={{
+                    margin: 1,
+                  }}
+                >
+                  <EditIcon />
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => navigate(`/visualizar-producto/${row.codigo}`)}
+                >
+                  <VisibilityIcon />
                 </Button>
               </TableCell>
             </TableRow>
@@ -291,6 +297,18 @@ const FiltrarProductos = () => {
             ))}
           </TextField>
 
+          <TextField
+            label="Buscar"
+            variant="outlined"
+            value={filtroTexto}
+            onChange={(e) => setFiltroTexto(e.target.value)}
+            sx={{
+              marginRight: 2,
+              backgroundColor: "#ffeb3b",
+              borderRadius: 2,
+              minWidth: 200,
+            }}
+          />
           <Button
             variant="contained"
             onClick={handleFiltrar}
@@ -375,7 +393,7 @@ const FiltrarProductos = () => {
         </Box>
       </Popover>
 
-      {renderTable(selectedColumns, productos)}
+      {renderTable(selectedColumns, filtrarProductos())}
     </Box>
   );
 };

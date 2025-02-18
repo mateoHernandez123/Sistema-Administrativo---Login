@@ -41,6 +41,7 @@ const FiltrarProveedor = () => {
   const [rubroSeleccionado, setRubroSeleccionado] = useState("");
   const [proveedores, setProveedores] = useState([]);
   const [paginas, setPaginas] = useState();
+  const [filtroTexto, setFiltroTexto] = useState("");
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedColumns, setSelectedColumns] = useState([
@@ -127,6 +128,14 @@ const FiltrarProveedor = () => {
 
   const handleAgregarProveedor = () => {
     navigate("/alta-proveedor");
+  };
+
+  const filtrarProveedores = () => {
+    return proveedores.filter((proveedor) =>
+      Object.values(proveedor).some((valor) =>
+        valor?.toString().toLowerCase().includes(filtroTexto.toLowerCase())
+      )
+    );
   };
 
   const handleFiltrar = async () => {
@@ -256,7 +265,7 @@ const FiltrarProveedor = () => {
                   key={colIndex}
                   sx={{
                     backgroundColor: "#e0e0e0",
-                    fontSize: "1.1rem",
+                    fontSize: "1rem",
                     borderColor: "black",
                     textAlign: "center",
                   }}
@@ -306,7 +315,6 @@ const FiltrarProveedor = () => {
       >
         Listado de Proveedores
       </Typography>
-
       <Box display="flex" justifyContent="center" mb={2}>
         <TextField
           label="Rubro"
@@ -326,6 +334,19 @@ const FiltrarProveedor = () => {
             </MenuItem>
           ))}
         </TextField>
+
+        <TextField
+          label="Buscar"
+          variant="outlined"
+          value={filtroTexto}
+          onChange={(e) => setFiltroTexto(e.target.value)}
+          sx={{
+            marginRight: 2,
+            backgroundColor: "#ffeb3b",
+            borderRadius: 2,
+            minWidth: 200,
+          }}
+        />
 
         <Button
           variant="contained"
@@ -380,7 +401,6 @@ const FiltrarProveedor = () => {
           <AddIcon />
         </IconButton>
       </Box>
-
       <Popover
         open={open}
         anchorEl={anchorEl}
@@ -408,8 +428,7 @@ const FiltrarProveedor = () => {
           ))}
         </Box>
       </Popover>
-
-      {renderTable(selectedColumns, proveedores)}
+      {renderTable(selectedColumns, filtrarProveedores())}{" "}
     </Box>
   );
 };
