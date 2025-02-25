@@ -13,18 +13,18 @@ import ListaLibroDiario from "../Contable/Diario/ListaLibroDiario";
 import EditarCuenta from "../Contable/Cuentas/EditarCuenta";
 import MayorCuenta from "../Contable/Mayor/MayorCuenta.jsx";
 import AltaProveedor from "../Abastecimientos/Proveedor/AltaProveedor.jsx";
-import AltaSolicitudCompra from "../Abastecimientos/SolicitudDeCompra/AltaSolicitudCompra.jsx";
 import AltaProducto from "../Abastecimientos/Productos/AltaProducto.jsx";
-import FormularioSolicitudCompra from "../Abastecimientos/SolicitudDeCompra/FormularioSolicitudCompra.jsx";
 import FormularioOrdenCompra from "../Abastecimientos/OrdenDeCompra/FormularioOrdenCompra.jsx";
 import FiltrarProductos from "../Abastecimientos/Productos/FiltrarProductos.jsx";
 import FiltrarProveedor from "../Abastecimientos/Proveedor/FiltrarProveedor.jsx";
 import EditarProveedor from "../Abastecimientos/Proveedor/EditarProveedor.jsx";
 import EditarProducto from "../Abastecimientos/Productos/EditarProducto.jsx";
-import DetalleSolicitud from "../Abastecimientos/SolicitudDeCompra/DetalleSolicitud.jsx";
 import GeneradorPresupuestos from "../Abastecimientos/Presupuesto/GeneradorPresupuestos.jsx";
 import PresupuestoDetalle from "../Abastecimientos/Presupuesto/PresupuestoDetalle.jsx";
 import VisualizarProducto from "../Abastecimientos/Productos/VisualizarProducto.jsx";
+import FiltrarSolicitudCompra from "../Abastecimientos/SolicitudDeCompra/FiltrarSolicitudCompra.jsx";
+import AltaSolicitudCompra from "../Abastecimientos/SolicitudDeCompra/FormularioSolicitudCompra.jsx";
+import DetalleSolicitud from "../Abastecimientos/SolicitudDeCompra/DetalleSolicitud.jsx";
 
 const App = () => {
   return (
@@ -56,7 +56,7 @@ const App = () => {
                   />
                   <Route
                     path="/solicitud-compra"
-                    element={<FormularioSolicitudCompra />}
+                    element={<FiltrarSolicitudCompra />}
                   />
                   <Route
                     path="/orden-compra"

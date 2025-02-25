@@ -42,13 +42,13 @@ const FormularioSolicitudCompra = () => {
   const [numero, setNumero] = useState("");
   const [numeroSolicitud, setNumeroSolicitud] = useState(prefijo);
   const [fechaSolicitud, setFechaSolicitud] = useState(today);
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
   const [solicitante, setSolicitante] = useState("");
   const [departamento, setDepartamento] = useState("");
-  const [proveedor, setProveedor] = useState("");
   const [productos, setProductos] = useState([
     { codigo: "", descripcion: "", cantidad: "", unidad: "" },
   ]);
-  const [justificacion, setJustificacion] = useState("");
+  const [observacion, setObservacion] = useState("");
   const [error, setError] = useState("");
 
   // Opciones para los Select
@@ -58,14 +58,21 @@ const FormularioSolicitudCompra = () => {
     "Compras",
     "Ventas",
   ];
-  const proveedores = ["Gilera", "Honda", "Yamaha"];
-  const productosDisponibles = [
-    "Cubiertas",
-    "Indumentaria",
-    "Cascos",
-    "Guantes",
-    "Accesorios",
+  const categoriasDisponibles = [
+    "Libreria",
+    "Motos",
+    "Repuestos",
+    "Ropa",
+    "Electronica",
   ];
+  const productosPorCategoria = {
+    Libreria: ["Cuadernos", "Lapiceras", "Resaltadores"],
+    Motos: ["Casco", "Guantes", "Cubiertas"],
+    Repuestos: ["Filtro de aceite", "Bujía", "Amortiguadores"],
+    Ropa: ["Campera", "Pantalón", "Botas"],
+    Electronica: ["Celular", "Laptop", "Auriculares"],
+  };
+
   const unidades = ["Unidad", "Caja", "Paquete", "Litro"];
 
   // Agregar un producto
@@ -104,6 +111,10 @@ const FormularioSolicitudCompra = () => {
     setProductos(nuevosProductos);
   };
 
+  const handleCategoriaChange = (event) => {
+    setCategoriaSeleccionada(event.target.value);
+  };
+
   // Validar y enviar la solicitud
   const enviarSolicitud = () => {
     if (
@@ -123,7 +134,7 @@ const FormularioSolicitudCompra = () => {
       solicitante,
       departamento,
       productos,
-      justificacion,
+      observacion,
       estado: "Pendiente",
     };
 
@@ -138,7 +149,7 @@ const FormularioSolicitudCompra = () => {
     setDepartamento("");
     setNumero("");
     setProductos([{ codigo: "", descripcion: "", cantidad: "", unidad: "" }]);
-    setJustificacion("");
+    setObservacion("");
   };
 
   return (
@@ -148,7 +159,7 @@ const FormularioSolicitudCompra = () => {
         color: "#3b3a31",
         padding: 4,
         borderRadius: 5,
-        width: "900px",
+        width: "100%",
         maxWidth: "100%",
         margin: "auto",
       }}
@@ -199,21 +210,6 @@ const FormularioSolicitudCompra = () => {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={12} sm={6}>
-          <FormControl fullWidth>
-            <InputLabel>Proveedor</InputLabel>
-            <Select
-              value={proveedor}
-              onChange={(e) => setProveedor(e.target.value)}
-            >
-              {proveedores.map((pro, index) => (
-                <MenuItem key={index} value={pro}>
-                  {pro}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
       </Grid>
 
       {/* Detalle de necesidades */}
@@ -228,7 +224,7 @@ const FormularioSolicitudCompra = () => {
           paddingBottom: 1,
         }}
       >
-        Detalle de Necesidades
+        Detalles
       </Typography>
 
       <TableContainer
@@ -248,6 +244,17 @@ const FormularioSolicitudCompra = () => {
         >
           <TableHead>
             <TableRow>
+              <TableCell
+                align="center"
+                sx={{
+                  color: "black",
+                  fontWeight: "bold",
+                  fontSize: "1.1rem",
+                  textAlign: "center",
+                }}
+              >
+                Categoría
+              </TableCell>
               <TableCell
                 align="center"
                 sx={{
@@ -307,9 +314,24 @@ const FormularioSolicitudCompra = () => {
           </TableHead>
           <TableBody fullWidth>
             {productos.map((producto, index) => (
-              <TableRow key={index}>
+              <TableRow fullWidth key={index}>
                 <TableCell>
-                  <FormControl fullWidth>
+                  <FormControl fullWidth sx={{ marginRight: 9 }}>
+                    <InputLabel>Categoría</InputLabel>
+                    <Select
+                      value={categoriaSeleccionada}
+                      onChange={handleCategoriaChange}
+                    >
+                      {categoriasDisponibles.map((cat, i) => (
+                        <MenuItem key={i} value={cat}>
+                          {cat}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </TableCell>
+                <TableCell>
+                  <FormControl fullWidth sx={{ marginRight: 9 }}>
                     <InputLabel>Producto</InputLabel>
                     <Select
                       value={producto.codigo}
@@ -317,11 +339,13 @@ const FormularioSolicitudCompra = () => {
                         handleProductoChange(index, "codigo", e.target.value)
                       }
                     >
-                      {productosDisponibles.map((prod, i) => (
-                        <MenuItem key={i} value={prod}>
-                          {prod}
-                        </MenuItem>
-                      ))}
+                      {(productosPorCategoria[categoriaSeleccionada] || []).map(
+                        (prod, i) => (
+                          <MenuItem key={i} value={prod}>
+                            {prod}
+                          </MenuItem>
+                        )
+                      )}
                     </Select>
                   </FormControl>
                 </TableCell>
@@ -333,6 +357,8 @@ const FormularioSolicitudCompra = () => {
                     onChange={(e) =>
                       handleProductoChange(index, "descripcion", e.target.value)
                     }
+                    fullWidth
+                    sx={{ marginRight: 13 }}
                   />
                 </TableCell>
                 <TableCell>
@@ -343,10 +369,12 @@ const FormularioSolicitudCompra = () => {
                     onChange={(e) =>
                       handleProductoChange(index, "cantidad", e.target.value)
                     }
+                    fullWidth
+                    sx={{ marginRight: 13 }}
                   />
                 </TableCell>
                 <TableCell>
-                  <FormControl fullWidth>
+                  <FormControl fullWidth sx={{ marginRight: 9 }}>
                     <InputLabel>Unidad</InputLabel>
                     <Select
                       value={producto.unidad}
@@ -366,6 +394,7 @@ const FormularioSolicitudCompra = () => {
                   <IconButton
                     onClick={() => eliminarProducto(index)}
                     color="error"
+                    sx={{ marginLeft: 2 }}
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -391,7 +420,7 @@ const FormularioSolicitudCompra = () => {
         Agregar Producto
       </Button>
 
-      {/* Justificación */}
+      {/* Observaciones */}
       <Typography
         variant="h4"
         sx={{
@@ -403,14 +432,14 @@ const FormularioSolicitudCompra = () => {
           paddingBottom: 1,
         }}
       >
-        Justificación
+        Observaciones
       </Typography>
       <TextField
         fullWidth
         multiline
         rows={4}
-        value={justificacion}
-        onChange={(e) => setJustificacion(e.target.value)}
+        value={observacion}
+        onChange={(e) => setObservacion(e.target.value)}
       />
 
       {/* Error */}
