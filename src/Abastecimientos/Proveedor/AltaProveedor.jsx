@@ -216,6 +216,7 @@ const AltaProveedor = () => {
         });
       }
     } catch (error) {
+      console.error(error);
       Swal.fire({
         title: "Error en la carga de datos",
         icon: "error",

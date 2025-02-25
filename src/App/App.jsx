@@ -13,6 +13,7 @@ import ListaLibroDiario from "../Contable/Diario/ListaLibroDiario";
 import EditarCuenta from "../Contable/Cuentas/EditarCuenta";
 import MayorCuenta from "../Contable/Mayor/MayorCuenta.jsx";
 import AltaProveedor from "../Abastecimientos/Proveedor/AltaProveedor.jsx";
+import AltaSolicitudCompra from "../Abastecimientos/SolicitudDeCompra/AltaSolicitudCompra.jsx";
 import AltaProducto from "../Abastecimientos/Productos/AltaProducto.jsx";
 import FormularioSolicitudCompra from "../Abastecimientos/SolicitudDeCompra/FormularioSolicitudCompra.jsx";
 import FormularioOrdenCompra from "../Abastecimientos/OrdenDeCompra/FormularioOrdenCompra.jsx";
@@ -49,6 +50,10 @@ const App = () => {
                   <Route path="/editar-cuenta" element={<EditarCuenta />} />
                   <Route path="/alta-proveedor" element={<AltaProveedor />} />
                   <Route path="/alta-producto" element={<AltaProducto />} />
+                  <Route
+                    path="/alta-solicitud-compra"
+                    element={<AltaSolicitudCompra />}
+                  />
                   <Route
                     path="/solicitud-compra"
                     element={<FormularioSolicitudCompra />}

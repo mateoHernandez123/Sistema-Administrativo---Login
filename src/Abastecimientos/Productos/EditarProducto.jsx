@@ -78,6 +78,7 @@ const EditarProducto = () => {
         };
         setFormData(producto);
       } catch (err) {
+        console.error(err);
         Swal.fire({
           title: "Error",
           text: "No se pudo cargar la información del producto.",

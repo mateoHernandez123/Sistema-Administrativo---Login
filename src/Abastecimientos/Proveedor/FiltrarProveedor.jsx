@@ -67,6 +67,7 @@ const FiltrarProveedor = () => {
         ];
         setRubros(rubrosMock);
       } catch (err) {
+        console.error(err);
         Swal.fire({
           title: "Error",
           text: "No se pudieron cargar los rubros",
@@ -113,6 +114,7 @@ const FiltrarProveedor = () => {
           setPaginas(data.TotalPaginas); //Establecer las paginas que se van a mostrar
         }
       } catch (error) {
+        console.error(error);
         Swal.fire({
           title: "Error en la carga de datos",
           icon: "error",
@@ -164,8 +166,9 @@ const FiltrarProveedor = () => {
       const filtrados = proveedoresMock.filter(
         (proveedor) => proveedor.rubro === rubroSeleccionado
       );
-      //setProveedores(filtrados);
+      setProveedores(filtrados);
     } catch (error) {
+      console.error(error);
       Swal.fire({
         title: "Error",
         text: "No se pudieron cargar los proveedores",

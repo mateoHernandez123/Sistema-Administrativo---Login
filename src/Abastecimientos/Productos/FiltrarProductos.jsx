@@ -59,6 +59,7 @@ const FiltrarProductos = () => {
         const categoriasMock = ["Electrónica", "Hogar", "Deportes", "Ropa"];
         setCategorias(categoriasMock);
       } catch (err) {
+        console.error(err);
         Swal.fire({
           title: "Error",
           text: "No se pudieron cargar las categorías",
@@ -102,6 +103,7 @@ const FiltrarProductos = () => {
       );
       setProductos(filtrados);
     } catch (error) {
+      console.error(error);
       Swal.fire({
         title: "Error",
         text: "No se pudieron cargar los productos",

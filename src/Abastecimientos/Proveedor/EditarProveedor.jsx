@@ -55,6 +55,7 @@ const EditarProveedor = () => {
         };
         setFormData(proveedorMock);
       } catch (error) {
+        console.error(error);
         Swal.fire("Error", "No se pudo cargar el proveedor", "error");
       }
     };
@@ -164,6 +165,7 @@ const EditarProveedor = () => {
 
       navigate("/proveedores");
     } catch (error) {
+      console.error(error);
       Swal.fire({
         title: "Error en la carga de datos",
         icon: "error",

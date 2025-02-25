@@ -1,16 +1,31 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import {ContextProvider} from './context/Context.jsx'
+import { ContextProvider } from "../context/Context.jsx";
 import AppLayout from "./AppLayout";
-import AltaCuenta from "./AltaCuenta";
-import FormularioCuenta from "./FormularioCuenta";
-import FormularioAsiento from "./FormularioAsiento";
-import MayorCuenta from "../src/MayorCuenta.jsx";
-import ListaResultados from "./ListaResultados";
-import ListaUsuarios from "./ListaUsuarios";
-import Home from "./Home";
-import LoginPage from "./LoginPage";
-import ListaLibroDiario from "./ListaLibroDiario";
-import EditarCuenta from "./EditarCuenta";
+import AltaCuenta from "../Cuentas/AltaCuenta";
+import FormularioCuenta from "../Cuentas/FormularioCuenta";
+import FormularioAsiento from "../Asientos/FormularioAsiento";
+import ListaMayores from "../Mayor/ListaMayores";
+import ListaResultados from "../Resultado/ListaResultados";
+import ListaUsuarios from "../Usuario/ListaUsuarios";
+import Home from "../Home/Home";
+import LoginPage from "../Login/LoginPage";
+import ListaLibroDiario from "../Diario/ListaLibroDiario";
+import EditarCuenta from "../Cuentas/EditarCuenta";
+import MayorCuenta from "../Mayor/MayorCuenta.jsx";
+import AltaProveedor from "../Abastecimientos/Proveedor/AltaProveedor.jsx";
+import AltaProducto from "../Abastecimientos/Productos/AltaProducto.jsx";
+import FormularioSolicitudCompra from "../Abastecimientos/SolicitudDeCompra/FormularioSolicitudCompra.jsx";
+import FormularioOrdenCompra from "../Abastecimientos/OrdenDeCompra/FormularioOrdenCompra.jsx";
+import FiltrarProductos from "../Abastecimientos/Productos/FiltrarProductos.jsx";
+import FiltrarProveedor from "../Abastecimientos/Proveedor/FiltrarProveedor.jsx";
+import EditarProveedor from "../Abastecimientos/Proveedor/EditarProveedor.jsx";
+import EditarProducto from "../Abastecimientos/Productos/EditarProducto.jsx";
+import FiltrarSolicitudCompra from "../Abastecimientos/SolicitudDeCompra/FiltrarSolicitudCompra.jsx";
+import AltaSolicitudCompra from "../Abastecimientos/SolicitudDeCompra/FormularioSolicitudCompra.jsx";
+import DetalleSolicitud from "../Abastecimientos/SolicitudDeCompra/DetalleSolicitud.jsx";
+import GeneradorPresupuestos from "../Abastecimientos/Presupuesto/GeneradorPresupuestos.jsx";
+import PresupuestoDetalle from "../Abastecimientos/Presupuesto/PresupuestoDetalle.jsx";
+import VisualizarProducto from "../Abastecimientos/Productos/VisualizarProducto.jsx";
 
 const App = () => {
   return (
@@ -33,7 +48,22 @@ const App = () => {
                   <Route path="/resultados" element={<ListaResultados />} />
                   <Route path="/usuarios" element={<ListaUsuarios />} />
                   <Route path="/" element={<Home />} />
-                  <Route path="/editar-cuenta" element={<EditarCuenta />} /> 
+                  <Route path="/editar-cuenta" element={<EditarCuenta />} />
+                  <Route path="/alta-proveedor" element={<AltaProveedor />} />
+                  <Route path="/alta-producto" element={<AltaProducto />} />
+                  <Route path="/alta-solicitud-compra" element={<AltaSolicitudCompra />} />
+                  <Route path="/solicitud-compra" element={<FiltrarSolicitudCompra />} />
+                  <Route path="/orden-compra" element={<FormularioOrdenCompra />} />
+                  <Route path="/productos" element={<FiltrarProductos />} />
+                  <Route path="/proveedores" element={<FiltrarProveedor />} />
+                  <Route path="/editar-proveedor/:cuit" element={<EditarProveedor />} />
+                  <Route path="/editar-producto/:codigo" element={<EditarProducto />} />
+                  <Route path="/detalle-solicitud/:id" element={<DetalleSolicitud />} />
+                  <Route path="/presupuesto/" element={<GeneradorPresupuestos />} />
+                  <Route path="/presupuestos" element={<PresupuestoDetalle />}/>
+                  <Route path="/visualizar-producto/:codigo" element={<VisualizarProducto />}/>
+
+                                    
                 </Routes>
               </AppLayout>
             }
