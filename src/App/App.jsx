@@ -25,6 +25,7 @@ import VisualizarProducto from "../Abastecimientos/Productos/VisualizarProducto.
 import FiltrarSolicitudCompra from "../Abastecimientos/SolicitudDeCompra/FiltrarSolicitudCompra.jsx";
 import AltaSolicitudCompra from "../Abastecimientos/SolicitudDeCompra/FormularioSolicitudCompra.jsx";
 import DetalleSolicitud from "../Abastecimientos/SolicitudDeCompra/DetalleSolicitud.jsx";
+import AuthGuard from "../auth/AuthGuard.jsx";
 
 const App = () => {
   return (
@@ -37,59 +38,63 @@ const App = () => {
           <Route
             path="/*"
             element={
-              <AppLayout>
-                <Routes>
-                  <Route path="/cuentas" element={<FormularioCuenta />} />
-                  <Route path="/alta-cuentas" element={<AltaCuenta />} />
-                  <Route path="/asientos" element={<FormularioAsiento />} />
-                  <Route path="/diarios" element={<ListaLibroDiario />} />
-                  <Route path="/mayores" element={<MayorCuenta />} />
-                  <Route path="/resultados" element={<ListaResultados />} />
-                  <Route path="/usuarios" element={<ListaUsuarios />} />
-                  <Route path="/" element={<Home />} />
-                  <Route path="/editar-cuenta" element={<EditarCuenta />} />
-                  <Route path="/alta-proveedor" element={<AltaProveedor />} />
-                  <Route path="/alta-producto" element={<AltaProducto />} />
-                  <Route
-                    path="/alta-solicitud-compra"
-                    element={<AltaSolicitudCompra />}
-                  />
-                  <Route
-                    path="/solicitud-compra"
-                    element={<FiltrarSolicitudCompra />}
-                  />
-                  <Route
-                    path="/orden-compra"
-                    element={<FormularioOrdenCompra />}
-                  />
-                  <Route path="/productos" element={<FiltrarProductos />} />
-                  <Route path="/proveedores" element={<FiltrarProveedor />} />
-                  <Route
-                    path="/editar-proveedor/:cuit"
-                    element={<EditarProveedor />}
-                  />
-                  <Route
-                    path="/editar-producto/:codigo"
-                    element={<EditarProducto />}
-                  />
-                  <Route
-                    path="/detalle-solicitud/:id"
-                    element={<DetalleSolicitud />}
-                  />
-                  <Route
-                    path="/presupuesto/"
-                    element={<GeneradorPresupuestos />}
-                  />
-                  <Route
-                    path="/presupuestos"
-                    element={<PresupuestoDetalle />}
-                  />
-                  <Route
-                    path="/visualizar-producto/:codigo"
-                    element={<VisualizarProducto />}
-                  />
-                </Routes>
-              </AppLayout>
+              <AuthGuard>
+                {" "}
+                {/* Verifica que el usuario este Autenticado */}
+                <AppLayout>
+                  <Routes>
+                    <Route path="/cuentas" element={<FormularioCuenta />} />
+                    <Route path="/alta-cuentas" element={<AltaCuenta />} />
+                    <Route path="/asientos" element={<FormularioAsiento />} />
+                    <Route path="/diarios" element={<ListaLibroDiario />} />
+                    <Route path="/mayores" element={<MayorCuenta />} />
+                    <Route path="/resultados" element={<ListaResultados />} />
+                    <Route path="/usuarios" element={<ListaUsuarios />} />
+                    <Route path="/" element={<Home />} />
+                    <Route path="/editar-cuenta" element={<EditarCuenta />} />
+                    <Route path="/alta-proveedor" element={<AltaProveedor />} />
+                    <Route path="/alta-producto" element={<AltaProducto />} />
+                    <Route
+                      path="/alta-solicitud-compra"
+                      element={<AltaSolicitudCompra />}
+                    />
+                    <Route
+                      path="/solicitud-compra"
+                      element={<FiltrarSolicitudCompra />}
+                    />
+                    <Route
+                      path="/orden-compra"
+                      element={<FormularioOrdenCompra />}
+                    />
+                    <Route path="/productos" element={<FiltrarProductos />} />
+                    <Route path="/proveedores" element={<FiltrarProveedor />} />
+                    <Route
+                      path="/editar-proveedor/:cuit"
+                      element={<EditarProveedor />}
+                    />
+                    <Route
+                      path="/editar-producto/:codigo"
+                      element={<EditarProducto />}
+                    />
+                    <Route
+                      path="/detalle-solicitud/:id"
+                      element={<DetalleSolicitud />}
+                    />
+                    <Route
+                      path="/presupuesto/"
+                      element={<GeneradorPresupuestos />}
+                    />
+                    <Route
+                      path="/presupuestos"
+                      element={<PresupuestoDetalle />}
+                    />
+                    <Route
+                      path="/visualizar-producto/:codigo"
+                      element={<VisualizarProducto />}
+                    />
+                  </Routes>
+                </AppLayout>
+              </AuthGuard>
             }
           />
         </Routes>
