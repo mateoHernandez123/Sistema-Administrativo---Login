@@ -291,6 +291,17 @@ const AppLayout = ({ children }) => {
                     sx={{ color: "yellow" }}
                   />
                 </ListItem>
+                <ListItem
+                  component={Link}
+                  to={"/facturas"}
+                  key={"facturas"}
+                  sx={{ pl: 4 }}
+                >
+                  <ListItemIcon sx={{ color: "yellow" }}>
+                    <ReceiptIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={"Facturas"} sx={{ color: "yellow" }} />
+                </ListItem>
               </List>
             </Collapse>
 

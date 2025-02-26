@@ -26,6 +26,7 @@ import FiltrarSolicitudCompra from "../Abastecimientos/SolicitudDeCompra/Filtrar
 import AltaSolicitudCompra from "../Abastecimientos/SolicitudDeCompra/FormularioSolicitudCompra.jsx";
 import DetalleSolicitud from "../Abastecimientos/SolicitudDeCompra/DetalleSolicitud.jsx";
 import AuthGuard from "../auth/AuthGuard.jsx";
+import RemitoFactura from "../Abastecimientos/Remito/RemitoFactura.jsx";
 
 const App = () => {
   return (
@@ -92,6 +93,7 @@ const App = () => {
                       path="/visualizar-producto/:codigo"
                       element={<VisualizarProducto />}
                     />
+                    <Route path="/facturas" element={<RemitoFactura />} />
                   </Routes>
                 </AppLayout>
               </AuthGuard>
