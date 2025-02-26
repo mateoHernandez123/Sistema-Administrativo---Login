@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -13,21 +13,12 @@ import {
   IconButton,
 } from "@mui/material";
 import Swal from "sweetalert2";
-import { Context } from "../../context/Context";
 import { useNavigate } from "react-router-dom"; // Asegúrate de importar esto
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import axios from "axios"; // Importar axios para llamadas HTTP
 
 const AltaProveedor = () => {
-  const { usuarioAutenticado, deslogear, IP, tokenError } = useContext(Context); // Mueve el useContext aquí
   const navigate = useNavigate(); // Mueve el useNavigate aquí
-
-  useEffect(() => {
-    if (!JSON.parse(localStorage.getItem("UsuarioAutenticado"))) {
-      deslogear();
-      navigate("/login", { replace: true });
-    }
-  }, [usuarioAutenticado, navigate, deslogear]); // Asegúrate de incluir `deslogear` como dependencia
 
   const handleListarProveedores = () => {
     navigate("/proveedores");

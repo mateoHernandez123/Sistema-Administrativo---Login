@@ -16,26 +16,14 @@ import {
   FormControlLabel,
   Popover,
 } from "@mui/material";
-import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-import { Context } from "../../context/Context";
 import AddIcon from "@mui/icons-material/Add";
 import SettingsIcon from "@mui/icons-material/Settings";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
 const FiltrarProductos = () => {
-  const { usuarioAutenticado, deslogear } = useContext(Context);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!JSON.parse(localStorage.getItem("UsuarioAutenticado"))) {
-      deslogear();
-      navigate("/login", { replace: true });
-    }
-  }, [usuarioAutenticado, navigate, deslogear]);
-
   const [categorias, setCategorias] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
   const [productos, setProductos] = useState([]);

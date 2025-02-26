@@ -27,15 +27,9 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 
 const FiltrarProveedor = () => {
-  const { usuarioAutenticado, deslogear, IP, tokenError } = useContext(Context);
+  const { IP, tokenError } = useContext(Context);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!JSON.parse(localStorage.getItem("UsuarioAutenticado"))) {
-      deslogear();
-      navigate("/login", { replace: true });
-    }
-  }, [usuarioAutenticado, navigate, deslogear]);
 
   const [rubros, setRubros] = useState([]);
   const [rubroSeleccionado, setRubroSeleccionado] = useState("");

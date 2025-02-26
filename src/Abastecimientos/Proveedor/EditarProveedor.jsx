@@ -18,15 +18,9 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Context } from "../../context/Context";
 
 const EditarProveedor = () => {
-  const { usuarioAutenticado, deslogear, IP, tokenError } = useContext(Context); // Mueve el useContext aquí
+  const { IP, tokenError } = useContext(Context); // Mueve el useContext aquí
   const navigate = useNavigate(); // Mueve el useNavigate aquí
 
-  useEffect(() => {
-    if (!JSON.parse(localStorage.getItem("UsuarioAutenticado"))) {
-      deslogear();
-      navigate("/login", { replace: true });
-    }
-  }, [usuarioAutenticado, navigate, deslogear]); // Asegúrate de incluir `deslogear` como dependencia
   const { cuit } = useParams();
   const [formData, setFormData] = useState(null);
 

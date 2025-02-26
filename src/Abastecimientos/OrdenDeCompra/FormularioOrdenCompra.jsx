@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState } from "react";
 import {
   Box,
   Typography,
@@ -21,20 +21,8 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
-import { Context } from "../../context/Context";
 
 const FormularioOrdenCompra = () => {
-  const { usuarioAutenticado, deslogear } = useContext(Context);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!JSON.parse(localStorage.getItem("UsuarioAutenticado"))) {
-      deslogear();
-      navigate("/login", { replace: true });
-    }
-  }, [usuarioAutenticado, navigate, deslogear]);
-
   const today = new Date().toISOString().split("T")[0];
   const [numeroOrden, setNumeroOrden] = useState("OC-2024-001");
   const [fechaOrden, setFechaOrden] = useState(today);

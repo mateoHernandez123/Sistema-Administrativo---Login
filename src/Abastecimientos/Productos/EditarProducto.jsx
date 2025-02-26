@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -11,21 +11,11 @@ import {
   IconButton,
 } from "@mui/material";
 import Swal from "sweetalert2";
-import { Context } from "../../context/Context";
-import { useNavigate, useParams } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useParams } from "react-router-dom";
 
 const EditarProducto = () => {
-  const { usuarioAutenticado, deslogear } = useContext(Context);
-  const navigate = useNavigate();
   const { codigo } = useParams(); // Obtiene el código del producto desde la URL
-
-  useEffect(() => {
-    if (!JSON.parse(localStorage.getItem("UsuarioAutenticado"))) {
-      deslogear();
-      navigate("/login", { replace: true });
-    }
-  }, [usuarioAutenticado, navigate, deslogear]);
 
   const [formData, setFormData] = useState({
     codigo: "",
