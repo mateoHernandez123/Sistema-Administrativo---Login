@@ -114,7 +114,7 @@ const AppLayout = ({ children }) => {
         </Link>
 
         {/* Renderizar el menú filtrado según los permisos */}
-        <Box sx={{ overflow: "auto" }}>
+        <Box sx={{ overflow: "auto", marginBottom: 8 }}>
           <List>
             {/* Menú Contable */}
             <ListItem button onClick={handleClickContable}>
