@@ -1,52 +1,57 @@
-import { useState, useEffect } from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Button } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 const GeneradorPresupuestos = () => {
-  const [solicitudes, setSolicitudes] = useState([]);
-  const [seleccionadas, setSeleccionadas] = useState([]);
+  const [pedidos, setPedidos] = useState([]);
+  const [seleccionados, setSeleccionados] = useState([]);
+  const [seleccionarTodos, setSeleccionarTodos] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     // Simulación de datos obtenidos de una API
-    setSolicitudes([
-      {
-        id: 1,
-        productos: [
-          { id: "p1", nombre: "Laptop", cantidad: 2, proveedores: ["Proveedor A", "Proveedor B"] },
-          { id: "p2", nombre: "Mouse", cantidad: 5, proveedores: ["Proveedor A"] },
-        ],
-      },
-      {
-        id: 2,
-        productos: [
-          { id: "p3", nombre: "Teclado", cantidad: 3, proveedores: ["Proveedor B"] },
-        ],
-      },
-    ]);
+    const data = {
+      pedidos: [
+        { id: "p1", codigo: "LAP123", nombre: "Laptop", marca: "Dell", modelo: "XPS 15", descripcion: "Core i7, 16GB RAM, SSD 1TB", cantidad: 2, proveedores: ["Proveedor A", "Proveedor B"] },
+        { id: "p2", codigo: "MOU456", nombre: "Mouse", marca: "Logitech", modelo: "M705", descripcion: "Inalámbrico, ergonómico", cantidad: 5, proveedores: ["Proveedor A"] },
+        { id: "p3", codigo: "TEC789", nombre: "Teclado", marca: "Genius", modelo: "KB-110", descripcion: "Inalámbrico, silencioso", cantidad: 3, proveedores: ["Proveedor B"] },
+      ],
+    };
+
+    setPedidos(data.pedidos);
   }, []);
 
   const toggleSeleccion = (id) => {
-    setSeleccionadas((prev) =>
+    setSeleccionados((prev) =>
       prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
     );
   };
 
+  const toggleSeleccionarTodos = () => {
+    if (seleccionarTodos) {
+      setSeleccionados([]);
+    } else {
+      setSeleccionados(pedidos.map((p) => p.id));
+    }
+    setSeleccionarTodos(!seleccionarTodos);
+  };
+
   const generarPresupuestos = () => {
-    const productosSeleccionados = solicitudes
-      .filter((s) => seleccionadas.includes(s.id))
-      .flatMap((s) => s.productos);
+    const pedidosSeleccionados = pedidos.filter((p) => seleccionados.includes(p.id));
 
     const agrupadosPorProveedor = {};
-    productosSeleccionados.forEach((producto) => {
-      producto.proveedores.forEach((proveedor) => {
+    pedidosSeleccionados.forEach((pedido) => {
+      pedido.proveedores.forEach((proveedor) => {
         if (!agrupadosPorProveedor[proveedor]) {
           agrupadosPorProveedor[proveedor] = [];
         }
         agrupadosPorProveedor[proveedor].push({
-          id: producto.id,
-          nombre: producto.nombre,
-          cantidad: producto.cantidad,
+          id: pedido.id,
+          codigo: pedido.codigo,
+          nombre: pedido.nombre,
+          marca: pedido.marca,
+          modelo: pedido.modelo,
+          cantidad: pedido.cantidad,
         });
       });
     });
@@ -55,41 +60,69 @@ const GeneradorPresupuestos = () => {
   };
 
   return (
-    <div>
-      <h2>Generador de Presupuestos</h2>
-      <TableContainer component={Paper}>
+    <Box sx={{ padding: 4, backgroundColor: "#e6e2d5", borderRadius: 5 }}>
+      <Typography
+        variant="h4"
+        sx={{
+          marginBottom: 4,
+          color: "#333",
+          textAlign: "center",
+          fontWeight: "bold",
+        }}
+      >
+        Listado de Pedidos
+      </Typography>
+
+      <TableContainer component={Paper} sx={{ borderRadius: 5 }}>
         <Table>
           <TableHead>
-            <TableRow>
-              <TableCell>Seleccionar</TableCell>
-              <TableCell>ID Solicitud</TableCell>
-              <TableCell>Productos</TableCell>
+            <TableRow sx={{ backgroundColor: "#ffeb3b" }}>
+              <TableCell>
+                <Checkbox checked={seleccionarTodos} onChange={toggleSeleccionarTodos} />
+              </TableCell>
+              <TableCell><b>Código</b></TableCell>
+              <TableCell><b>Nombre</b></TableCell>
+              <TableCell><b>Marca</b></TableCell>
+              <TableCell><b>Modelo</b></TableCell>
+              <TableCell><b>Descripción</b></TableCell>
+              <TableCell><b>Cantidad</b></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {solicitudes.map((sol) => (
-              <TableRow key={sol.id}>
+            {pedidos.map((pedido) => (
+              <TableRow key={pedido.id} sx={{ backgroundColor: "#e0e0e0" }}>
                 <TableCell>
                   <Checkbox
-                    checked={seleccionadas.includes(sol.id)}
-                    onChange={() => toggleSeleccion(sol.id)}
+                    checked={seleccionados.includes(pedido.id)}
+                    onChange={() => toggleSeleccion(pedido.id)}
                   />
                 </TableCell>
-                <TableCell>{sol.id}</TableCell>
-                <TableCell>
-                  {sol.productos.map((p) => (
-                    <div key={p.id}>{p.nombre} (x{p.cantidad})</div>
-                  ))}
-                </TableCell>
+                <TableCell>{pedido.codigo}</TableCell>
+                <TableCell>{pedido.nombre}</TableCell>
+                <TableCell>{pedido.marca}</TableCell>
+                <TableCell>{pedido.modelo}</TableCell>
+                <TableCell>{pedido.descripcion}</TableCell>
+                <TableCell>{pedido.cantidad}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-      <Button variant="contained" color="primary" onClick={generarPresupuestos} disabled={seleccionadas.length === 0}>
+      
+      <Button
+        variant="contained"
+        sx={{
+          marginTop: 3,
+          backgroundColor: "#ffeb3b",
+          color: "black",
+          borderRadius: "1.2rem",
+        }}
+        onClick={generarPresupuestos}
+        disabled={seleccionados.length === 0}
+      >
         Generar Presupuestos
       </Button>
-    </div>
+    </Box>
   );
 };
 

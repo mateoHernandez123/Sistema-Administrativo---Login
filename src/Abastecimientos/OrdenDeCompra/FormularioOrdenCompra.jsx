@@ -27,6 +27,7 @@ const FormularioOrdenCompra = () => {
   const [numeroOrden, setNumeroOrden] = useState("OC-2024-001");
   const [fechaOrden, setFechaOrden] = useState(today);
   const [proveedor, setProveedor] = useState("");
+  const [presupuesto, setPresupuesto] = useState("");
   const [cuit, setCuit] = useState("");
   const [direccionProveedor, setDireccionProveedor] = useState("");
   const [telefonoProveedor, setTelefonoProveedor] = useState("");
@@ -49,6 +50,12 @@ const FormularioOrdenCompra = () => {
     "Papelería Universal S.A.",
     "Oficina Fácil",
     "Almacenes del Norte",
+  ];
+
+  const presupuestosDisponibles = [
+    "Presupuesto A",
+    "Presupuesto B",
+    "Presupuesto C",
   ];
 
   const departamentosList = ["Almacén", "Ventas", "Administración"];
@@ -116,6 +123,28 @@ const FormularioOrdenCompra = () => {
       <Typography variant="h4" sx={{ marginBottom: 2, textAlign: "center" }}>
         Orden de Compra
       </Typography>
+
+      <Typography variant="h6" sx={{ marginBottom: 2 }}>
+        Presupuesto
+      </Typography>
+      <Grid container spacing={2} sx={{ marginBottom: 3 }}>
+        <Grid item xs={12} sm={6}>
+          <FormControl fullWidth>
+            <InputLabel>Presupuestos Disponibles</InputLabel>
+            <Select
+              value={presupuesto}
+              onChange={(e) => setPresupuesto(e.target.value)}
+              required
+            >
+              {presupuestosDisponibles.map((presupuesto, index) => (
+                <MenuItem key={index} value={presupuesto}>
+                  {presupuesto}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+      </Grid>
 
       {/* Información del proveedor */}
       <Typography variant="h6" sx={{ marginBottom: 2 }}>

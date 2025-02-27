@@ -1,6 +1,21 @@
 import { useState } from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Button, TextField } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Checkbox,
+  Button,
+  TextField,
+} from "@mui/material";
 import { useLocation } from "react-router-dom";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const PresupuestoDetalle = () => {
   const location = useLocation();
@@ -11,77 +26,195 @@ const PresupuestoDetalle = () => {
   const toggleSeleccion = (proveedor, producto) => {
     setSeleccionados((prev) => {
       const nuevos = { ...prev };
-      if (!nuevos[proveedor]) {
-        nuevos[proveedor] = [];
-      }
-      if (nuevos[proveedor].some((p) => p.id === producto.id)) {
-        nuevos[proveedor] = nuevos[proveedor].filter((p) => p.id !== producto.id);
+      if (!nuevos[proveedor]) nuevos[proveedor] = [];
+
+      const index = nuevos[proveedor].findIndex((p) => p.id === producto.id);
+      if (index !== -1) {
+        nuevos[proveedor].splice(index, 1);
       } else {
-        nuevos[proveedor].push({ ...producto, cantidad: cantidades[producto.id] || producto.cantidad });
+        nuevos[proveedor].push({
+          ...producto,
+          cantidad: cantidades[producto.id] || producto.cantidad,
+        });
       }
+      return nuevos;
+    });
+  };
+
+  const toggleSeleccionProveedor = (proveedor, productos) => {
+    setSeleccionados((prev) => {
+      const nuevos = { ...prev };
+      nuevos[proveedor] =
+        nuevos[proveedor]?.length === productos.length
+          ? []
+          : productos.map((p) => ({
+              ...p,
+              cantidad: cantidades[p.id] || p.cantidad,
+            }));
       return nuevos;
     });
   };
 
   const actualizarCantidad = (productoId, nuevaCantidad) => {
     setCantidades((prev) => ({ ...prev, [productoId]: nuevaCantidad }));
+    setSeleccionados((prev) => {
+      const nuevos = { ...prev };
+      Object.keys(nuevos).forEach((proveedor) => {
+        nuevos[proveedor] = nuevos[proveedor].map((p) =>
+          p.id === productoId ? { ...p, cantidad: nuevaCantidad } : p
+        );
+      });
+      return nuevos;
+    });
   };
 
-  const generarArchivo = () => {
-    const detalles = Object.entries(seleccionados).map(([proveedor, productos]) => {
-      return `Proveedor: ${proveedor}\nProductos:\n${productos.map((p) => `${p.nombre} - Cantidad: ${p.cantidad}`).join("\n")}`;
+  const generarPDFs = () => {
+    Object.entries(seleccionados).forEach(([proveedor, productos]) => {
+      if (!productos.length) return;
+
+      const doc = new jsPDF();
+      const fecha = new Date().toLocaleDateString();
+      const numeroPresupuesto = Math.floor(1000 + Math.random() * 9000);
+
+      doc.setFontSize(16);
+      doc.text("Presupuesto de Productos", 14, 20);
+      doc.setFontSize(12);
+      doc.text(`Proveedor: ${proveedor}`, 14, 30);
+      doc.text(`Fecha: ${fecha}`, 14, 40);
+      doc.text(`Número de Presupuesto: ${numeroPresupuesto}`, 14, 50);
+
+      autoTable(doc, {
+        startY: 60,
+        head: [["Código", "Nombre", "Marca", "Modelo", "Cantidad"]],
+        body: productos.map((p) => [
+          p.codigo,
+          p.nombre,
+          p.marca,
+          p.modelo,
+          p.cantidad,
+        ]),
+      });
+
+      doc.save(`Presupuesto_${proveedor}.pdf`);
     });
-    const blob = new Blob([detalles.join("\n\n")], { type: "text/plain" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "presupuestos.txt";
-    link.click();
   };
 
   return (
-    <div>
-      <h2>Detalles de Presupuesto</h2>
-      {presupuestos.map(([proveedor, productos]) => (
-        <TableContainer component={Paper} key={proveedor}>
-          <h3>{proveedor}</h3>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Seleccionar</TableCell>
-                <TableCell>Producto</TableCell>
-                <TableCell>Descripción</TableCell>
-                <TableCell>Cantidad</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {productos.map((producto) => (
-                <TableRow key={producto.id}>
-                  <TableCell>
+    <Box sx={{ padding: 4, backgroundColor: "#e6e2d5", borderRadius: 5 }}>
+      <Typography
+        variant="h4"
+        sx={{
+          marginBottom: 4,
+          color: "#333",
+          textAlign: "center",
+          fontWeight: "bold",
+        }}
+      >
+        Detalles de Presupuesto
+      </Typography>
+      {presupuestos.map(([proveedor, productos]) => {
+        const todosSeleccionados =
+          seleccionados[proveedor]?.length === productos.length;
+        return (
+          <TableContainer
+            component={Paper}
+            key={proveedor}
+            sx={{ marginBottom: 3, borderRadius: 5 }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                backgroundColor: "#ffeb3b",
+                padding: 2,
+                borderRadius: "5px 5px 0 0",
+                fontWeight: "bold",
+              }}
+            >
+              {proveedor}
+            </Typography>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: "#ffeb3b" }}>
+                  <TableCell padding="checkbox">
                     <Checkbox
-                      checked={seleccionados[proveedor]?.some((p) => p.id === producto.id) || false}
-                      onChange={() => toggleSeleccion(proveedor, producto)}
+                      checked={todosSeleccionados || false}
+                      onChange={() =>
+                        toggleSeleccionProveedor(proveedor, productos)
+                      }
                     />
                   </TableCell>
-                  <TableCell>{producto.nombre}</TableCell>
-                  <TableCell>{producto.descripcion || "Sin descripción"}</TableCell>
                   <TableCell>
-                    <TextField
-                      type="number"
-                      value={cantidades[producto.id] || producto.cantidad}
-                      onChange={(e) => actualizarCantidad(producto.id, e.target.value)}
-                      inputProps={{ min: 1 }}
-                    />
+                    <b>Código</b>
+                  </TableCell>
+                  <TableCell>
+                    <b>Nombre</b>
+                  </TableCell>
+                  <TableCell>
+                    <b>Marca</b>
+                  </TableCell>
+                  <TableCell>
+                    <b>Modelo</b>
+                  </TableCell>
+                  <TableCell>
+                    <b>Cantidad</b>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      ))}
-      <Button variant="contained" color="primary" onClick={generarArchivo} disabled={Object.keys(seleccionados).length === 0}>
-        Generar Archivo
+              </TableHead>
+              <TableBody>
+                {productos.map((producto) => (
+                  <TableRow
+                    key={producto.id}
+                    sx={{ backgroundColor: "#e0e0e0" }}
+                  >
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={
+                          seleccionados[proveedor]?.some(
+                            (p) => p.id === producto.id
+                          ) || false
+                        }
+                        onChange={() => toggleSeleccion(proveedor, producto)}
+                      />
+                    </TableCell>
+                    <TableCell>{producto.codigo}</TableCell>
+                    <TableCell>{producto.nombre}</TableCell>
+                    <TableCell>{producto.marca}</TableCell>
+                    <TableCell>{producto.modelo}</TableCell>
+                    <TableCell>
+                      <TextField
+                        type="number"
+                        value={cantidades[producto.id] || producto.cantidad}
+                        onChange={(e) =>
+                          actualizarCantidad(producto.id, e.target.value)
+                        }
+                        inputProps={{ min: 1 }}
+                        size="small"
+                        sx={{ width: "80px" }}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        );
+      })}
+      <Button
+        variant="contained"
+        sx={{
+          marginTop: 3,
+          backgroundColor: "#ffeb3b",
+          color: "black",
+          borderRadius: "1.2rem",
+        }}
+        onClick={generarPDFs}
+        disabled={Object.keys(seleccionados).every(
+          (p) => seleccionados[p].length === 0
+        )}
+      >
+        Generar PDFs
       </Button>
-    </div>
+    </Box>
   );
 };
 
