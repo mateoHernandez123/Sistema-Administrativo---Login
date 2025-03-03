@@ -235,20 +235,22 @@ const AppLayout = ({ children }) => {
                     />
                   </ListItem>
                 )}
-                <ListItem
-                  component={Link}
-                  to={"/productos"}
-                  key={"productos"}
-                  sx={{ pl: 4 }}
-                >
-                  <ListItemIcon sx={{ color: "yellow" }}>
-                    <Inventory2Icon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={"Productos"}
-                    sx={{ color: "yellow" }}
-                  />
-                </ListItem>
+                {permisos.Productos && (
+                  <ListItem
+                    component={Link}
+                    to={"/productos"}
+                    key={"productos"}
+                    sx={{ pl: 4 }}
+                  >
+                    <ListItemIcon sx={{ color: "yellow" }}>
+                      <Inventory2Icon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"Productos"}
+                      sx={{ color: "yellow" }}
+                    />
+                  </ListItem>
+                )}
                 <ListItem
                   component={Link}
                   to={"/solicitud-compra"}

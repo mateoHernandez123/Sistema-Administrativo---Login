@@ -111,6 +111,66 @@ create table proveedores(
     activo boolean not null
 );
 
+-- Tablas productos:
+
+create table productos(
+	idproducto int auto_increment not null primary key,
+    codigo varchar(25) not null unique,
+    codigo_barra varchar(15) not null unique,
+    activo boolean not null,
+    nombre varchar(100) not null,
+    marca varchar(50) not null,
+    modelo varchar(50) not null,
+    precio_venta double not null,
+    precio_compra double not null,
+    iva_porcentaje int not null,
+    stock_actual int not null,
+    stock_minimo int not null,
+    stock_maximo int not null,
+    punto_reposicion varchar(3) not null,
+    categoria varchar(50) not null,
+    almacen varchar(20) not null,
+    url_imagen varchar(100) not null
+);
+
+-- Tabla N a N de productos y proveedores
+
+create table producto_proveedor(
+	producto_id int not null,
+    proveedor_id int not null,
+    constraint `UQ_producto_proveedor` unique(producto_id, proveedor_id),
+    constraint `FK_producto_producto_proveedor` foreign key(producto_id) references productos(idproducto),
+    constraint `FK_proveedor_producto_proveedor` foreign key(proveedor_id) references proveedores(idproveedor)
+);
+
+-- Tabla de historial de compras
+create table historial_compra(
+	idhistorialcompra int auto_increment primary key not null,
+    producto_id int not null,
+    proveedor_id int not null,
+    fecha_hora datetime not null,
+    cantidad int not null,
+    precio_unitario double not null,
+    constraint `FK_historial_compra_proveedor`
+    foreign key (proveedor_id) references proveedores(idproveedor),
+    constraint `FK_historial_compra_producto` 
+    foreign key (producto_id) references productos(idproducto)
+);
+
+
+/*
+INSERT INTO historial_compra (producto_id, proveedor_id, fecha_hora, cantidad, precio_unitario) VALUES (..., ..., '2025-03-01 17:13:00', ..., ...);
+
+SELECT 
+    producto_id, 
+    proveedor_id, 
+    DATE_FORMAT(fecha_hora, '%Y-%m-%d %H:%i:%s') AS fecha_formateada, 
+    cantidad, 
+    precio_unitario 
+FROM historial_compra;
+*/
+
+--------------------------------------- INSERTS / UPDATES / DELETES -----------------------------------------
 
 INSERT INTO roles(tipo)
 VALUES ("admin");
@@ -140,10 +200,17 @@ UPDATE usuarios  set contrasenia = '173af653133d964edfc16cafe0aba33c8f500a07f3ba
 insert into permisos(nombre)
 values('Cuentas'), ('Asientos'), ('Diarios'), ('Mayores'), ('Resultados'), ('Usuarios'),('Proveedores');
 
-/*INSERTS DE PROVEEDORES*/
+/*INSERTS DE Productos*/
 
 insert into permisos(nombre)
-values('Proveedores');
+values('Productos');
+
+insert into roles_permisos(rol_id, permiso_id, valor)
+values(
+	(select idrol from roles where tipo = 'admin' ),
+    (select idpermiso from permisos where nombre = 'Productos' ),
+    1
+);
 
 select * from roles_permisos;
 
