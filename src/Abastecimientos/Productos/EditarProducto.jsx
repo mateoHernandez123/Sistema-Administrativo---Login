@@ -12,10 +12,11 @@ import {
 } from "@mui/material";
 import Swal from "sweetalert2";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const EditarProducto = () => {
   const { codigo } = useParams(); // Obtiene el código del producto desde la URL
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     codigo: "",

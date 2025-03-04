@@ -22,6 +22,7 @@ import AddIcon from "@mui/icons-material/Add";
 import SettingsIcon from "@mui/icons-material/Settings";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import { useNavigate } from "react-router-dom";
 
 const FiltrarProductos = () => {
   const [categorias, setCategorias] = useState([]);
@@ -40,6 +41,7 @@ const FiltrarProductos = () => {
   ]);
 
   const open = Boolean(anchorEl);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCategorias = async () => {
@@ -61,6 +63,8 @@ const FiltrarProductos = () => {
   const handleAgregarProducto = () => {
     navigate("/alta-producto");
   };
+
+  
 
   const handleFiltrar = async () => {
     try {
