@@ -12,6 +12,7 @@ import {
   Checkbox,
   Button,
   TextField,
+  Modal,
 } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import jsPDF from "jspdf";
@@ -22,6 +23,7 @@ const PresupuestoDetalle = () => {
   const presupuestos = location.state?.presupuestos || [];
   const [seleccionados, setSeleccionados] = useState({});
   const [cantidades, setCantidades] = useState({});
+  const [modalOpen, setModalOpen] = useState(false);
 
   const toggleSeleccion = (proveedor, producto) => {
     setSeleccionados((prev) => {
@@ -97,6 +99,7 @@ const PresupuestoDetalle = () => {
 
       doc.save(`Presupuesto_${proveedor}.pdf`);
     });
+    setModalOpen(false);
   };
 
   return (
@@ -199,21 +202,60 @@ const PresupuestoDetalle = () => {
           </TableContainer>
         );
       })}
+
       <Button
         variant="contained"
-        sx={{
-          marginTop: 3,
-          backgroundColor: "#ffeb3b",
-          color: "black",
-          borderRadius: "1.2rem",
-        }}
-        onClick={generarPDFs}
+        sx={{ marginTop: 3, backgroundColor: "#ffeb3b", color: "black" }}
+        onClick={() => setModalOpen(true)}
         disabled={Object.keys(seleccionados).every(
           (p) => seleccionados[p].length === 0
         )}
       >
-        Generar PDFs
+        Confirmar
       </Button>
+
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <Box
+          sx={{
+            padding: 4,
+            backgroundColor: "white",
+            margin: "auto",
+            marginTop: 10,
+            width: "50%",
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="h6">Confirmar Presupuesto</Typography>
+          {Object.entries(seleccionados).map(([proveedor, productos]) => (
+            <Box key={proveedor} sx={{ marginTop: 2 }}>
+              <Typography variant="h6">{proveedor}</Typography>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Código</TableCell>
+                    <TableCell>Nombre</TableCell>
+                    <TableCell>Cantidad</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {productos.map((p) => (
+                    <TableRow key={p.id}>
+                      <TableCell>{p.codigo}</TableCell>
+                      <TableCell>{p.nombre}</TableCell>
+                      <TableCell>{p.cantidad}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+          ))}
+          <Box sx={{ display: "flex", justifyContent: "center", marginTop: 2 }}>
+            <Button variant="contained" onClick={generarPDFs}>
+              Generar PDF
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </Box>
   );
 };

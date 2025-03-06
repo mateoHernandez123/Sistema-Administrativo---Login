@@ -45,6 +45,7 @@ const FormularioOrdenCompra = () => {
   const [envio, setEnvio] = useState("");
   const [fechaEntrega, setFechaEntrega] = useState("");
   const [lugarEntrega, setLugarEntrega] = useState("");
+  const [observacion, setObservacion] = useState("");
 
   const proveedoresList = [
     "Papelería Universal S.A.",
@@ -201,7 +202,7 @@ const FormularioOrdenCompra = () => {
       </Grid>
 
       {/* Información del solicitante */}
-      <Typography variant="h6" sx={{ marginTop: 3, marginBottom: 2 }}>
+      {/* <Typography variant="h6" sx={{ marginTop: 3, marginBottom: 2 }}>
         Información del Solicitante
       </Typography>
       <Grid container spacing={2}>
@@ -227,8 +228,8 @@ const FormularioOrdenCompra = () => {
               ))}
             </Select>
           </FormControl>
-        </Grid>
       </Grid>
+        </Grid> */}
 
       {/* Detalle del pedido */}
       <Typography variant="h6" sx={{ marginTop: 3, marginBottom: 2 }}>
@@ -381,6 +382,27 @@ const FormularioOrdenCompra = () => {
           />
         </Grid>
       </Grid>
+      {/* Observaciones */}
+      <Typography
+        variant="h4"
+        sx={{
+          color: "#333",
+          fontSize: "1.6rem",
+          marginTop: 2,
+          marginBottom: 2,
+          borderBottom: "2px solid #000",
+          paddingBottom: 1,
+        }}
+      >
+        Observaciones
+      </Typography>
+      <TextField
+        fullWidth
+        multiline
+        rows={4}
+        value={observacion}
+        onChange={(e) => setObservacion(e.target.value)}
+      />
 
       <Box sx={{ textAlign: "center", marginTop: 4 }}>
         <Button

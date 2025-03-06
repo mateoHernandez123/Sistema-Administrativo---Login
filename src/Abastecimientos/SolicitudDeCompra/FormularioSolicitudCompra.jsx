@@ -158,7 +158,7 @@ const FormularioSolicitudCompra = () => {
       </Typography>
 
       {/* Encabezado */}
-      <Grid container spacing={2}>
+      {/* <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
           <TextField
             label="Número de Solicitud"
@@ -199,7 +199,7 @@ const FormularioSolicitudCompra = () => {
             </Select>
           </FormControl>
         </Grid>
-      </Grid>
+      </Grid> */}
 
       {/* Detalle de necesidades */}
       <Typography
