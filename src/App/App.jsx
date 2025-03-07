@@ -26,7 +26,11 @@ import FiltrarSolicitudCompra from "../Abastecimientos/SolicitudDeCompra/Filtrar
 import AltaSolicitudCompra from "../Abastecimientos/SolicitudDeCompra/FormularioSolicitudCompra.jsx";
 import DetalleSolicitud from "../Abastecimientos/SolicitudDeCompra/DetalleSolicitud.jsx";
 import AuthGuard from "../auth/AuthGuard.jsx";
-import RemitoFactura from "../Abastecimientos/Remito/RemitoFactura.jsx";
+import OCRemito from "../Abastecimientos/Remito/OrdenesCompraList.jsx";
+import AltaRemito from "../Abastecimientos/Remito/AltaRemito.jsx";
+import OCFacturas from "../Abastecimientos/Facturas/OrdenesCompraList.jsx";
+import AltaFactura from "../Abastecimientos/Facturas/AltaFactura.jsx";
+import Venta from "../Abastecimientos/Ventas/Venta.jsx";
 
 const App = () => {
   return (
@@ -93,7 +97,11 @@ const App = () => {
                       path="/visualizar-producto/:codigo"
                       element={<VisualizarProducto />}
                     />
-                    <Route path="/facturas" element={<RemitoFactura />} />
+                    <Route path="/remitos" element={<OCRemito />} />
+                    <Route path="/alta-remito" element={<AltaRemito />} />
+                    <Route path="/facturas" element={<OCFacturas />} />
+                    <Route path="/alta-factura" element={<AltaFactura />} />
+                    <Route path="/venta" element={<Venta />} />
                   </Routes>
                 </AppLayout>
               </AuthGuard>

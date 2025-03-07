@@ -267,20 +267,6 @@ const AppLayout = ({ children }) => {
                 </ListItem>
                 <ListItem
                   component={Link}
-                  to={"/presupuesto"}
-                  key={"presupuesto"}
-                  sx={{ pl: 4 }}
-                >
-                  <ListItemIcon sx={{ color: "yellow" }}>
-                    <ReceiptIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={"Presupuesto"}
-                    sx={{ color: "yellow" }}
-                  />
-                </ListItem>
-                <ListItem
-                  component={Link}
                   to={"/orden-compra"}
                   key={"orden-compra"}
                   sx={{ pl: 4 }}
@@ -290,6 +276,20 @@ const AppLayout = ({ children }) => {
                   </ListItemIcon>
                   <ListItemText
                     primary={"Orden De Compra"}
+                    sx={{ color: "yellow" }}
+                  />
+                </ListItem>
+                <ListItem
+                  component={Link}
+                  to={"/presupuesto"}
+                  key={"presupuesto"}
+                  sx={{ pl: 4 }}
+                >
+                  <ListItemIcon sx={{ color: "yellow" }}>
+                    <ReceiptIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={"Presupuesto"}
                     sx={{ color: "yellow" }}
                   />
                 </ListItem>
@@ -326,6 +326,15 @@ const AppLayout = ({ children }) => {
                 <ListItemText primary={"Usuarios"} sx={{ color: "yellow" }} />
               </ListItem>
             )}
+
+
+  <ListItem component={Link} to={"/venta"} key={"venta"}>
+    <ListItemIcon sx={{ color: "yellow" }}>
+      <ShoppingCartIcon /> {/* Ícono de carrito para ventas */}
+    </ListItemIcon>
+    <ListItemText primary={"Ventas"} sx={{ color: "yellow" }} />
+  </ListItem>
+
 
             <ContenedorUsuarioSesion />
           </List>
