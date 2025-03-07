@@ -29,7 +29,10 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-
+import TopicIcon from "@mui/icons-material/Topic";
+import FolderZipIcon from "@mui/icons-material/FolderZip";
+import ListIcon from "@mui/icons-material/List";
+import FilePresentOutlinedIcon from "@mui/icons-material/FilePresentOutlined";
 const drawerWidth = 240;
 
 const AppLayout = ({ children }) => {
@@ -272,7 +275,7 @@ const AppLayout = ({ children }) => {
                   sx={{ pl: 4 }}
                 >
                   <ListItemIcon sx={{ color: "yellow" }}>
-                    <ReceiptIcon />
+                    <ListIcon />
                   </ListItemIcon>
                   <ListItemText
                     primary={"Presupuesto"}
@@ -286,7 +289,7 @@ const AppLayout = ({ children }) => {
                   sx={{ pl: 4 }}
                 >
                   <ListItemIcon sx={{ color: "yellow" }}>
-                    <ReceiptIcon />
+                    <FilePresentOutlinedIcon />
                   </ListItemIcon>
                   <ListItemText
                     primary={"Orden De Compra"}
@@ -300,7 +303,7 @@ const AppLayout = ({ children }) => {
                   sx={{ pl: 4 }}
                 >
                   <ListItemIcon sx={{ color: "yellow" }}>
-                    <ReceiptIcon />
+                    <FolderZipIcon />
                   </ListItemIcon>
                   <ListItemText primary={"Remitos"} sx={{ color: "yellow" }} />
                 </ListItem>
@@ -311,7 +314,7 @@ const AppLayout = ({ children }) => {
                   sx={{ pl: 4 }}
                 >
                   <ListItemIcon sx={{ color: "yellow" }}>
-                    <ReceiptIcon />
+                    <TopicIcon />
                   </ListItemIcon>
                   <ListItemText primary={"Facturas"} sx={{ color: "yellow" }} />
                 </ListItem>
