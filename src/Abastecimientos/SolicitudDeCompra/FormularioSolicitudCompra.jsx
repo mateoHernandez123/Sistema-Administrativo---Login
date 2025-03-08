@@ -35,7 +35,7 @@ const FormularioSolicitudCompra = () => {
   const [solicitante, setSolicitante] = useState("");
   const [departamento, setDepartamento] = useState("");
   const [productos, setProductos] = useState([
-    { codigo: "", descripcion: "", cantidad: "", unidad: "" },
+    { codigo: "", descripcion: "", cantidad: ""},
   ]);
   const [observacion, setObservacion] = useState("");
   const [error, setError] = useState("");
@@ -62,14 +62,11 @@ const FormularioSolicitudCompra = () => {
     Electronica: ["Celular", "Laptop", "Auriculares"],
   };
 
-  const unidades = ["Unidad", "Caja", "Paquete", "Litro"];
+  // const unidades = ["Unidad", "Caja", "Paquete", "Litro"];
 
   // Agregar un producto
   const agregarProducto = () => {
-    setProductos([
-      ...productos,
-      { codigo: "", descripcion: "", cantidad: "", unidad: "" },
-    ]);
+    setProductos([...productos, { codigo: "", descripcion: "", cantidad: "" }]);
   };
 
   useEffect(() => {
@@ -109,9 +106,7 @@ const FormularioSolicitudCompra = () => {
     if (
       !solicitante ||
       !departamento ||
-      productos.some(
-        (p) => !p.codigo || !p.descripcion || !p.cantidad || !p.unidad
-      )
+      productos.some((p) => !p.codigo || !p.descripcion || !p.cantidad)
     ) {
       setError("Todos los campos son obligatorios.");
       return;
@@ -137,7 +132,7 @@ const FormularioSolicitudCompra = () => {
     setSolicitante("");
     setDepartamento("");
     setNumero("");
-    setProductos([{ codigo: "", descripcion: "", cantidad: "", unidad: "" }]);
+    setProductos([{ codigo: "", descripcion: "", cantidad: "" }]);
     setObservacion("");
   };
 
@@ -277,7 +272,7 @@ const FormularioSolicitudCompra = () => {
               >
                 Cantidad
               </TableCell>
-              <TableCell
+              {/* <TableCell
                 align="center"
                 sx={{
                   color: "black",
@@ -287,7 +282,7 @@ const FormularioSolicitudCompra = () => {
                 }}
               >
                 Unidad
-              </TableCell>
+              </TableCell> */}
               <TableCell
                 align="center"
                 sx={{
@@ -362,7 +357,7 @@ const FormularioSolicitudCompra = () => {
                     sx={{ marginRight: 13 }}
                   />
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <FormControl fullWidth sx={{ marginRight: 9 }}>
                     <InputLabel>Unidad</InputLabel>
                     <Select
@@ -378,7 +373,7 @@ const FormularioSolicitudCompra = () => {
                       ))}
                     </Select>
                   </FormControl>
-                </TableCell>
+                </TableCell> */}
                 <TableCell>
                   <IconButton
                     onClick={() => eliminarProducto(index)}

@@ -25,28 +25,22 @@ const ListadoPresupuestos = () => {
         id: 1,
         proveedor: "Proveedor A",
         codigo: "LAP123",
-        nombre: "Laptop",
-        marca: "Dell",
-        modelo: "XPS 15",
-        cantidad: 2,
+        fecha: "08/03/2025",
+        hora: "20:45",
       },
       {
         id: 2,
         proveedor: "Proveedor B",
         codigo: "MOU456",
-        nombre: "Mouse",
-        marca: "Logitech",
-        modelo: "M705",
-        cantidad: 5,
+        fecha: "07/03/2025",
+        hora: "15:04",
       },
       {
         id: 3,
         proveedor: "Proveedor A",
         codigo: "TEC789",
-        nombre: "Teclado",
-        marca: "Genius",
-        modelo: "KB-110",
-        cantidad: 3,
+        fecha: "06/03/2025",
+        hora: "10:00",
       },
     ];
     setPresupuestos(data);
@@ -54,28 +48,20 @@ const ListadoPresupuestos = () => {
 
   const handleReimprimir = (presupuesto) => {
     const doc = new jsPDF();
-    const fecha = new Date().toLocaleDateString();
     const numeroPresupuesto = Math.floor(1000 + Math.random() * 9000);
 
     doc.setFontSize(16);
     doc.text("Presupuesto de Productos", 14, 20);
     doc.setFontSize(12);
     doc.text(`Proveedor: ${presupuesto.proveedor}`, 14, 30);
-    doc.text(`Fecha: ${fecha}`, 14, 40);
-    doc.text(`Número de Presupuesto: ${numeroPresupuesto}`, 14, 50);
+    doc.text(`Fecha: ${presupuesto.fecha}`, 14, 40);
+    doc.text(`Hora: ${presupuesto.hora}`, 14, 50);
+    doc.text(`Número de Presupuesto: ${numeroPresupuesto}`, 14, 60);
 
     autoTable(doc, {
-      startY: 60,
-      head: [["Código", "Nombre", "Marca", "Modelo", "Cantidad"]],
-      body: [
-        [
-          presupuesto.codigo,
-          presupuesto.nombre,
-          presupuesto.marca,
-          presupuesto.modelo,
-          presupuesto.cantidad,
-        ],
-      ],
+      startY: 70,
+      head: [["Código", "Fecha", "Hora"]],
+      body: [[presupuesto.codigo, presupuesto.fecha, presupuesto.hora]],
     });
 
     doc.save(`Presupuesto_${presupuesto.proveedor}.pdf`);
@@ -106,16 +92,10 @@ const ListadoPresupuestos = () => {
                 <b>Código</b>
               </TableCell>
               <TableCell>
-                <b>Nombre</b>
+                <b>Fecha</b>
               </TableCell>
               <TableCell>
-                <b>Marca</b>
-              </TableCell>
-              <TableCell>
-                <b>Modelo</b>
-              </TableCell>
-              <TableCell>
-                <b>Cantidad</b>
+                <b>Hora</b>
               </TableCell>
               <TableCell>
                 <b>Acción</b>
@@ -130,10 +110,8 @@ const ListadoPresupuestos = () => {
               >
                 <TableCell>{presupuesto.proveedor}</TableCell>
                 <TableCell>{presupuesto.codigo}</TableCell>
-                <TableCell>{presupuesto.nombre}</TableCell>
-                <TableCell>{presupuesto.marca}</TableCell>
-                <TableCell>{presupuesto.modelo}</TableCell>
-                <TableCell>{presupuesto.cantidad}</TableCell>
+                <TableCell>{presupuesto.fecha}</TableCell>
+                <TableCell>{presupuesto.hora}</TableCell>
                 <TableCell>
                   <IconButton onClick={() => handleReimprimir(presupuesto)}>
                     <PrintIcon />
