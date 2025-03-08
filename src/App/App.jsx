@@ -31,6 +31,7 @@ import AltaRemito from "../Abastecimientos/Remito/AltaRemito.jsx";
 import OCFacturas from "../Abastecimientos/Facturas/OrdenesCompraList.jsx";
 import AltaFactura from "../Abastecimientos/Facturas/AltaFactura.jsx";
 import Venta from "../Abastecimientos/Ventas/Venta.jsx";
+import ListadoPresupuesto from "../Abastecimientos/Presupuesto/ListadoPresupuesto.jsx";
 
 const App = () => {
   return (
@@ -102,6 +103,7 @@ const App = () => {
                     <Route path="/facturas" element={<OCFacturas />} />
                     <Route path="/alta-factura" element={<AltaFactura />} />
                     <Route path="/venta" element={<Venta />} />
+                    <Route path="/listar-presupuesto" element={<ListadoPresupuesto />} />
                   </Routes>
                 </AppLayout>
               </AuthGuard>
