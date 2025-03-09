@@ -13,6 +13,7 @@ import {
   Button,
   TextField,
 } from "@mui/material";
+import Asiento from "../../Contable/Asientos/FormularioAsiento";
 
 const AltaFactura = ({ ordenCompra }) => {
   const [productos, setProductos] = useState([]);
@@ -61,9 +62,16 @@ const AltaFactura = ({ ordenCompra }) => {
 
   return (
     <Box sx={{ padding: 4, backgroundColor: "#e6e2d5", borderRadius: 5 }}>
+      <Asiento />
       <Typography
         variant="h4"
-        sx={{ marginBottom: 2, color: "#333", fontWeight: "bold", textAlign: "center" }}
+        sx={{
+          marginTop: 2,
+          marginBottom: 2,
+          color: "#333",
+          fontWeight: "bold",
+          textAlign: "center",
+        }}
       >
         Alta de Factura
       </Typography>
@@ -92,13 +100,27 @@ const AltaFactura = ({ ordenCompra }) => {
                   onChange={toggleSeleccionTodos}
                 />
               </TableCell>
-              <TableCell><b>Código</b></TableCell>
-              <TableCell><b>Nombre</b></TableCell>
-              <TableCell><b>Marca</b></TableCell>
-              <TableCell><b>Modelo</b></TableCell>
-              <TableCell><b>Descripción</b></TableCell>
-              <TableCell><b>Cantidad</b></TableCell>
-              <TableCell><b>Precio</b></TableCell>
+              <TableCell>
+                <b>Código</b>
+              </TableCell>
+              <TableCell>
+                <b>Nombre</b>
+              </TableCell>
+              <TableCell>
+                <b>Marca</b>
+              </TableCell>
+              <TableCell>
+                <b>Modelo</b>
+              </TableCell>
+              <TableCell>
+                <b>Descripción</b>
+              </TableCell>
+              <TableCell>
+                <b>Cantidad</b>
+              </TableCell>
+              <TableCell>
+                <b>Precio</b>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -128,17 +150,18 @@ const AltaFactura = ({ ordenCompra }) => {
                   />
                 </TableCell>
                 <TableCell>
-                <TextField
-  type="text"
-  value={producto.precio}
-  onChange={(e) => actualizarPrecio(producto.id, e.target.value)}
-  inputMode="decimal"
-  pattern="[0-9]+(\.[0-9]{1,2})?"
-  size="small"
-  sx={{ width: "100px" }}
-  placeholder="Ingresar precio"
-/>
-
+                  <TextField
+                    type="text"
+                    value={producto.precio}
+                    onChange={(e) =>
+                      actualizarPrecio(producto.id, e.target.value)
+                    }
+                    inputMode="decimal"
+                    pattern="[0-9]+(\.[0-9]{1,2})?"
+                    size="small"
+                    sx={{ width: "100px" }}
+                    placeholder="Ingresar precio"
+                  />
                 </TableCell>
               </TableRow>
             ))}
@@ -166,9 +189,33 @@ const AltaFactura = ({ ordenCompra }) => {
 const ejemploOrdenCompra = {
   proveedor: "Proveedor A",
   productos: [
-    { id: 1, codigo: "P001", nombre: "Producto 1", marca: "Marca A", modelo: "Modelo X", descripcion: "Descripción 1", cantidad: 1 },
-    { id: 2, codigo: "P002", nombre: "Producto 2", marca: "Marca B", modelo: "Modelo Y", descripcion: "Descripción 2", cantidad: 2 },
-    { id: 3, codigo: "P003", nombre: "Producto 3", marca: "Marca C", modelo: "Modelo Z", descripcion: "Descripción 3", cantidad: 1 },
+    {
+      id: 1,
+      codigo: "P001",
+      nombre: "Producto 1",
+      marca: "Marca A",
+      modelo: "Modelo X",
+      descripcion: "Descripción 1",
+      cantidad: 1,
+    },
+    {
+      id: 2,
+      codigo: "P002",
+      nombre: "Producto 2",
+      marca: "Marca B",
+      modelo: "Modelo Y",
+      descripcion: "Descripción 2",
+      cantidad: 2,
+    },
+    {
+      id: 3,
+      codigo: "P003",
+      nombre: "Producto 3",
+      marca: "Marca C",
+      modelo: "Modelo Z",
+      descripcion: "Descripción 3",
+      cantidad: 1,
+    },
   ],
 };
 

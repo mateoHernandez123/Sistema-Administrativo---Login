@@ -33,6 +33,7 @@ import TopicIcon from "@mui/icons-material/Topic";
 import FolderZipIcon from "@mui/icons-material/FolderZip";
 import ListIcon from "@mui/icons-material/List";
 import FilePresentOutlinedIcon from "@mui/icons-material/FilePresentOutlined";
+import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 const drawerWidth = 240;
 
 const AppLayout = ({ children }) => {
@@ -317,6 +318,17 @@ const AppLayout = ({ children }) => {
                     <TopicIcon />
                   </ListItemIcon>
                   <ListItemText primary={"Facturas"} sx={{ color: "yellow" }} />
+                </ListItem>
+                <ListItem
+                  component={Link}
+                  to={"/venta"}
+                  key={"venta"}
+                  sx={{ pl: 4 }}
+                >
+                  <ListItemIcon sx={{ color: "yellow" }}>
+                    <PointOfSaleIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={"Ventas"} sx={{ color: "yellow" }} />
                 </ListItem>
               </List>
             </Collapse>

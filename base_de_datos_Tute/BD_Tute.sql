@@ -133,6 +133,12 @@ create table productos(
     url_imagen varchar(100) not null
 );
 
+-- precio_compra double not null,
+
+-- Si tienen registros, para no borrar los datos hagan
+-- ALTER TABLE productos add descripcion text;
+-- ALTER TABLE productos drop column precio_compra;
+
 -- Tabla N a N de productos y proveedores
 
 create table producto_proveedor(
@@ -169,6 +175,140 @@ SELECT
     precio_unitario 
 FROM historial_compra;
 */
+
+create table solicitud_compra(
+	idsolicitud int auto_increment not null primary key,
+    codigo varchar(20) not null,
+    constraint `UQ_solicitud_compra_codigo` unique (codigo),
+    fecha datetime not null,
+    obvservacion text,
+    usuario_id int not null,
+    constraint `FK_solicitud_compra_usuario` foreign key (usuario_id) references usuarios(idusuarios)
+);
+
+create table presupuesto_compra(
+	idpresupuesto int auto_increment not null primary key,
+    codigo varchar(20) not null,
+    constraint `UQ_presupuesto_compra_codigo` unique (codigo),
+    fecha datetime not null,
+    activo boolean not null,
+    proveedor_id int not null,
+    constraint `FK_presupuesto_compra_proveedor` foreign key (proveedor_id) references proveedores(idproveedor),
+    usuario_id int not null,
+    constraint `FK_presupuesto_compra_usuario` foreign key (usuario_id) references usuarios(idusuarios)
+);
+
+create table orden_compra(
+	idorden int auto_increment not null primary key,
+    codigo varchar(20) not null,
+    constraint `UQ_orden_compra_codigo` unique (codigo),
+    fecha datetime not null,
+    subtotal double not null,
+    iva double not null,
+    total double not null,
+    forma_pago varchar(50) not null,
+    plazo_pago varchar(50) not null,
+    envio boolean not null,
+    fecha_entrega date,
+    lugar_entrega varchar(100),
+    obvservaciones text,
+    usuario_id int not null,
+    constraint `FK_orden_compra_usuario` foreign key (usuario_id) references usuarios(idusuarios),
+    presupuesto_id int not null,
+    constraint `FK_orden_compra_presupuesto` foreign key (presupuesto_id) references presupuesto_compra(idpresupuesto)
+);
+
+create table estado_pedido(
+	valor int not null primary key,
+    nombre_estado varchar(15) not null
+);
+INSERT INTO estado_pedido (valor, nombre_estado) VALUES
+(1, 'Pendiente'),
+(2, 'Presupuestado'),
+(3, 'Comprometido'),
+(4, 'Ingresado'),
+(5, 'Finalizado'),
+(6, 'Cancelado');
+
+create table pedido_compra(
+	idpedido int auto_increment not null primary key,
+	codigo varchar(20) not null,
+    constraint `UQ_pedido_compra_codigo` unique (codigo),
+    cantidad int not null,
+    precio_unitario double,
+    estado int not null,
+    constraint `FK_pedido_compra_estado` foreign key (estado) references estado_pedido(valor),
+    solicitud_id int not null,
+    constraint `FK_pedido_compra_solicitud` foreign key (solicitud_id) references solicitud_compra(idsolicitud),
+    producto_id int not null,
+    constraint `FK_pedido_compra_producto` foreign key (producto_id) references productos(idproducto),
+    orden_id int,
+    constraint `FK_pedido_compra_orden` foreign key (orden_id) references orden_compra(idorden)
+);
+
+create table historial_pedido(
+	idhistorial_pedido int not null auto_increment primary key,
+	pedido_id int not null,
+    constraint `FK_historial_pedido_pedido_compra` foreign key (pedido_id) references pedido_compra(idpedido),
+    fecha datetime not null,
+    cantidad_anterior int,
+    cantidad_actual int not null,
+    precio_unitario_anterior double,
+    precio_unitario_actual double,
+    estado_anterior int,
+    constraint `FK_historial_pedido_compra_estado_anterior` foreign key (estado_anterior) references estado_pedido(valor),
+    estado_actual int not null,
+    constraint `FK_historial_pedido_compra_estado_actual` foreign key (estado_actual) references estado_pedido(valor),
+    usuario_id_anterior int ,
+    constraint `FK_historial_pedido_usuario_anterior` foreign key (usuario_id_anterior) references usuarios(idusuarios),
+    usuario_id_actual int not null,
+    constraint `FK_historial_pedido_usuario_actual` foreign key (usuario_id_actual) references usuarios(idusuarios)
+);
+
+create table presupuesto_pedido(
+	idpresupuesto_pedido int not null auto_increment primary key,
+	presupuesto_id int not null,
+    constraint `FK_presupuesto_pedido_presupuesto` foreign key (presupuesto_id) references presupuesto_compra(idpresupuesto),
+    pedido_id int not null,
+    constraint `FK_presupuesto_pedido_pedido` foreign key (pedido_id) references pedido_compra(idpedido)
+);
+
+create table remito(
+	idremito int auto_increment primary key not null,
+    fecha datetime not null,
+    nro_remito int not null,
+    constraint `UQ_remito_nro_remito` unique (nro_remito),
+    orden_id int not null,
+    constraint `FK_remito_orden_compra` foreign key (orden_id) references orden_compra(idorden)
+);
+
+create table remito_pedido(
+	idremito_pedido int not null auto_increment primary key,
+	remito_id int not null,
+    constraint `FK_remito_pedido_remito` foreign key (remito_id) references remito(idremito),
+    pedido_id int not null,
+    constraint `FK_remito_pedido_pedido` foreign key (pedido_id) references pedido_compra(idpedido),
+    cantidad int not null
+);
+
+create table factura(
+	idfactura int not null auto_increment primary key,
+    fecha datetime not null,
+    nro_factura int not null,
+    constraint `UQ_factura_nro_factura` unique (nro_factura),
+    orden_id int not null,
+    constraint `FK_factura_orden_compra` foreign key (orden_id) references orden_compra(idorden)
+);
+
+create table factura_pedido(
+	idfactura_pedido int not null auto_increment primary key,
+	factura_id int not null,
+    constraint `FK_factura_pedido_factura` foreign key (factura_id) references factura(idfactura),
+    pedido_id int not null,
+    constraint `FK_factura_pedido_pedido` foreign key (pedido_id) references pedido_compra(idpedido),
+    cantidad int not null
+);
+
 
 --------------------------------------- INSERTS / UPDATES / DELETES -----------------------------------------
 
@@ -302,7 +442,57 @@ values
 insert into cuentas(nombre, tipo, recibe_saldo, codigo, descripcion, activa, padre_id)
 values('Cajas y Bancos', 'A', 0, '1.1', 'Subcategoria de Activo que engloba caja y banco', 1, (select c.idcuentas from cuentas as c where c.nombre = 'Activo'));
 
-/*---------------------- SELECT ------------------------*/
+
+insert into permisos(nombre)
+values('SolicitudCompra');
+
+insert into roles_permisos(rol_id, permiso_id, valor)
+values(
+	(select idrol from roles where tipo = 'admin' ),
+    (select idpermiso from permisos where nombre = 'SolicitudCompra' ),
+    1
+);
+
+insert into permisos(nombre)
+values('PresupuestoCompra');
+
+insert into roles_permisos(rol_id, permiso_id, valor)
+values(
+	(select idrol from roles where tipo = 'admin' ),
+    (select idpermiso from permisos where nombre = 'PresupuestoCompra' ),
+    1
+);
+
+insert into permisos(nombre)
+values('OrdenCompra');
+
+insert into roles_permisos(rol_id, permiso_id, valor)
+values(
+	(select idrol from roles where tipo = 'admin' ),
+    (select idpermiso from permisos where nombre = 'OrdenCompra' ),
+    1
+);
+
+insert into permisos(nombre)
+values('RemitoCompra');
+
+insert into roles_permisos(rol_id, permiso_id, valor)
+values(
+	(select idrol from roles where tipo = 'admin' ),
+    (select idpermiso from permisos where nombre = 'RemitoCompra' ),
+    1
+);
+
+insert into permisos(nombre)
+values('FacturaCompra');
+
+insert into roles_permisos(rol_id, permiso_id, valor)
+values(
+	(select idrol from roles where tipo = 'admin' ),
+    (select idpermiso from permisos where nombre = 'FacturaCompra' ),
+    1
+);
+------------------------------------------- SELECT ---------------------------------------------------------
 
 -- Obtener los permisos de un usuario mediante el mail
 select  p.nombre, rp.valor  

@@ -30,7 +30,6 @@ const FiltrarProveedor = () => {
   const { IP, tokenError } = useContext(Context);
   const navigate = useNavigate();
 
-
   const [rubros, setRubros] = useState([]);
   const [rubroSeleccionado, setRubroSeleccionado] = useState("");
   const [proveedores, setProveedores] = useState([]);
@@ -47,17 +46,23 @@ const FiltrarProveedor = () => {
     "Rubro",
     "Ciudad",
   ]);
-
   const open = Boolean(anchorEl);
 
   useEffect(() => {
     const fetchRubros = async () => {
       try {
         const rubrosMock = [
-          "Tecnología",
-          "Soporte",
-          "Construcción",
-          "Alimentos",
+          "Motos y Vehículos",
+          "Repuestos y Accesorios",
+          "Indumentaria y Seguridad",
+          "Lubricantes y Químicos",
+          "Neumáticos",
+          "Herramientas y Equipamiento",
+          "Electrónica y Tecnología",
+          "Servicios Mecánicos",
+          "Financieras y Seguros",
+          "Publicidad y Marketing",
+          "Logística y Transporte",
         ];
         setRubros(rubrosMock);
       } catch (err) {
@@ -120,7 +125,7 @@ const FiltrarProveedor = () => {
       }
     };
     fetchProveedores();
-  }, [[IP, tokenError]]);
+  }, [IP, tokenError]);
 
   const handleAgregarProveedor = () => {
     navigate("/alta-proveedor");
@@ -287,7 +292,11 @@ const FiltrarProveedor = () => {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={() => navigate(`/editar-proveedor/${row.cuit}`)}
+                  onClick={() =>
+                    navigate(`/editar-proveedor/${row.cuit}`, {
+                      state: { proveedor: row }, // Aquí pasas el proveedor completo con datos bancarios incluidos
+                    })
+                  }
                 >
                   <EditIcon />
                 </Button>

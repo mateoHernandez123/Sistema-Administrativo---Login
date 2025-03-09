@@ -12,49 +12,84 @@ import {
   FormControlLabel,
   IconButton,
 } from "@mui/material";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Context } from "../../context/Context";
+import axios from "axios";
 
 const EditarProveedor = () => {
-  const { IP, tokenError } = useContext(Context); // Mueve el useContext aquí
-  const navigate = useNavigate(); // Mueve el useNavigate aquí
-
+  const { IP, tokenError } = useContext(Context);
+  const navigate = useNavigate();
   const { cuit } = useParams();
-  const [formData, setFormData] = useState(null);
+  const location = useLocation();
+  const proveedor = location.state?.proveedor || {};
 
+  const [formData, setFormData] = useState({
+    nombre: proveedor.nombre || "",
+    razon_social: proveedor.razon_social || "",
+    cuit: proveedor.cuit || "",
+    telefono: proveedor.telefono || "",
+    correo: proveedor.correo || "",
+    direccion: proveedor.direccion || "",
+    provincia: proveedor.provincia || "",
+    ciudad: proveedor.ciudad || "",
+    codigo_postal: proveedor.codigo_postal || "",
+    tipo_proveedor: proveedor.tipo_proveedor || "",
+    rubro: proveedor.rubro || "",
+    activo: proveedor.activo || false,
+  });
+
+  const [provincias, setProvincias] = useState([]);
+  const [ciudades, setCiudades] = useState([]);
+
+  // Obtener provincias al montar el componente
   useEffect(() => {
-    const fetchProveedor = async () => {
-      try {
-        // Simulación de datos
-        const proveedorMock = {
-          nombreProveedor: "Proveedor A",
-          razonSocial: "Proveedor A S.A.",
-          cuit: "20-12345678-9",
-          telefono: "123456789",
-          correo: "contacto@proveedora.com",
-          direccion: "Calle Falsa 123",
-          ciudad: "Ciudad A",
-          provincia: "Provincia A",
-          codigoPostal: "1234",
-          banco: "Banco Nación",
-          numeroCuenta: "123456789",
-          cbu: "0123456789012345678901",
-          tipoProveedor: "Mayorista",
-          rubro: "Tecnología",
-          proveedorActivo: true,
-          calificacion: "A",
-          comentarios: "Proveedor confiable",
-        };
-        setFormData(proveedorMock);
-      } catch (error) {
-        console.error(error);
-        Swal.fire("Error", "No se pudo cargar el proveedor", "error");
-      }
-    };
-    fetchProveedor();
-  }, [cuit]);
+    if (formData.provincia) {
+      axios
+        .get(
+          `https://apis.datos.gob.ar/georef/api/municipios?provincia=${formData.provincia}&campos=nombre&max=1000`
+        )
+        .then((response) => {
+          setCiudades(response.data.municipios);
+        })
+        .catch((error) => {
+          console.error("Error al obtener ciudades:", error);
+        });
+    }
+  }, [formData.provincia]);
+
+  // Manejar cambio de provincia y cargar ciudades
+  const handleProvinciaChange = (e) => {
+    const provinciaId = e.target.value;
+    setFormData((prevData) => ({
+      ...prevData,
+      provincia: provinciaId,
+      ciudad: "",
+      codigo_postal: "",
+    }));
+
+    axios
+      .get(
+        `https://apis.datos.gob.ar/georef/api/municipios?provincia=${provinciaId}&campos=nombre&max=1000`
+      )
+      .then((response) => {
+        setCiudades(response.data.municipios);
+      })
+      .catch((error) => {
+        console.error("Error al obtener ciudades:", error);
+      });
+  };
+
+  // Manejar cambio de ciudad
+  const handleCiudadChange = (e) => {
+    const ciudadSeleccionada = e.target.value;
+    setFormData((prevData) => ({
+      ...prevData,
+      ciudad: ciudadSeleccionada,
+      codigo_postal: "",
+    }));
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -67,12 +102,10 @@ const EditarProveedor = () => {
   const handleSave = async () => {
     try {
       const token = JSON.parse(localStorage.getItem("accessToken"));
-      const Cuit = {
-        cuit: formData.cuit,
-      };
-      // Verificar si se debe activar o desactivar el proveedor
-      const activationResponse = formData.proveedorActivo
-        ? await fetch(`${IP}/api/proveedores/activar`, {
+      const Cuit = { cuit: formData.cuit };
+
+      const activationResponse = formData.activo
+        ? await fetch(`${IP}/api/proveedores/activarProveedor`, {
             method: "PUT",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -80,7 +113,7 @@ const EditarProveedor = () => {
             },
             body: JSON.stringify({ Cuit }),
           })
-        : await fetch(`${IP}/api/proveedores/desactivar`, {
+        : await fetch(`${IP}/api/proveedores/desactivarProveedor`, {
             method: "DELETE",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -88,7 +121,6 @@ const EditarProveedor = () => {
             },
             body: JSON.stringify({ Cuit }),
           });
-      console.log({ Cuit });
       const activationData = await activationResponse.json();
 
       if (activationData.AuthErr) {
@@ -113,47 +145,44 @@ const EditarProveedor = () => {
         });
       }
 
-      // // Enviar los datos del formulario al backend para la actualización
-      // const updateResponse = await fetch(
-      //   `${IP}/api/proveedores/${formData.cuit}`,
-      //   {
-      //     method: "PUT",
-      //     headers: {
-      //       Authorization: `Bearer ${token}`,
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify(formData),
-      //   }
-      // );
+      // Enviar los datos del formulario al backend para la actualización
+      const updateResponse = await fetch(`${IP}/api/proveedores/modificar`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-      // const updateData = await updateResponse.json();
+      const updateData = await updateResponse.json();
 
-      // if (updateData.AuthErr) {
-      //   return tokenError(updateData.MENSAJE);
-      // } else if (updateData.ServErr) {
-      //   return Swal.fire({
-      //     title: "Error del Servidor",
-      //     icon: "error",
-      //     text: updateData.MENSAJE,
-      //     color: "#fff",
-      //     background: "#333",
-      //     confirmButtonColor: "#3085d6",
-      //   });
-      // } else if (updateData.ERROR) {
-      //   return Swal.fire({
-      //     icon: "warning",
-      //     title: "Atención",
-      //     text: updateData.MENSAJE,
-      //     color: "#fff",
-      //     background: "#333",
-      //     confirmButtonColor: "#3085d6",
-      //   });
-      // }
+      if (updateData.AuthErr) {
+        return tokenError(updateData.MENSAJE);
+      } else if (updateData.ServErr) {
+        return Swal.fire({
+          title: "Error del Servidor",
+          icon: "error",
+          text: updateData.MENSAJE,
+          color: "#fff",
+          background: "#333",
+          confirmButtonColor: "#3085d6",
+        });
+      } else if (updateData.ERROR) {
+        return Swal.fire({
+          icon: "warning",
+          title: "Atención",
+          text: updateData.MENSAJE,
+          color: "#fff",
+          background: "#333",
+          confirmButtonColor: "#3085d6",
+        });
+      }
 
       // Éxito: Activación/Desactivación y Actualización Completadas
       Swal.fire({
         title: "Proveedor Actualizado",
-        text: `Proveedor ${formData.nombreProveedor} actualizado correctamente`,
+        text: `Proveedor ${formData.nombre} actualizado correctamente`,
         icon: "success",
       });
 
@@ -176,7 +205,19 @@ const EditarProveedor = () => {
   }
 
   const tiposProveedores = ["Minorista", "Mayorista", "Exportador", "Otro"];
-  const rubros = ["Tecnología", "Soporte"];
+  const rubros = [
+    "Motos y Vehículos",
+    "Repuestos y Accesorios",
+    "Indumentaria y Seguridad",
+    "Lubricantes y Químicos",
+    "Neumáticos",
+    "Herramientas y Equipamiento",
+    "Electrónica y Tecnología",
+    "Servicios Mecánicos",
+    "Financieras y Seguros",
+    "Publicidad y Marketing",
+    "Logística y Transporte",
+  ];
 
   return (
     <Box
@@ -212,7 +253,7 @@ const EditarProveedor = () => {
         <TextField
           label="Nombre del Proveedor"
           name="nombreProveedor"
-          value={formData.nombreProveedor}
+          value={formData.nombre}
           onChange={handleInputChange}
           fullWidth
           margin="normal"
@@ -220,10 +261,11 @@ const EditarProveedor = () => {
         <TextField
           label="Razón Social"
           name="razonSocial"
-          value={formData.razonSocial}
+          value={formData.razon_social}
           onChange={handleInputChange}
           fullWidth
           margin="normal"
+          disabled
         />
         <TextField
           label="CUIT"
@@ -250,75 +292,65 @@ const EditarProveedor = () => {
           fullWidth
           margin="normal"
         />
-        <TextField
-          label="Dirección"
-          name="direccion"
-          value={formData.direccion}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Ciudad"
-          name="ciudad"
-          value={formData.ciudad}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Provincia"
-          name="provincia"
-          value={formData.provincia}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Código Postal"
-          name="codigoPostal"
-          value={formData.codigoPostal}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        />
-      </Box>
 
-      <Box mb={2}>
-        <Typography variant="h6">Datos Bancarios</Typography>
-        <TextField
-          label="Banco"
-          name="banco"
-          value={formData.banco}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Número de Cuenta"
-          name="numeroCuenta"
-          value={formData.numeroCuenta}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="CBU"
-          name="cbu"
-          value={formData.cbu}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        />
+        <Typography variant="h6">Ubicación</Typography>
+        <Box mb={3}>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Provincia</InputLabel>
+            <Select
+              name="provincia"
+              value={formData.provincia}
+              onChange={handleProvinciaChange}
+              type="text"
+            >
+              {provincias.map((provincia) => (
+                <MenuItem key={provincia.id} value={provincia.nombre}>
+                  {provincia.nombre}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Ciudad</InputLabel>
+            <Select
+              name="ciudad"
+              value={formData.ciudad}
+              onChange={handleCiudadChange}
+              type="text"
+            >
+              {ciudades.map((ciudad) => (
+                <MenuItem key={ciudad.id} value={ciudad.nombre}>
+                  {ciudad.nombre}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            fullWidth
+            label="Código Postal"
+            name="codigo_postal"
+            value={formData.codigo_postal}
+            onChange={handleInputChange}
+            margin="normal"
+            required
+          />
+          <TextField
+            label="Dirección"
+            name="direccion"
+            value={formData.direccion}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+        </Box>
       </Box>
-
       <Box mb={2}>
         <Typography variant="h6">Tipo y Rubro</Typography>
         <FormControl fullWidth margin="normal">
           <InputLabel>Tipo de Proveedor</InputLabel>
           <Select
             name="tipoProveedor"
-            value={formData.tipoProveedor}
+            value={formData.tipo_proveedor}
             onChange={handleInputChange}
           >
             {tiposProveedores.map((tipo) => (
@@ -349,29 +381,29 @@ const EditarProveedor = () => {
         <FormControlLabel
           control={
             <Checkbox
-              name="proveedorActivo"
-              checked={formData.proveedorActivo}
-              onChange={handleInputChange}
+              name="activo" // Asegúrate de que el nombre coincida con el campo en el estado
+              checked={formData.activo}
+              onChange={handleInputChange} // Se mantiene igual
             />
           }
           label="Proveedor Activo"
         />
-        <TextField
+        {/* <TextField
           label="Calificación"
           name="calificacion"
-          value={formData.calificacion}
+          value={formData.califi}
           onChange={handleInputChange}
           fullWidth
           margin="normal"
-        />
-        <TextField
+        /> */}
+        {/* <TextField
           label="Comentarios"
           name="comentarios"
           value={formData.comentarios}
           onChange={handleInputChange}
           fullWidth
           margin="normal"
-        />
+        /> */}
       </Box>
 
       <Box sx={{ display: "flex", justifyContent: "center" }}>

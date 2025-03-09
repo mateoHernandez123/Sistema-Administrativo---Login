@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   TextField,
   Button,
@@ -16,10 +16,11 @@ import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom"; // Asegúrate de importar esto
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import axios from "axios"; // Importar axios para llamadas HTTP
+import { Context } from "../../context/Context";
 
 const AltaProveedor = () => {
   const navigate = useNavigate(); // Mueve el useNavigate aquí
-
+  const { IP, tokenError } = useContext(Context);
   const handleListarProveedores = () => {
     navigate("/proveedores");
   };
@@ -45,7 +46,20 @@ const AltaProveedor = () => {
   });
 
   const tiposProveedores = ["Minorista", "Mayorista", "Exportador", "Otro"];
-  const rubros = ["Tecnología", "Soporte"];
+  const rubros = [
+    "Motos y Vehículos",
+    "Repuestos y Accesorios",
+    "Indumentaria y Seguridad",
+    "Lubricantes y Químicos",
+    "Neumáticos",
+    "Herramientas y Equipamiento",
+    "Electrónica y Tecnología",
+    "Servicios Mecánicos",
+    "Financieras y Seguros",
+    "Publicidad y Marketing",
+    "Logística y Transporte",
+  ];
+
   const [provincias, setProvincias] = useState([]);
   const [ciudades, setCiudades] = useState([]);
   // Obtener provincias al montar el componente
@@ -217,7 +231,7 @@ const AltaProveedor = () => {
         confirmButtonColor: "#3085d6",
       });
     }
-    console.log("Datos del proveedor:", Prov);
+    navigate("/proveedores");
   };
 
   return (

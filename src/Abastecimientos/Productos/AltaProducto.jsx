@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import Swal from "sweetalert2";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useNavigate } from "react-router-dom";
 
 const AltaProducto = () => {
   const [formData, setFormData] = useState({
@@ -32,12 +33,14 @@ const AltaProducto = () => {
     categoria: "",
     proveedor: "",
     almacen: "",
+    descripcion: "",
     imagen: null, // Nuevo campo para la imagen
   });
 
   const categorias = ["Electrónica", "Hogar", "Ropa", "Alimentos"];
   const proveedores = ["Proveedor A", "Proveedor B", "Proveedor C"];
   const almacenes = ["Almacén 1", "Almacén 2", "Almacén 3"];
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
@@ -320,6 +323,30 @@ const AltaProducto = () => {
               </MenuItem>
             ))}
           </Select>
+
+          {/* Descripción */}
+          <Typography
+            variant="h4"
+            sx={{
+              color: "#333",
+              fontSize: "1.6rem",
+              marginTop: 2,
+              marginBottom: 2,
+              borderBottom: "2px solid #000",
+              paddingBottom: 1,
+            }}
+          >
+            Descripción
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label="Descripción"
+            name="descripcion"
+            value={formData.descripcion}
+            onChange={handleInputChange}
+          />
         </FormControl>
         <Box mt={3}>
           <Typography variant="body1" gutterBottom>

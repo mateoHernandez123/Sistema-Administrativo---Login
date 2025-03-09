@@ -16,18 +16,21 @@ import {
   FormControlLabel,
   Popover,
 } from "@mui/material";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Swal from "sweetalert2";
 import AddIcon from "@mui/icons-material/Add";
 import SettingsIcon from "@mui/icons-material/Settings";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useNavigate } from "react-router-dom";
+import { Context } from "../../context/Context";
 
 const FiltrarProductos = () => {
   const [categorias, setCategorias] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
   const [productos, setProductos] = useState([]);
+  const [paginas, setPaginas] = useState([]);
+
   const [filtroTexto, setFiltroTexto] = useState("");
 
   const [anchorEl, setAnchorEl] = useState(null); // Estado del Popover
@@ -42,6 +45,7 @@ const FiltrarProductos = () => {
 
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
+  const { IP, tokenError } = useContext(Context);
 
   useEffect(() => {
     const fetchCategorias = async () => {
@@ -58,13 +62,65 @@ const FiltrarProductos = () => {
       }
     };
     fetchCategorias();
-  }, []);
+
+    const fetchProductos = async () => {
+      try {
+        const token = JSON.parse(localStorage.getItem("accessToken"));
+        const response = await fetch(
+          `${IP}/api/productos/listar?listartodo=1`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (data.AuthErr) {
+          tokenError(data.MENSAJE);
+        } else if (data.ServErr) {
+          Swal.fire({
+            title: "Error",
+            icon: "error",
+            text: data.MENSAJE,
+            color: "#fff",
+            background: "#333",
+            confirmButtonColor: "#3085d6",
+          });
+        } else if (data.ERROR) {
+          Swal.fire({
+            icon: "warning",
+            title: "Atención",
+            text: data.MENSAJE,
+            color: "#fff",
+            background: "#333",
+            confirmButtonColor: "#3085d6",
+          });
+        } else {
+          setProductos(data.ListaProd); // Establecer los productos
+          setPaginas(data.TotalPaginas); //Establecer las paginas que se van a mostrar
+          console.log(data);
+        }
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          title: "Error en la carga de datos",
+          icon: "error",
+          text: "Hubo un problema al conectar con el servidor.",
+          color: "#fff",
+          background: "#333",
+          confirmButtonColor: "#3085d6",
+        });
+      }
+    };
+    fetchProductos();
+  }, [IP, tokenError]);
 
   const handleAgregarProducto = () => {
     navigate("/alta-producto");
   };
-
-  
 
   const handleFiltrar = async () => {
     try {
