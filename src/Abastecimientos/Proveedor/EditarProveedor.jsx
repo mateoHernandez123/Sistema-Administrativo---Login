@@ -37,11 +37,28 @@ const EditarProveedor = () => {
     codigo_postal: proveedor.codigo_postal || "",
     tipo_proveedor: proveedor.tipo_proveedor || "",
     rubro: proveedor.rubro || "",
+    banco: "",
+    nro_cuenta: "",
+    cbu: "",
+    comentario: "",
+    calificacion: "",
     activo: proveedor.activo || false,
   });
 
   const [provincias, setProvincias] = useState([]);
   const [ciudades, setCiudades] = useState([]);
+
+  // Obtener provincias al montar el componente
+  useEffect(() => {
+    axios
+      .get("https://apis.datos.gob.ar/georef/api/provincias")
+      .then((response) => {
+        setProvincias(response.data.provincias);
+      })
+      .catch((error) => {
+        console.error("Error al obtener provincias:", error);
+      });
+  }, []);
 
   // Obtener provincias al montar el componente
   useEffect(() => {
@@ -91,6 +108,22 @@ const EditarProveedor = () => {
     }));
   };
 
+  const handleRubroChange = (e) => {
+    const rubroSeleccionado = e.target.value;
+    setFormData((prevData) => ({
+      ...prevData,
+      rubro: rubroSeleccionado,
+    }));
+  };
+
+  const handleTipoProveedorChange = (e) => {
+    const tipoSeleccionado = e.target.value;
+    setFormData((prevData) => ({
+      ...prevData,
+      tipo_proveedor: tipoSeleccionado,
+    }));
+  };
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -102,48 +135,7 @@ const EditarProveedor = () => {
   const handleSave = async () => {
     try {
       const token = JSON.parse(localStorage.getItem("accessToken"));
-      const Cuit = { cuit: formData.cuit };
-
-      const activationResponse = formData.activo
-        ? await fetch(`${IP}/api/proveedores/activarProveedor`, {
-            method: "PUT",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ Cuit }),
-          })
-        : await fetch(`${IP}/api/proveedores/desactivarProveedor`, {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ Cuit }),
-          });
-      const activationData = await activationResponse.json();
-
-      if (activationData.AuthErr) {
-        return tokenError(activationData.MENSAJE);
-      } else if (activationData.ServErr) {
-        return Swal.fire({
-          title: "Error del Servidor",
-          icon: "error",
-          text: activationData.MENSAJE,
-          color: "#fff",
-          background: "#333",
-          confirmButtonColor: "#3085d6",
-        });
-      } else if (activationData.ERROR) {
-        return Swal.fire({
-          icon: "warning",
-          title: "Atención",
-          text: activationData.MENSAJE,
-          color: "#fff",
-          background: "#333",
-          confirmButtonColor: "#3085d6",
-        });
-      }
+      const Cuit = formData.cuit;
 
       // Enviar los datos del formulario al backend para la actualización
       const updateResponse = await fetch(`${IP}/api/proveedores/modificar`, {
@@ -152,7 +144,7 @@ const EditarProveedor = () => {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ Cuit, Datos: formData }),
       });
 
       const updateData = await updateResponse.json();
@@ -252,7 +244,7 @@ const EditarProveedor = () => {
         <Typography variant="h6">Datos Principales</Typography>
         <TextField
           label="Nombre del Proveedor"
-          name="nombreProveedor"
+          name="nombre"
           value={formData.nombre}
           onChange={handleInputChange}
           fullWidth
@@ -260,7 +252,7 @@ const EditarProveedor = () => {
         />
         <TextField
           label="Razón Social"
-          name="razonSocial"
+          name="razon_social"
           value={formData.razon_social}
           onChange={handleInputChange}
           fullWidth
@@ -349,9 +341,10 @@ const EditarProveedor = () => {
         <FormControl fullWidth margin="normal">
           <InputLabel>Tipo de Proveedor</InputLabel>
           <Select
-            name="tipoProveedor"
+            name="tipo_proveedor"
             value={formData.tipo_proveedor}
-            onChange={handleInputChange}
+            onChange={handleTipoProveedorChange}
+            type="text"
           >
             {tiposProveedores.map((tipo) => (
               <MenuItem key={tipo} value={tipo}>
@@ -365,7 +358,8 @@ const EditarProveedor = () => {
           <Select
             name="rubro"
             value={formData.rubro}
-            onChange={handleInputChange}
+            onChange={handleRubroChange}
+            type="text"
           >
             {rubros.map((rubro) => (
               <MenuItem key={rubro} value={rubro}>
@@ -374,36 +368,6 @@ const EditarProveedor = () => {
             ))}
           </Select>
         </FormControl>
-      </Box>
-
-      <Box mb={2}>
-        <Typography variant="h6">Otros Atributos</Typography>
-        <FormControlLabel
-          control={
-            <Checkbox
-              name="activo" // Asegúrate de que el nombre coincida con el campo en el estado
-              checked={formData.activo}
-              onChange={handleInputChange} // Se mantiene igual
-            />
-          }
-          label="Proveedor Activo"
-        />
-        {/* <TextField
-          label="Calificación"
-          name="calificacion"
-          value={formData.califi}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        /> */}
-        {/* <TextField
-          label="Comentarios"
-          name="comentarios"
-          value={formData.comentarios}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        /> */}
       </Box>
 
       <Box sx={{ display: "flex", justifyContent: "center" }}>

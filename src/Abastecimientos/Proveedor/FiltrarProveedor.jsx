@@ -30,9 +30,22 @@ const FiltrarProveedor = () => {
   const { IP, tokenError } = useContext(Context);
   const navigate = useNavigate();
 
-  const [rubros, setRubros] = useState([]);
+  const [rubros, setRubros] = useState([
+    "Motos y Vehículos",
+    "Repuestos y Accesorios",
+    "Indumentaria y Seguridad",
+    "Lubricantes y Químicos",
+    "Neumáticos",
+    "Herramientas y Equipamiento",
+    "Electrónica y Tecnología",
+    "Servicios Mecánicos",
+    "Financieras y Seguros",
+    "Publicidad y Marketing",
+    "Logística y Transporte",
+  ]);
   const [rubroSeleccionado, setRubroSeleccionado] = useState("");
-  const [proveedores, setProveedores] = useState([]);
+  const [proveedoresOriginales, setProveedoresOriginales] = useState([]); // Guarda todos los proveedores
+  const [proveedores, setProveedores] = useState([]); // Guarda los proveedores filtrados
   const [paginas, setPaginas] = useState();
   const [filtroTexto, setFiltroTexto] = useState("");
 
@@ -49,33 +62,6 @@ const FiltrarProveedor = () => {
   const open = Boolean(anchorEl);
 
   useEffect(() => {
-    const fetchRubros = async () => {
-      try {
-        const rubrosMock = [
-          "Motos y Vehículos",
-          "Repuestos y Accesorios",
-          "Indumentaria y Seguridad",
-          "Lubricantes y Químicos",
-          "Neumáticos",
-          "Herramientas y Equipamiento",
-          "Electrónica y Tecnología",
-          "Servicios Mecánicos",
-          "Financieras y Seguros",
-          "Publicidad y Marketing",
-          "Logística y Transporte",
-        ];
-        setRubros(rubrosMock);
-      } catch (err) {
-        console.error(err);
-        Swal.fire({
-          title: "Error",
-          text: "No se pudieron cargar los rubros",
-          icon: "error",
-        });
-      }
-    };
-    fetchRubros();
-
     const fetchProveedores = async () => {
       try {
         const token = JSON.parse(localStorage.getItem("accessToken"));
@@ -90,7 +76,7 @@ const FiltrarProveedor = () => {
 
         if (data.AuthErr) {
           tokenError(data.MENSAJE);
-        } else if (data.ServErr) {
+        } else if (data.ServErr || data.ERROR) {
           Swal.fire({
             title: "Error",
             icon: "error",
@@ -99,18 +85,10 @@ const FiltrarProveedor = () => {
             background: "#333",
             confirmButtonColor: "#3085d6",
           });
-        } else if (data.ERROR) {
-          Swal.fire({
-            icon: "warning",
-            title: "Atención",
-            text: data.MENSAJE,
-            color: "#fff",
-            background: "#333",
-            confirmButtonColor: "#3085d6",
-          });
         } else {
-          setProveedores(data.ListaProv); // Establecer los proveedores
-          setPaginas(data.TotalPaginas); //Establecer las paginas que se van a mostrar
+          setProveedoresOriginales(data.ListaProv); // Guardar la lista completa
+          setProveedores(data.ListaProv); // Usar la lista para mostrar
+          setPaginas(data.TotalPaginas);
         }
       } catch (error) {
         console.error(error);
@@ -139,47 +117,71 @@ const FiltrarProveedor = () => {
     );
   };
 
-  const handleFiltrar = async () => {
+  const handleActivar = async (cuit, activo) => {
+    const token = JSON.parse(localStorage.getItem("accessToken"));
+    const endpoint = activo
+      ? `${IP}/api/proveedores/desactivarProveedor`
+      : `${IP}/api/proveedores/activarProveedor`;
+
     try {
-      const proveedoresMock = [
-        {
-          nombreProveedor: "Proveedor A",
-          razonSocial: "Proveedor A S.A.",
-          cuit: "20-12345678-9",
-          telefono: "123456789",
-          correo: "contacto@proveedora.com",
-          direccion: "Calle Falsa 123",
-          ciudad: "Ciudad A",
-          provincia: "Provincia A",
-          codigoPostal: "1234",
-          banco: "Banco Nación",
-          numeroCuenta: "123456789",
-          cbu: "0123456789012345678901",
-          tipoProveedor: "Mayorista",
-          rubro: "Tecnología",
-          proveedorActivo: true,
-          calificacion: "A",
-          comentarios: "Proveedor confiable",
+      const response = await fetch(endpoint, {
+        method: activo ? "DELETE" : "PUT", // DELETE para desactivar, PUT para activar
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-      ];
-      const filtrados = proveedoresMock.filter(
-        (proveedor) => proveedor.rubro === rubroSeleccionado
+        body: JSON.stringify({ Cuit: cuit }),
+      });
+
+      const data = await response.json();
+
+      if (data.AuthErr) {
+        return tokenError(data.MENSAJE);
+      } else if (data.ServErr || data.ERROR) {
+        return Swal.fire({
+          title: "Error",
+          icon: "error",
+          text: data.MENSAJE,
+          color: "#fff",
+          background: "#333",
+          confirmButtonColor: "#3085d6",
+        });
+      }
+
+      // Actualizar el estado de los proveedores
+      setProveedores((prevProveedores) =>
+        prevProveedores.map((prov) =>
+          prov.cuit === cuit ? { ...prov, activo: !activo } : prov
+        )
       );
-      setProveedores(filtrados);
     } catch (error) {
       console.error(error);
       Swal.fire({
-        title: "Error",
-        text: "No se pudieron cargar los proveedores",
+        title: "Error en la carga de datos",
         icon: "error",
+        text: "Hubo un problema al conectar con el servidor.",
+        color: "#fff",
+        background: "#333",
+        confirmButtonColor: "#3085d6",
       });
     }
   };
 
-  const handleLimpiar = () => {
-    setRubroSeleccionado("");
-    setProveedores([]);
+  const handleFiltrar = () => {
+    if (rubroSeleccionado) {
+      const filtrados = proveedoresOriginales.filter(
+        (proveedor) => proveedor.rubro === rubroSeleccionado
+      );
+      setProveedores(filtrados);
+    } else {
+      setProveedores(proveedoresOriginales); // Si no hay rubro seleccionado, mostrar todos
+    }
   };
+
+ const handleLimpiar = () => {
+  setRubroSeleccionado("");
+  setProveedores(proveedoresOriginales); // Restaurar la lista completa
+};
 
   const handlePopoverOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -297,8 +299,18 @@ const FiltrarProveedor = () => {
                       state: { proveedor: row }, // Aquí pasas el proveedor completo con datos bancarios incluidos
                     })
                   }
+                  sx={{
+                    margin: 1,
+                  }}
                 >
                   <EditIcon />
+                </Button>
+                <Button
+                  variant="contained"
+                  color={row.activo ? "error" : "success"}
+                  onClick={() => handleActivar(row.cuit, row.activo)}
+                >
+                  {row.activo ? "Desactivar" : "Activar"}
                 </Button>
               </TableCell>
             </TableRow>

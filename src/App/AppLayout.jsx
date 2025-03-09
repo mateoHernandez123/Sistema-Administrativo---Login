@@ -121,7 +121,11 @@ const AppLayout = ({ children }) => {
         <Box sx={{ overflow: "auto", marginBottom: 8 }}>
           <List>
             {/* Menú Contable */}
-            <ListItem button onClick={handleClickContable}>
+            <ListItem
+              button
+              onClick={handleClickContable}
+              sx={{ cursor: "pointer" }}
+            >
               <ListItemIcon sx={{ color: "yellow" }}>
                 <AccountBalanceIcon /> {/* Icono para Contable */}
               </ListItemIcon>
@@ -214,7 +218,11 @@ const AppLayout = ({ children }) => {
             </Collapse>
 
             {/* Menú Abastecimiento */}
-            <ListItem button onClick={handleClickAbastecimiento}>
+            <ListItem
+              button
+              onClick={handleClickAbastecimiento}
+              sx={{ cursor: "pointer" }}
+            >
               <ListItemIcon sx={{ color: "yellow" }}>
                 <StoreIcon /> {/* Icono para Abastecimiento */}
               </ListItemIcon>
