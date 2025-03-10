@@ -256,7 +256,11 @@ const FiltrarProductos = () => {
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={() => navigate(`/editar-producto/${row.codigo}`)}
+                    onClick={() =>
+                      navigate(`/editar-producto/${row.codigo}`, {
+                        state: { producto: row },
+                      })
+                    }
                     sx={{ margin: 1 }}
                   >
                     <EditIcon />

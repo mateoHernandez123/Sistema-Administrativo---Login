@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   TextField,
   Button,
@@ -12,140 +12,138 @@ import {
 } from "@mui/material";
 import Swal from "sweetalert2";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Context } from "../../context/Context";
 
 const EditarProducto = () => {
-  const { codigo } = useParams(); // Obtiene el código del producto desde la URL
+  const { codigo } = useParams();
   const navigate = useNavigate();
-
+  const { IP, tokenError } = useContext(Context);
+  const location = useLocation();
+  const producto = location.state?.producto || {};
   const [formData, setFormData] = useState({
-    codigo: "",
-    codigoBarras: "",
-    nombre: "",
-    marca: "",
-    modelo: "",
-    precioVenta: "",
-    precioCompra: "",
-    iva: "",
-    stockActual: "",
-    stockMaximo: "",
-    stockMinimo: "",
-    puntoReposicion: "",
-    fechaAlta: "",
-    categoria: "",
-    proveedor: "",
-    almacen: "",
-    imagen: null,
+    codigo: producto.codigo || "",
+    razon_social: producto.razon_social || "",
+    codigo_barra: producto.codigo_barra || "",
+    nombre: producto.nombre || "",
+    marca: producto.marca || "",
+    categoria: producto.categoria || "",
+    modelo: producto.modelo || "",
+    punto_reposicion: producto.punto_reposicion || 0,
+    almacen: producto.almacen || "",
+    url_imagen: producto.url_imagen || "",
+    precio_venta: producto.precio_venta || 0,
+    stock_actual: producto.stock_actual || 0,
+    stock_maximo: producto.stock_maximo || 0,
+    stock_minimo: producto.stock_minimo || 0,
+    iva_porcentaje: producto.iva_porcentaje || 0,
   });
 
-  // Datos de ejemplo para las categorías, proveedores y almacenes
-  const categorias = ["Electrónica", "Hogar", "Ropa", "Alimentos"];
-  const proveedores = ["Proveedor A", "Proveedor B", "Proveedor C"];
-  const almacenes = ["Almacén 1", "Almacén 2", "Almacén 3"];
-
-  useEffect(() => {
-    const fetchProducto = async () => {
-      try {
-        // Aquí puedes hacer la solicitud para obtener los datos del producto con el código
-        const producto = {
-          codigo: "P001",
-          codigoBarras: "1234567890123",
-          nombre: "Televisor",
-          marca: "Samsung",
-          modelo: "QLED",
-          precioVenta: 1000,
-          precioCompra: 800,
-          iva: 21,
-          stockActual: 10,
-          stockMaximo: 20,
-          stockMinimo: 5,
-          puntoReposicion: 7,
-          fechaAlta: "11/12/2023",
-          categoria: "Electrónica",
-          proveedor: "Proveedor A",
-          almacen: "Almacén Central",
-          imagen:
-            "https://http2.mlstatic.com/D_NQ_NP_693649-MLU79054759999_092024-F.webp",
-        };
-        setFormData(producto);
-      } catch (err) {
-        console.error(err);
-        Swal.fire({
-          title: "Error",
-          text: "No se pudo cargar la información del producto.",
-          icon: "error",
-        });
-      }
-    };
-
-    fetchProducto();
-  }, [codigo]);
+  const categorias = [
+    "Accesorios",
+    "Cubiertas",
+    "Lubricantes",
+    "Filtros de aire",
+    "Frenos",
+    "Suspensión",
+    "Escape",
+    "Escape Deportivo",
+    "Iluminación",
+    "Baterías",
+    "Transmisión",
+    "Embrague",
+    "Indumentaria",
+    "Cascos",
+    "Guantes",
+    "Botas",
+    "Protección",
+    "Seguridad",
+  ];
+  const almacenes = ["Taller Mecanico", "Primer piso", "Planta baja"];
 
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
+    let newValue = type === "number" ? Number(value) : value;
 
-    // Validar que los valores numéricos sean positivos
-    if (type === "number" && value < 0) {
-      Swal.fire({
-        title: "Error",
-        text: "Los valores numéricos deben ser positivos.",
-        icon: "error",
-      });
+    if (type === "number" && newValue < 0) {
+      Swal.fire("Error", "Los valores numéricos deben ser positivos.", "error");
       return;
     }
-
-    setFormData({
-      ...formData,
-      [name]: type === "file" ? e.target.files[0] : value,
-    });
+    setFormData({ ...formData, [name]: newValue });
   };
 
-  const handleListarProductos = () => {
-    navigate("/productos");
+  const handleListarProductos = () => navigate("/productos");
+
+  const handleSave = async () => {
+    try {
+      const token = JSON.parse(localStorage.getItem("accessToken"));
+      const response = await fetch(`${IP}/api/productos/modificacion`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      if (data.AuthErr) return tokenError(data.MENSAJE);
+      if (data.ServErr || data.ERROR) {
+        return Swal.fire("Error", data.MENSAJE, "error");
+      }
+
+      Swal.fire(
+        "Producto Actualizado",
+        `Producto ${formData.nombre} actualizado correctamente`,
+        "success"
+      );
+      navigate("/productos");
+    } catch (error) {
+      Swal.fire(
+        "Error",
+        "Hubo un problema al conectar con el servidor.",
+        "error"
+      );
+    }
   };
 
-  const handleSave = () => {
-    Swal.fire("Éxito", "Producto actualizado correctamente", "success");
-    navigate("/productos");
-  };
-
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     const {
       codigo,
-      codigoBarras,
+      codigo_barra,
       nombre,
       marca,
       modelo,
-      precioVenta,
-      precioCompra,
-      iva,
+      precio_venta,
+      iva_porcentaje,
+      stock_maximo,
+      stock_minimo,
+      categoria,
+      almacen,
     } = formData;
 
     if (
       !codigo ||
-      !codigoBarras ||
+      !codigo_barra ||
       !nombre ||
       !marca ||
       !modelo ||
-      !precioVenta ||
-      !precioCompra ||
-      !iva
+      !precio_venta ||
+      !iva_porcentaje ||
+      !stock_maximo ||
+      !stock_minimo ||
+      !categoria ||
+      !almacen
     ) {
-      Swal.fire({
-        title: "Error",
-        text: "Por favor complete todos los campos obligatorios.",
-        icon: "error",
-      });
+      Swal.fire(
+        "Error",
+        "Por favor complete todos los campos obligatorios.",
+        "error"
+      );
       return;
     }
-
-    Swal.fire({
-      title: "Producto Actualizado",
-      text: "El producto ha sido actualizado con éxito.",
-      icon: "success",
-    });
-
-    console.log("Datos del producto:", formData);
+    handleSave();
   };
 
   return (
@@ -181,105 +179,65 @@ const EditarProducto = () => {
 
       <Box
         component="form"
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 3,
-        }}
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSubmit();
-        }}
+        sx={{ display: "flex", flexDirection: "column", gap: 3 }}
+        onSubmit={handleSubmit}
       >
         <TextField
           label="Código"
           name="codigo"
           value={formData.codigo}
-          onChange={handleInputChange}
           disabled
         />
-
         <TextField
           label="Código de Barras"
-          name="codigoBarras"
-          value={formData.codigoBarras}
+          name="codigo_barra"
+          value={formData.codigo_barra}
           onChange={handleInputChange}
         />
-
         <TextField
           label="Nombre"
           name="nombre"
           value={formData.nombre}
           onChange={handleInputChange}
         />
-
         <TextField
           label="Marca"
           name="marca"
           value={formData.marca}
           onChange={handleInputChange}
         />
-
         <TextField
           label="Modelo"
           name="modelo"
           value={formData.modelo}
           onChange={handleInputChange}
         />
-
         <TextField
           label="Precio de Venta"
-          name="precioVenta"
+          name="precio_venta"
           type="number"
-          value={formData.precioVenta}
+          value={formData.precio_venta}
           onChange={handleInputChange}
         />
-
-        <TextField
-          label="Precio de Compra"
-          name="precioCompra"
-          type="number"
-          value={formData.precioCompra}
-          onChange={handleInputChange}
-        />
-
         <TextField
           label="IVA"
-          name="iva"
+          name="iva_porcentaje"
           type="number"
-          value={formData.iva}
+          value={formData.iva_porcentaje}
           onChange={handleInputChange}
         />
-
         <TextField
-          label="Stock Actual"
-          name="stockActual"
+          label="Stock Maximo"
+          name="stock_maximo"
           type="number"
-          value={formData.stockActual}
+          value={formData.stock_maximo}
           onChange={handleInputChange}
         />
-
         <TextField
-          label="Stock Máximo"
-          name="stockMaximo"
+          label="Stock Minimo"
+          name="stock_minimo"
           type="number"
-          value={formData.stockMaximo}
-          onChange={handleInputChange}
-        />
-
-        <TextField
-          label="Stock Mínimo"
-          name="stockMinimo"
-          type="number"
-          value={formData.stockMinimo}
-          onChange={handleInputChange}
-        />
-
-        <TextField
-          label="Punto de Reposición"
-          name="puntoReposicion"
-          type="number"
-          value={formData.puntoReposicion}
+          value={formData.stock_minimo}
           onChange={handleInputChange}
         />
 
@@ -290,24 +248,9 @@ const EditarProducto = () => {
             value={formData.categoria}
             onChange={handleInputChange}
           >
-            {categorias.map((categoria, index) => (
-              <MenuItem key={index} value={categoria}>
-                {categoria}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl>
-          <InputLabel>Proveedor</InputLabel>
-          <Select
-            name="proveedor"
-            value={formData.proveedor}
-            onChange={handleInputChange}
-          >
-            {proveedores.map((proveedor, index) => (
-              <MenuItem key={index} value={proveedor}>
-                {proveedor}
+            {categorias.map((cat, i) => (
+              <MenuItem key={i} value={cat}>
+                {cat}
               </MenuItem>
             ))}
           </Select>
@@ -320,9 +263,9 @@ const EditarProducto = () => {
             value={formData.almacen}
             onChange={handleInputChange}
           >
-            {almacenes.map((almacen, index) => (
-              <MenuItem key={index} value={almacen}>
-                {almacen}
+            {almacenes.map((alm, i) => (
+              <MenuItem key={i} value={alm}>
+                {alm}
               </MenuItem>
             ))}
           </Select>
@@ -332,7 +275,6 @@ const EditarProducto = () => {
           variant="contained"
           color="primary"
           type="submit"
-          onClick={handleSave}
           sx={{ backgroundColor: "#3b3a31", color: "#ffff", marginTop: 2 }}
         >
           Actualizar Producto
