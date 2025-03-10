@@ -219,6 +219,7 @@ const AltaProveedor = () => {
           text: `Proveedor ${formData.nombreProveedor} agregado correctamente`,
           icon: "success",
         });
+        navigate("/proveedores");
       }
     } catch (error) {
       console.error(error);
@@ -231,7 +232,6 @@ const AltaProveedor = () => {
         confirmButtonColor: "#3085d6",
       });
     }
-    navigate("/proveedores");
   };
 
   return (

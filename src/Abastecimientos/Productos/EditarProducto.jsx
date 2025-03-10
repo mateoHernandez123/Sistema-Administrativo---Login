@@ -23,20 +23,20 @@ const EditarProducto = () => {
   const producto = location.state?.producto || {};
   const [formData, setFormData] = useState({
     codigo: producto.codigo || "",
-    razon_social: producto.razon_social || "",
-    codigo_barra: producto.codigo_barra || "",
+    codigoBarra: producto.codigo_barra || "",
     nombre: producto.nombre || "",
     marca: producto.marca || "",
     categoria: producto.categoria || "",
     modelo: producto.modelo || "",
-    punto_reposicion: producto.punto_reposicion || 0,
+    puntoReposicion: producto.punto_reposicion || 0,
     almacen: producto.almacen || "",
-    url_imagen: producto.url_imagen || "",
-    precio_venta: producto.precio_venta || 0,
-    stock_actual: producto.stock_actual || 0,
-    stock_maximo: producto.stock_maximo || 0,
-    stock_minimo: producto.stock_minimo || 0,
-    iva_porcentaje: producto.iva_porcentaje || 0,
+    urlImagen: producto.url_imagen || "",
+    descripcion: producto.descripcion || "",
+    precioVenta: producto.precio_venta || 0,
+    stockActual: producto.stock_actual || 0,
+    stockMaximo: producto.stock_maximo || 0,
+    stockMinimo: producto.stock_minimo || 0,
+    ivaPorcentaje: producto.iva_porcentaje || 0,
   });
 
   const categorias = [
@@ -83,7 +83,7 @@ const EditarProducto = () => {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ Producto: formData }),
       });
 
       const data = await response.json();
@@ -190,8 +190,8 @@ const EditarProducto = () => {
         />
         <TextField
           label="Código de Barras"
-          name="codigo_barra"
-          value={formData.codigo_barra}
+          name="codigoBarra"
+          value={formData.codigoBarra}
           onChange={handleInputChange}
         />
         <TextField
@@ -213,31 +213,37 @@ const EditarProducto = () => {
           onChange={handleInputChange}
         />
         <TextField
+          label="Descripción"
+          name="descripcion"
+          value={formData.descripcion}
+          onChange={handleInputChange}
+        />
+        <TextField
           label="Precio de Venta"
-          name="precio_venta"
+          name="precioVenta"
           type="number"
-          value={formData.precio_venta}
+          value={formData.precioVenta}
           onChange={handleInputChange}
         />
         <TextField
           label="IVA"
-          name="iva_porcentaje"
+          name="ivaPorcentaje"
           type="number"
-          value={formData.iva_porcentaje}
+          value={formData.ivaPorcentaje}
           onChange={handleInputChange}
         />
         <TextField
           label="Stock Maximo"
-          name="stock_maximo"
+          name="stockMaximo"
           type="number"
-          value={formData.stock_maximo}
+          value={formData.stockMaximo}
           onChange={handleInputChange}
         />
         <TextField
           label="Stock Minimo"
-          name="stock_minimo"
+          name="stockMinimo"
           type="number"
-          value={formData.stock_minimo}
+          value={formData.stockMinimo}
           onChange={handleInputChange}
         />
 

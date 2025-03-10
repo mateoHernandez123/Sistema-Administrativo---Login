@@ -24,6 +24,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useNavigate } from "react-router-dom";
 import { Context } from "../../context/Context";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 const FiltrarProductos = () => {
   const categorias = [
@@ -57,17 +59,18 @@ const FiltrarProductos = () => {
   const [selectedColumns, setSelectedColumns] = useState([
     "Código",
     "Nombre",
+    "Marca",
+    "Modelo",
     "Categoría",
     "Stock Actual",
-    "Punto de Reposición",
     "Precio de Venta",
+    "Descripción",
+    "Activo",
   ]);
 
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
   const { IP, tokenError } = useContext(Context);
-
-  console.log(productos);
 
   useEffect(() => {
     const fetchProductos = async () => {
@@ -145,6 +148,56 @@ const FiltrarProductos = () => {
     setProductos(productosOriginales);
   };
 
+  const handleActivar = async (codigo, activo) => {
+    const token = JSON.parse(localStorage.getItem("accessToken"));
+    const endpoint = activo
+      ? `${IP}/api/productos/desactivar`
+      : `${IP}/api/productos/activar`;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: activo ? "DELETE" : "PUT", // DELETE para desactivar, PUT para activar
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ Codigo: codigo }),
+      });
+
+      const data = await response.json();
+
+      if (data.AuthErr) {
+        return tokenError(data.MENSAJE);
+      } else if (data.ServErr || data.ERROR) {
+        return Swal.fire({
+          title: "Error",
+          icon: "error",
+          text: data.MENSAJE,
+          color: "#fff",
+          background: "#333",
+          confirmButtonColor: "#3085d6",
+        });
+      }
+
+      // Actualizar el estado de los productos
+      setProductos((prevProductos) =>
+        prevProductos.map((prov) =>
+          prov.codigo === codigo ? { ...prov, activo: !activo } : prov
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        title: "Error en la carga de datos",
+        icon: "error",
+        text: "Hubo un problema al conectar con el servidor.",
+        color: "#fff",
+        background: "#333",
+        confirmButtonColor: "#3085d6",
+      });
+    }
+  };
+
   const handlePopoverOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -179,11 +232,13 @@ const FiltrarProductos = () => {
     Modelo: "modelo",
     "Punto de Reposición": "punto_reposicion",
     Almacén: "almacen",
+    Descripción: "descripcion",
     Imagen: "url_imagen",
     "Precio de Venta": "precio_venta",
     "Stock Actual": "stock_actual",
     "Stock Máximo": "stock_maximo",
     "Stock Mínimo": "stock_minimo",
+    Activo: "activo",
   };
 
   const renderTable = (columns, data) => (
@@ -233,6 +288,7 @@ const FiltrarProductos = () => {
                       fontSize: "1.1rem",
                       textAlign: "center",
                       backgroundColor: "#e0e0e0",
+                      borderColor: "black",
                     }}
                   >
                     {column === "Imagen" ? (
@@ -244,6 +300,12 @@ const FiltrarProductos = () => {
                         />
                       ) : (
                         "Sin imagen"
+                      )
+                    ) : column === "Activo" ? (
+                      row.activo ? (
+                        <CheckCircleIcon color="success" />
+                      ) : (
+                        <CancelIcon color="error" />
                       )
                     ) : (
                       row[columnToProperty[column]] ?? "N/A"
@@ -271,8 +333,17 @@ const FiltrarProductos = () => {
                     onClick={() =>
                       navigate(`/visualizar-producto/${row.codigo}`)
                     }
+                    sx={{ margin: 1 }}
                   >
                     <VisibilityIcon />
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color={row.activo ? "error" : "success"}
+                    onClick={() => handleActivar(row.codigo, row.activo)}
+                    sx={{ margin: 1 }}
+                  >
+                    {row.activo ? "Desactivar" : "Activar"}
                   </Button>
                 </TableCell>
               </TableRow>
