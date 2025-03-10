@@ -26,8 +26,28 @@ import { useNavigate } from "react-router-dom";
 import { Context } from "../../context/Context";
 
 const FiltrarProductos = () => {
-  const [categorias, setCategorias] = useState([]);
+  const categorias = [
+    "Accesorios",
+    "Cubiertas",
+    "Lubricantes",
+    "Filtros de aire",
+    "Frenos",
+    "Suspensión",
+    "Escape",
+    "Escape Deportivo",
+    "Iluminación",
+    "Baterías",
+    "Transmisión",
+    "Embrague",
+    "Indumentaria",
+    "Cascos",
+    "Guantes",
+    "Botas",
+    "Protección",
+    "Seguridad",
+  ];
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
+  const [productosOriginales, setProductosOriginales] = useState([]);
   const [productos, setProductos] = useState([]);
   const [paginas, setPaginas] = useState([]);
 
@@ -47,22 +67,9 @@ const FiltrarProductos = () => {
   const navigate = useNavigate();
   const { IP, tokenError } = useContext(Context);
 
-  useEffect(() => {
-    const fetchCategorias = async () => {
-      try {
-        const categoriasMock = ["Electrónica", "Hogar", "Deportes", "Ropa"];
-        setCategorias(categoriasMock);
-      } catch (err) {
-        console.error(err);
-        Swal.fire({
-          title: "Error",
-          text: "No se pudieron cargar las categorías",
-          icon: "error",
-        });
-      }
-    };
-    fetchCategorias();
+  console.log(productos);
 
+  useEffect(() => {
     const fetchProductos = async () => {
       try {
         const token = JSON.parse(localStorage.getItem("accessToken"));
@@ -99,9 +106,9 @@ const FiltrarProductos = () => {
             confirmButtonColor: "#3085d6",
           });
         } else {
+          setProductosOriginales(data.ListaProd);
           setProductos(data.ListaProd); // Establecer los productos
           setPaginas(data.TotalPaginas); //Establecer las paginas que se van a mostrar
-          console.log(data);
         }
       } catch (error) {
         console.error(error);
@@ -122,47 +129,20 @@ const FiltrarProductos = () => {
     navigate("/alta-producto");
   };
 
-  const handleFiltrar = async () => {
-    try {
-      const productosMock = [
-        {
-          codigo: "P001",
-          codigoBarras: "1234567890123",
-          nombre: "Televisor",
-          marca: "Samsung",
-          modelo: "QLED",
-          precioVenta: 1000,
-          precioCompra: 800,
-          stockActual: 10,
-          stockMaximo: 20,
-          stockMinimo: 5,
-          puntoReposicion: 7,
-          precioPromedio: 850,
-          fechaAlta: "11/12/2023",
-          categoria: "Electrónica",
-          proveedor: "Proveedor A",
-          almacen: "Almacén Central",
-          imagen:
-            "https://http2.mlstatic.com/D_NQ_NP_693649-MLU79054759999_092024-F.webp",
-        },
-      ];
-      const filtrados = productosMock.filter(
+  const handleFiltrar = () => {
+    if (categoriaSeleccionada) {
+      const filtrados = productosOriginales.filter(
         (producto) => producto.categoria === categoriaSeleccionada
       );
       setProductos(filtrados);
-    } catch (error) {
-      console.error(error);
-      Swal.fire({
-        title: "Error",
-        text: "No se pudieron cargar los productos",
-        icon: "error",
-      });
+    } else {
+      setProductos(productosOriginales);
     }
   };
 
   const handleLimpiar = () => {
     setCategoriaSeleccionada("");
-    setProductos([]);
+    setProductos(productosOriginales);
   };
 
   const handlePopoverOpen = (event) => {
@@ -192,40 +172,27 @@ const FiltrarProductos = () => {
   // Mapeo de columnas a propiedades del producto
   const columnToProperty = {
     Código: "codigo",
-    "Código de Barras": "codigoBarras",
+    "Código de Barras": "codigo_barra",
     Nombre: "nombre",
     Marca: "marca",
     Categoría: "categoria",
     Modelo: "modelo",
-    "Punto de Reposición": "puntoReposicion",
+    "Punto de Reposición": "punto_reposicion",
     Almacén: "almacen",
-    Imagen: "imagen",
-    "Precio de Venta": "precioVenta",
-    "Precio de Compra": "precioCompra",
-    "Precio Promedio": "precioPromedio",
-    "Stock Actual": "stockActual",
-    "Stock Máximo": "stockMaximo",
-    "Stock Mínimo": "stockMinimo",
-    "Fecha de Alta": "fechaAlta",
-    Proveedor: "proveedor",
+    Imagen: "url_imagen",
+    "Precio de Venta": "precio_venta",
+    "Stock Actual": "stock_actual",
+    "Stock Máximo": "stock_maximo",
+    "Stock Mínimo": "stock_minimo",
   };
 
   const renderTable = (columns, data) => (
-    <TableContainer
-      component={Paper}
-      sx={{
-        marginBottom: 4,
-        borderRadius: 5,
-      }}
-    >
+    <TableContainer component={Paper} sx={{ marginBottom: 4, borderRadius: 5 }}>
       <Table
         sx={{
           fontSize: "1.5rem",
-          width: "800px",
-          "& .MuiTableCell-root": {
-            borderColor: "black",
-            borderWidth: "1px",
-          },
+          width: "100%",
+          "& .MuiTableCell-root": { borderColor: "black", borderWidth: "1px" },
         }}
       >
         <TableHead>
@@ -236,7 +203,6 @@ const FiltrarProductos = () => {
                 sx={{
                   fontWeight: "bold",
                   fontSize: "1.4rem",
-                  borderColor: "black",
                   textAlign: "center",
                   backgroundColor: "#ffeb3b",
                 }}
@@ -249,7 +215,6 @@ const FiltrarProductos = () => {
                 backgroundColor: "#ffeb3b",
                 fontWeight: "bold",
                 fontSize: "1.4rem",
-                borderColor: "black",
                 textAlign: "center",
               }}
             >
@@ -258,55 +223,66 @@ const FiltrarProductos = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((row, index) => (
-            <TableRow key={index}>
-              {columns.map((column, colIndex) => (
+          {data.length > 0 ? (
+            data.map((row, index) => (
+              <TableRow key={index}>
+                {columns.map((column, colIndex) => (
+                  <TableCell
+                    key={colIndex}
+                    sx={{
+                      fontSize: "1.1rem",
+                      textAlign: "center",
+                      backgroundColor: "#e0e0e0",
+                    }}
+                  >
+                    {column === "Imagen" ? (
+                      row[columnToProperty[column]] ? (
+                        <img
+                          src={row[columnToProperty[column]]}
+                          alt={row.nombre}
+                          style={{ width: 50, height: 50 }}
+                        />
+                      ) : (
+                        "Sin imagen"
+                      )
+                    ) : (
+                      row[columnToProperty[column]] ?? "N/A"
+                    )}
+                  </TableCell>
+                ))}
                 <TableCell
-                  key={colIndex}
-                  sx={{
-                    fontSize: "1.1rem",
-                    borderColor: "black",
-                    textAlign: "center",
-                    backgroundColor: "#e0e0e0",
-                  }}
+                  sx={{ textAlign: "center", backgroundColor: "#e0e0e0" }}
                 >
-                  {column === "Imagen" ? (
-                    <img
-                      src={row[columnToProperty[column]]}
-                      alt={row.nombre}
-                      style={{ width: 50, height: 50 }}
-                    />
-                  ) : (
-                    row[columnToProperty[column]]
-                  )}
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => navigate(`/editar-producto/${row.codigo}`)}
+                    sx={{ margin: 1 }}
+                  >
+                    <EditIcon />
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() =>
+                      navigate(`/visualizar-producto/${row.codigo}`)
+                    }
+                  >
+                    <VisibilityIcon />
+                  </Button>
                 </TableCell>
-              ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
               <TableCell
-                sx={{
-                  textAlign: "center",
-                  backgroundColor: "#e0e0e0",
-                }}
+                colSpan={columns.length + 1}
+                sx={{ textAlign: "center", fontSize: "1.2rem", color: "red" }}
               >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => navigate(`/editar-producto/${row.codigo}`)}
-                  sx={{
-                    margin: 1,
-                  }}
-                >
-                  <EditIcon />
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => navigate(`/visualizar-producto/${row.codigo}`)}
-                >
-                  <VisibilityIcon />
-                </Button>
+                No hay productos disponibles
               </TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
     </TableContainer>

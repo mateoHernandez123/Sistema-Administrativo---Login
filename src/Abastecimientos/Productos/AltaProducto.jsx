@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import {
   TextField,
   Button,
@@ -12,35 +12,55 @@ import {
 } from "@mui/material";
 import Swal from "sweetalert2";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Context } from "../../context/Context";
 import { useNavigate } from "react-router-dom";
 
 const AltaProducto = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    codigo: "",
     codigoBarras: "",
+    activo: true,
     nombre: "",
     marca: "",
     modelo: "",
+    descripcion: "",
     precioVenta: "",
-    precioCompra: "",
-    iva: "",
-    stockActual: "",
+    //precioCompra: "",
+    ivaPorcentaje: "",
+    //stockActual: "",
     stockMaximo: "",
     stockMinimo: "",
     puntoReposicion: "",
-    // precioPromedioPonderado: "",
-    fechaAlta: "",
     categoria: "",
-    proveedor: "",
+    // proveedor: "",
     almacen: "",
-    descripcion: "",
-    imagen: null, // Nuevo campo para la imagen
+    url: "url.hola",
   });
 
-  const categorias = ["Electrónica", "Hogar", "Ropa", "Alimentos"];
-  const proveedores = ["Proveedor A", "Proveedor B", "Proveedor C"];
-  const almacenes = ["Almacén 1", "Almacén 2", "Almacén 3"];
-  const navigate = useNavigate();
+  const { IP, tokenError } = useContext(Context);
+  const categorias = [
+    "Accesorios",
+    "Cubiertas",
+    "Lubricantes",
+    "Filtros de aire",
+    "Frenos",
+    "Suspensión",
+    "Escape",
+    "Escape Deportivo",
+    "Iluminación",
+    "Baterías",
+    "Transmisión",
+    "Embrague",
+    "Indumentaria",
+    "Cascos",
+    "Guantes",
+    "Botas",
+    "Protección",
+    "Seguridad",
+  ];
+
+  //const proveedores = ["Proveedor A", "Proveedor B", "Proveedor C"];
+  const almacenes = ["Taller Mecanico", "Primer piso", "Planta baja"];
 
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
@@ -58,7 +78,7 @@ const AltaProducto = () => {
     // Manejar cambios en el formulario
     setFormData({
       ...formData,
-      [name]: type === "file" ? e.target.files[0] : value,
+      [name]: value,
     });
   };
 
@@ -66,27 +86,32 @@ const AltaProducto = () => {
     navigate("/productos");
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const {
-      codigo,
       codigoBarras,
       nombre,
       marca,
       modelo,
+      descripcion, // Nuevo campo
       precioVenta,
-      precioCompra,
-      iva,
+      ivaPorcentaje,
+      stockActual,
+      stockMinimo,
+      stockMaximo,
+      puntoReposicion,
+      categoria,
+      almacen,
     } = formData;
 
     if (
-      !codigo ||
       !codigoBarras ||
       !nombre ||
       !marca ||
       !modelo ||
+      !descripcion ||
       !precioVenta ||
-      !precioCompra ||
-      !iva
+      //!precioCompra ||
+      !ivaPorcentaje
     ) {
       Swal.fire({
         title: "Error",
@@ -96,13 +121,80 @@ const AltaProducto = () => {
       return;
     }
 
-    Swal.fire({
-      title: "Producto Agregado",
-      text: "El producto ha sido registrado con éxito.",
-      icon: "success",
-    });
+    const producto = {
+      Producto: {
+        codigoBarras: codigoBarras || null,
+        activo: true,
+        nombre: nombre || null,
+        marca: marca || null,
+        modelo: modelo || null,
+        descripcion: descripcion || null,
+        precioVenta: precioVenta || null,
+        // precioCompra: precioCompra || null,
+        ivaPorcentaje: ivaPorcentaje || null,
+        stockActual: 0,
+        stockMinimo: stockMinimo || null,
+        stockMaximo: stockMaximo || null,
+        puntoReposicion: puntoReposicion || null,
+        categoria: categoria || null,
+        almacen: almacen || null,
+        url: "url.hola",
+      },
+    };
 
-    console.log("Datos del producto:", formData);
+    try {
+      const token = JSON.parse(localStorage.getItem("accessToken"));
+      const response = await fetch(`${IP}/api/productos/alta`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(producto),
+      });
+
+      const data = await response.json();
+
+      if (data.AuthErr) {
+        tokenError(data.MENSAJE);
+      } else if (data.ServErr) {
+        Swal.fire({
+          title: "Error",
+          icon: "error",
+          text: data.MENSAJE,
+          color: "#fff",
+          background: "#333",
+          confirmButtonColor: "#3085d6",
+        });
+      } else if (data.ERROR) {
+        Swal.fire({
+          icon: "warning",
+          title: "Atención",
+          text: data.MENSAJE,
+          color: "#fff",
+          background: "#333",
+          confirmButtonColor: "#3085d6",
+        });
+      } else {
+        Swal.fire({
+          title: "Producto Agregado",
+          text: "El producto ha sido registrado con éxito.",
+          icon: "success",
+        });
+        // console.log("Datos del producto:", formData);
+        handleListarProductos();
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        title: "Error en la carga de datos",
+        icon: "error",
+        text: "Hubo un problema al conectar con el servidor.",
+        color: "#fff",
+        background: "#333",
+        confirmButtonColor: "#3085d6",
+      });
+    }
   };
 
   return (
@@ -136,15 +228,6 @@ const AltaProducto = () => {
       </Typography>
 
       <Box mb={3}>
-        <TextField
-          fullWidth
-          label="Código"
-          name="codigo"
-          value={formData.codigo}
-          onChange={handleInputChange}
-          margin="normal"
-          required
-        />
         <TextField
           fullWidth
           label="Código de Barras"
@@ -183,6 +266,15 @@ const AltaProducto = () => {
         />
         <TextField
           fullWidth
+          label="Descripción"
+          name="descripcion"
+          value={formData.descripcion}
+          onChange={handleInputChange}
+          margin="normal"
+          required
+        />
+        <TextField
+          fullWidth
           label="Precio de Venta"
           name="precioVenta"
           type="number"
@@ -192,6 +284,7 @@ const AltaProducto = () => {
           margin="normal"
           required
         />
+        {/*
         <TextField
           fullWidth
           label="Precio de Compra"
@@ -202,14 +295,15 @@ const AltaProducto = () => {
           onChange={handleInputChange}
           margin="normal"
           required
-        />
+        /> 
+        */}
         <TextField
           fullWidth
           label="IVA %"
-          name="iva"
+          name="ivaPorcentaje"
           type="number"
           inputProps={{ min: 0 }}
-          value={formData.iva}
+          value={formData.ivaPorcentaje}
           onChange={handleInputChange}
           margin="normal"
           required
@@ -218,6 +312,7 @@ const AltaProducto = () => {
 
       <Typography variant="h6">Stock</Typography>
       <Box mb={3}>
+        {/*
         <TextField
           fullWidth
           label="Stock Actual"
@@ -228,6 +323,7 @@ const AltaProducto = () => {
           onChange={handleInputChange}
           margin="normal"
         />
+        */}
         <TextField
           fullWidth
           label="Stock Máximo"
@@ -258,20 +354,11 @@ const AltaProducto = () => {
           onChange={handleInputChange}
           margin="normal"
         />
-        {/* <TextField ESTO NO VA: CORRECION DE LEA
-          fullWidth
-          label="Precio Promedio Ponderado"
-          name="precioPromedioPonderado"
-          type="number"
-          inputProps={{ min: 0 }}
-          value={formData.precioPromedioPonderado}
-          onChange={handleInputChange}
-          margin="normal"
-        /> */}
       </Box>
 
       <Typography variant="h6">Otros</Typography>
       <Box mb={3}>
+        {/*}
         <TextField
           fullWidth
           label="Fecha de Alta"
@@ -282,6 +369,7 @@ const AltaProducto = () => {
           InputLabelProps={{ shrink: true }}
           margin="normal"
         />
+        */}
         <FormControl fullWidth margin="normal">
           <InputLabel>Categoría</InputLabel>
           <Select
@@ -296,6 +384,7 @@ const AltaProducto = () => {
             ))}
           </Select>
         </FormControl>
+        {/*
         <FormControl fullWidth margin="normal">
           <InputLabel>Proveedor</InputLabel>
           <Select
@@ -310,6 +399,7 @@ const AltaProducto = () => {
             ))}
           </Select>
         </FormControl>
+        */}
         <FormControl fullWidth margin="normal">
           <InputLabel>Almacén</InputLabel>
           <Select
@@ -323,44 +413,7 @@ const AltaProducto = () => {
               </MenuItem>
             ))}
           </Select>
-
-          {/* Descripción */}
-          <Typography
-            variant="h4"
-            sx={{
-              color: "#333",
-              fontSize: "1.6rem",
-              marginTop: 2,
-              marginBottom: 2,
-              borderBottom: "2px solid #000",
-              paddingBottom: 1,
-            }}
-          >
-            Descripción
-          </Typography>
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            label="Descripción"
-            name="descripcion"
-            value={formData.descripcion}
-            onChange={handleInputChange}
-          />
         </FormControl>
-        <Box mt={3}>
-          <Typography variant="body1" gutterBottom>
-            Imagen del Producto:
-          </Typography>
-          <TextField
-            type="file"
-            name="Imagen del Producto"
-            fullWidth
-            margin="normal"
-            inputProps={{ accept: "image/*" }}
-            onChange={handleInputChange}
-          />
-        </Box>
       </Box>
 
       <Button
