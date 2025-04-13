@@ -8,25 +8,26 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Button,
   TextField,
   Checkbox,
   FormControlLabel,
   MenuItem,
   IconButton,
 } from "@mui/material";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom"; // Asegurate de importar esto
 import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import { Context } from "../../context/Context";
+import Swal from "sweetalert2";
 
 const ListadoSolicitudes = () => {
   const [solicitudes, setSolicitudes] = useState([]);
   const [filtroAbiertas, setFiltroAbiertas] = useState(true);
   const [criterioBusqueda, setCriterioBusqueda] = useState("producto");
   const [valorBusqueda, setValorBusqueda] = useState("");
-
-  const navigate = useNavigate(); // Inicializá acá el hook useNavigate
+  const navigate = useNavigate();
+  const { IP, tokenError } = useContext(Context);
 
   useEffect(() => {
     // Simulación de datos
@@ -59,6 +60,39 @@ const ListadoSolicitudes = () => {
     setSolicitudes(solicitudesMock);
   }, []);
 
+  useEffect(() => {
+    const fetchListarSolicitudes = async () => {
+      try {
+        const token = JSON.parse(localStorage.getItem("accessToken"));
+        const response = await fetch(
+          `${IP}/api/sulicitud-compra/listar-pedidos`,
+          {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const data = await response.json();
+
+        if (data.AuthErr) {
+          tokenError(data.MENSAJE);
+        } else if (data.ERROR || data.ServErr) {
+          Swal.fire({ title: "Error", icon: "error", text: data.MENSAJE });
+        } else {
+          console.log(data);
+          setSolicitudes([]);
+        }
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          title: "Error en la carga de datos",
+          icon: "error",
+          text: "Hubo un problema al conectar con el servidor.",
+        });
+      }
+    };
+    fetchListarSolicitudes();
+  }, [IP, tokenError]);
+
   const handleFiltroCambio = () => {
     setFiltroAbiertas(!filtroAbiertas);
   };
@@ -77,7 +111,7 @@ const ListadoSolicitudes = () => {
   });
 
   const handleAgregarSolicitud = () => {
-    navigate("/alta-solicitud-compra"); // Redirigí al formulario
+    navigate("/alta-solicitud-compra");
   };
 
   return (

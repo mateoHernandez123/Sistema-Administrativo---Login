@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -16,66 +16,87 @@ import {
   TextField,
   Button,
   IconButton,
-  Alert,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Context } from "../../context/Context";
 
 const FormularioSolicitudCompra = () => {
   const navigate = useNavigate();
   const { IP, tokenError } = useContext(Context);
+  const [productos, setProductos] = useState([]);
   const [formData, setFormData] = useState({
-    categoriaSeleccionada: "",
-    pedidos: [{ codigo: "", descripcion: "", cantidad: "" }],
-    observacion: "",
+    Pedidos: [{ codigo: "", descripcion: "", cantidad: "" }],
+    Observaciones: "",
   });
+
   const [error, setError] = useState("");
 
-  const categoriasDisponibles = [
-    "Libreria",
-    "Motos",
-    "Repuestos",
-    "Ropa",
-    "Electronica",
-  ];
-  const productosPorCategoria = {
-    Libreria: ["Cuadernos", "Lapiceras", "Resaltadores"],
-    Motos: ["Casco", "Guantes", "Cubiertas"],
-    Repuestos: ["Filtro de aceite", "Bujía", "Amortiguadores"],
-    Ropa: ["Campera", "Pantalón", "Botas"],
-    Electronica: ["Celular", "Laptop", "Auriculares"],
-  };
+  useEffect(() => {
+    const fetchProductos = async () => {
+      try {
+        const token = JSON.parse(localStorage.getItem("accessToken"));
+        const response = await fetch(
+          `${IP}/api/productos/listar?listartodo=1`,
+          {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const data = await response.json();
+
+        if (data.AuthErr) {
+          tokenError(data.MENSAJE);
+        } else if (data.ERROR || data.ServErr) {
+          Swal.fire({ title: "Error", icon: "error", text: data.MENSAJE });
+        } else {
+          setProductos(data.ListaProd || []);
+        }
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          title: "Error en la carga de datos",
+          icon: "error",
+          text: "Hubo un problema al conectar con el servidor.",
+        });
+      }
+    };
+    fetchProductos();
+  }, [IP, tokenError]);
 
   const handleChange = (index, field, value) => {
-    if (field === "categoriaSeleccionada") {
-      setFormData((prev) => ({ ...prev, categoriaSeleccionada: value }));
-    } else if (field === "observacion") {
-      setFormData((prev) => ({ ...prev, observacion: value }));
+    if (field === "Observaciones") {
+      setFormData((prev) => ({ ...prev, Observaciones: value }));
     } else {
-      const nuevosPedidos = [...formData.pedidos];
+      const nuevosPedidos = [...formData.Pedidos];
       nuevosPedidos[index][field] = value;
-      setFormData((prev) => ({ ...prev, pedidos: nuevosPedidos }));
+      setFormData((prev) => ({ ...prev, Pedidos: nuevosPedidos }));
     }
   };
 
   const agregarProducto = () => {
     setFormData((prev) => ({
       ...prev,
-      pedidos: [...prev.pedidos, { codigo: "", descripcion: "", cantidad: "" }],
+      Pedidos: [...prev.Pedidos, { codigo: "", descripcion: "", cantidad: "" }],
     }));
   };
 
   const eliminarProducto = (index) => {
-    if (formData.pedidos.length > 1) {
+    if (formData.Pedidos.length > 1) {
       setFormData((prev) => ({
-        pedidos: prev.pedidos.filter((_, i) => i !== index),
+        ...prev,
+        Pedidos: prev.Pedidos.filter((_, i) => i !== index),
       }));
     } else {
       setError("Debe haber al menos un producto en la lista.");
     }
+  };
+
+  const handleListarSolicitudes = () => {
+    navigate("/solicitud-compra");
   };
 
   const enviarSolicitud = async () => {
@@ -89,14 +110,18 @@ const FormularioSolicitudCompra = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify({
+            Pedidos: formData.Pedidos,
+            Observaciones: formData.Observaciones,
+          }),
         }
       );
+
       const data = await response.json();
 
       if (data.AuthErr) {
         tokenError(data.MENSAJE);
-      } else if (data.ServErr || data.ERROR) {
+      } else if (data.ERROR || data.ServErr) {
         Swal.fire({ title: "Error", icon: "error", text: data.MENSAJE });
       } else {
         Swal.fire({
@@ -126,49 +151,76 @@ const FormularioSolicitudCompra = () => {
         margin: "auto",
       }}
     >
-      <Typography variant="h4" align="center" gutterBottom>
+      <IconButton
+        onClick={handleListarSolicitudes}
+        sx={{
+          backgroundColor: "#ffeb3b",
+          "&:hover": { backgroundColor: "#fdd835" },
+          color: "#333",
+        }}
+      >
+        <ArrowBackIcon />
+      </IconButton>
+      <Typography
+        variant="h4"
+        sx={{
+          marginBottom: 2,
+          color: "#333",
+          textAlign: "center",
+          fontWeight: "bold",
+        }}
+      >
         Solicitud de Compra
       </Typography>
       <TableContainer
         component={Paper}
         sx={{ backgroundColor: "#ffeb3b", borderRadius: 5 }}
       >
-        <Table>
+        <Table
+          sx={{
+            minWidth: 700,
+            fontSize: "1.5rem",
+            width: "800px",
+            "& .MuiTableCell-root": {
+              borderColor: "black", // Aplica color negro a las líneas de celda
+              borderWidth: "1px", // Ajusta el grosor de las líneas
+            },
+          }}
+          aria-label="tabla solicitud de compra"
+        >
           <TableHead>
             <TableRow>
-              <TableCell align="center">Categoría</TableCell>
-              <TableCell align="center">Producto</TableCell>
-              <TableCell align="center">Descripción</TableCell>
-              <TableCell align="center">Cantidad</TableCell>
-              <TableCell align="center">Acciones</TableCell>
+              <TableCell
+                align="center"
+                sx={{ fontWeight: "bold", fontSize: "1rem" }}
+              >
+                Producto
+              </TableCell>
+              <TableCell
+                align="center"
+                sx={{ fontWeight: "bold", fontSize: "1rem" }}
+              >
+                Descripción
+              </TableCell>
+              <TableCell
+                align="center"
+                sx={{ fontWeight: "bold", fontSize: "1rem" }}
+              >
+                Cantidad
+              </TableCell>
+              <TableCell
+                align="center"
+                sx={{ fontWeight: "bold", fontSize: "1rem" }}
+              >
+                Acciones
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {formData.pedidos.map((producto, index) => (
+            {formData.Pedidos.map((producto, index) => (
               <TableRow key={index}>
-                <TableCell>
-                  <FormControl fullWidth>
-                    <InputLabel>Categoría</InputLabel>
-                    <Select
-                      value={formData.categoriaSeleccionada}
-                      onChange={(e) =>
-                        handleChange(
-                          index,
-                          "categoriaSeleccionada",
-                          e.target.value
-                        )
-                      }
-                    >
-                      {categoriasDisponibles.map((cat, i) => (
-                        <MenuItem key={i} value={cat}>
-                          {cat}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </TableCell>
-                <TableCell>
-                  <FormControl fullWidth>
+                <TableCell align="center">
+                  <FormControl sx={{ width: "auto", minWidth: 120 }}>
                     <InputLabel>Producto</InputLabel>
                     <Select
                       value={producto.codigo}
@@ -176,18 +228,15 @@ const FormularioSolicitudCompra = () => {
                         handleChange(index, "codigo", e.target.value)
                       }
                     >
-                      {(
-                        productosPorCategoria[formData.categoriaSeleccionada] ||
-                        []
-                      ).map((prod, i) => (
-                        <MenuItem key={i} value={prod}>
-                          {prod}
+                      {productos.map((prod) => (
+                        <MenuItem key={prod.codigo} value={prod.codigo}>
+                          {prod.nombre}
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
                 </TableCell>
-                <TableCell>
+                <TableCell align="center">
                   <TextField
                     label="Descripción"
                     fullWidth
@@ -197,7 +246,7 @@ const FormularioSolicitudCompra = () => {
                     }
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell align="center">
                   <TextField
                     label="Cantidad"
                     fullWidth
@@ -207,7 +256,7 @@ const FormularioSolicitudCompra = () => {
                     }
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell align="center">
                   <IconButton
                     color="error"
                     onClick={() => eliminarProducto(index)}
@@ -220,15 +269,6 @@ const FormularioSolicitudCompra = () => {
           </TableBody>
         </Table>
       </TableContainer>
-      <Button
-        variant="outlined"
-        startIcon={<AddIcon />}
-        fullWidth
-        onClick={agregarProducto}
-        sx={{ mt: 2 }}
-      >
-        Agregar Producto
-      </Button>
       <Typography variant="h5" sx={{ mt: 3 }}>
         Observaciones
       </Typography>
@@ -236,20 +276,29 @@ const FormularioSolicitudCompra = () => {
         fullWidth
         multiline
         rows={4}
-        value={formData.observacion}
-        onChange={(e) => handleChange(null, "observacion", e.target.value)}
+        value={formData.Observaciones}
+        onChange={(e) => handleChange(null, "Observaciones", e.target.value)}
       />
-      {error && (
-        <Alert severity="error" sx={{ mt: 2 }}>
-          {error}
-        </Alert>
-      )}
+      <Button
+        variant="outlined"
+        startIcon={<AddIcon />}
+        fullWidth
+        onClick={agregarProducto}
+        sx={{
+          color: "#3b3a31",
+          borderColor: "#3b3a31",
+          marginBottom: 2,
+          marginTop: 2,
+        }}
+      >
+        Agregar Producto
+      </Button>
       <Button
         variant="contained"
         color="success"
         fullWidth
         onClick={enviarSolicitud}
-        sx={{ mt: 2 }}
+        sx={{ backgroundColor: "#3b3a31", color: "#ffff", marginTop: 2 }}
       >
         Crear Solicitud
       </Button>

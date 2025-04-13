@@ -32,6 +32,7 @@ import OCFacturas from "../Abastecimientos/Facturas/OrdenesCompraList.jsx";
 import AltaFactura from "../Abastecimientos/Facturas/AltaFactura.jsx";
 import Venta from "../Abastecimientos/Ventas/Venta.jsx";
 import ListadoPresupuesto from "../Abastecimientos/Presupuesto/ListadoPresupuesto.jsx";
+import ProductoProveedor from "../Abastecimientos/Productos/ProductoProveedor.jsx";
 
 const App = () => {
   return (
@@ -103,7 +104,14 @@ const App = () => {
                     <Route path="/facturas" element={<OCFacturas />} />
                     <Route path="/alta-factura" element={<AltaFactura />} />
                     <Route path="/venta" element={<Venta />} />
-                    <Route path="/listar-presupuesto" element={<ListadoPresupuesto />} />
+                    <Route
+                      path="/listar-presupuesto"
+                      element={<ListadoPresupuesto />}
+                    />
+                    <Route
+                      path="/producto-proveedor/:codigo"
+                      element={<ProductoProveedor />}
+                    />
                   </Routes>
                 </AppLayout>
               </AuthGuard>

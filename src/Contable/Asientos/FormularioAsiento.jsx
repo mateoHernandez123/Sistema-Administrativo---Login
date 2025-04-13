@@ -339,7 +339,7 @@ const FormularioAsiento = () => {
     };
 
     verificarUsuario(); // Llama a la función asíncrona
-  }, [usuarioAutenticado, deslogear, navigate, IP, Swal]); // Asegúrate de agregar todas las dependencias necesarias
+  }, [usuarioAutenticado, deslogear, navigate, IP, Swal]);
 
   return (
     <Box
@@ -348,8 +348,8 @@ const FormularioAsiento = () => {
         color: "#3b3a31",
         padding: 4,
         borderRadius: 5,
-        width: "900px", // Ancho fijo
-        maxWidth: "100%", // Ajusta en móviles si es necesario
+        width: "900px",
+        maxWidth: "100%",
         margin: "auto",
       }}
     >

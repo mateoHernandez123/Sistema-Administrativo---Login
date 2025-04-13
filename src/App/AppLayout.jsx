@@ -263,70 +263,86 @@ const AppLayout = ({ children }) => {
                     />
                   </ListItem>
                 )}
-                <ListItem
-                  component={Link}
-                  to={"/solicitud-compra"}
-                  key={"solicitud-compra"}
-                  sx={{ pl: 4 }}
-                >
-                  <ListItemIcon sx={{ color: "yellow" }}>
-                    <ShoppingCartIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={"Solicitud De Compra"}
-                    sx={{ color: "yellow" }}
-                  />
-                </ListItem>
-                <ListItem
-                  component={Link}
-                  to={"/presupuesto"}
-                  key={"presupuesto"}
-                  sx={{ pl: 4 }}
-                >
-                  <ListItemIcon sx={{ color: "yellow" }}>
-                    <ListIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={"Presupuesto"}
-                    sx={{ color: "yellow" }}
-                  />
-                </ListItem>
-                <ListItem
-                  component={Link}
-                  to={"/orden-compra"}
-                  key={"orden-compra"}
-                  sx={{ pl: 4 }}
-                >
-                  <ListItemIcon sx={{ color: "yellow" }}>
-                    <FilePresentOutlinedIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={"Orden De Compra"}
-                    sx={{ color: "yellow" }}
-                  />
-                </ListItem>
-                <ListItem
-                  component={Link}
-                  to={"/remitos"}
-                  key={"remitos"}
-                  sx={{ pl: 4 }}
-                >
-                  <ListItemIcon sx={{ color: "yellow" }}>
-                    <FolderZipIcon />
-                  </ListItemIcon>
-                  <ListItemText primary={"Remitos"} sx={{ color: "yellow" }} />
-                </ListItem>
-                <ListItem
-                  component={Link}
-                  to={"/facturas"}
-                  key={"facturas"}
-                  sx={{ pl: 4 }}
-                >
-                  <ListItemIcon sx={{ color: "yellow" }}>
-                    <TopicIcon />
-                  </ListItemIcon>
-                  <ListItemText primary={"Facturas"} sx={{ color: "yellow" }} />
-                </ListItem>
+                {permisos.SolicitudCompra && (
+                  <ListItem
+                    component={Link}
+                    to={"/solicitud-compra"}
+                    key={"solicitud-compra"}
+                    sx={{ pl: 4 }}
+                  >
+                    <ListItemIcon sx={{ color: "yellow" }}>
+                      <ShoppingCartIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"Solicitud De Compra"}
+                      sx={{ color: "yellow" }}
+                    />
+                  </ListItem>
+                )}
+                {permisos.PresupuestoCompra && (
+                  <ListItem
+                    component={Link}
+                    to={"/presupuesto"}
+                    key={"presupuesto"}
+                    sx={{ pl: 4 }}
+                  >
+                    <ListItemIcon sx={{ color: "yellow" }}>
+                      <ListIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"Presupuesto"}
+                      sx={{ color: "yellow" }}
+                    />
+                  </ListItem>
+                )}
+                {permisos.OrdenCompra && (
+                  <ListItem
+                    component={Link}
+                    to={"/orden-compra"}
+                    key={"orden-compra"}
+                    sx={{ pl: 4 }}
+                  >
+                    <ListItemIcon sx={{ color: "yellow" }}>
+                      <FilePresentOutlinedIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"Orden De Compra"}
+                      sx={{ color: "yellow" }}
+                    />
+                  </ListItem>
+                )}
+                {permisos.RemitoCompra && (
+                  <ListItem
+                    component={Link}
+                    to={"/remitos"}
+                    key={"remitos"}
+                    sx={{ pl: 4 }}
+                  >
+                    <ListItemIcon sx={{ color: "yellow" }}>
+                      <FolderZipIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"Remitos"}
+                      sx={{ color: "yellow" }}
+                    />
+                  </ListItem>
+                )}
+                {permisos.FacturaCompra && (
+                  <ListItem
+                    component={Link}
+                    to={"/facturas"}
+                    key={"facturas"}
+                    sx={{ pl: 4 }}
+                  >
+                    <ListItemIcon sx={{ color: "yellow" }}>
+                      <TopicIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"Facturas"}
+                      sx={{ color: "yellow" }}
+                    />
+                  </ListItem>
+                )}
                 <ListItem
                   component={Link}
                   to={"/venta"}

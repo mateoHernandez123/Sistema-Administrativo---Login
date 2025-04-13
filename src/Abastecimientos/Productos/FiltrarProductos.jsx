@@ -26,6 +26,7 @@ import { useNavigate } from "react-router-dom";
 import { Context } from "../../context/Context";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 
 const FiltrarProductos = () => {
   const categorias = [
@@ -344,6 +345,17 @@ const FiltrarProductos = () => {
                     sx={{ margin: 1 }}
                   >
                     {row.activo ? "Desactivar" : "Activar"}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() =>
+                      navigate(`/producto-proveedor/${row.codigo}`)
+                    }
+                    sx={{ margin: 1 }}
+                  >
+                    <LocalShippingIcon />
+                           
                   </Button>
                 </TableCell>
               </TableRow>

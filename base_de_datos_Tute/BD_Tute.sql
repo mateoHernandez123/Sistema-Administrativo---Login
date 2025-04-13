@@ -473,6 +473,8 @@ values(
     1
 );
 
+SELECT * FROM permisos;
+
 insert into permisos(nombre)
 values('RemitoCompra');
 
