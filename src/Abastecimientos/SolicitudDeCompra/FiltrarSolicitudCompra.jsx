@@ -30,47 +30,13 @@ const ListadoSolicitudes = () => {
   const { IP, tokenError } = useContext(Context);
 
   useEffect(() => {
-    // Simulación de datos
-    const solicitudesMock = [
-      {
-        nro: 1,
-        producto: "Televisor",
-        proveedor: "Proveedor A",
-        estado: "Abierta",
-      },
-      {
-        nro: 2,
-        producto: "Laptop",
-        proveedor: "Proveedor B",
-        estado: "Cerrada",
-      },
-      {
-        nro: 3,
-        producto: "Celular",
-        proveedor: "Proveedor A",
-        estado: "Abierta",
-      },
-      {
-        nro: 4,
-        producto: "Mouse",
-        proveedor: "Proveedor C",
-        estado: "Cerrada",
-      },
-    ];
-    setSolicitudes(solicitudesMock);
-  }, []);
-
-  useEffect(() => {
     const fetchListarSolicitudes = async () => {
       try {
         const token = JSON.parse(localStorage.getItem("accessToken"));
-        const response = await fetch(
-          `${IP}/api/sulicitud-compra/listar-pedidos`,
-          {
-            method: "GET",
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const response = await fetch(`${IP}/api/pedidos-compra`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const data = await response.json();
 
         if (data.AuthErr) {
@@ -79,7 +45,16 @@ const ListadoSolicitudes = () => {
           Swal.fire({ title: "Error", icon: "error", text: data.MENSAJE });
         } else {
           console.log(data);
-          setSolicitudes([]);
+          const solicitudesAdaptadas = data.pedidos.map((pedido) => ({
+            nro: pedido.codigosolicitud,
+            codigoPedido: pedido.codigopedido,
+            codigoProducto: pedido.codigoproducto,
+            producto: pedido.nombre,
+            cantidad: pedido.cantidad,
+            proveedor: pedido.marca,
+            estado: pedido.estado === 1 ? "Abierta" : "Cerrada",
+          }));
+          setSolicitudes(solicitudesAdaptadas);
         }
       } catch (error) {
         console.error(error);
@@ -309,7 +284,7 @@ const ListadoSolicitudes = () => {
                 >
                   <IconButton
                     onClick={() =>
-                      navigate(`/detalle-solicitud/${solicitud.nro}`)
+                      navigate(`/detalle-solicitud/${solicitud.codigoPedido}`)
                     }
                     sx={{
                       backgroundColor: "#ffeb3b",

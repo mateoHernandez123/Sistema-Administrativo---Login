@@ -33,7 +33,7 @@ const FormularioSolicitudCompra = () => {
     Observaciones: "",
   });
 
-  const [error, setError] = useState("");
+  const [setError] = useState("");
 
   useEffect(() => {
     const fetchProductos = async () => {

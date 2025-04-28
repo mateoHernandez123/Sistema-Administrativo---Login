@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Stepper,
   Step,
@@ -10,67 +10,67 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { useParams } from "react-router-dom";
+import Swal from "sweetalert2";
+import { Context } from "../../context/Context";
 
 // Pasos de la solicitud
-const steps = ["Inicio", "Presupuestada", "Comprometida", "Ingresada", "Finalizada"];
+const steps = [
+  "Inicio",
+  "Presupuestada",
+  "Comprometida",
+  "Ingresada",
+  "Finalizada",
+];
 
 // Estilo personalizado del conector
 const CustomConnector = styled(StepConnector)({
   "& .MuiStepConnector-line": {
-    borderColor: "#1976d2", // Azul fijo
+    borderColor: "#1976d2", // Azul
     borderWidth: 2,
   },
 });
 
 const DetalleSolicitud = () => {
-  const { id } = useParams(); // Obtener el ID de la solicitud desde la URL
-  const [activeStep, setActiveStep] = useState(0); // Paso activo
-  const [loading, setLoading] = useState(true); // Estado de carga
-  const [solicitud, setSolicitud] = useState(null); // Datos de la solicitud
+  const { id } = useParams(); // "id" es el codigo_solicitud
+  const [activeStep, setActiveStep] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [pedido, setPedido] = useState(null);
+  const { IP, tokenError } = useContext(Context);
 
   useEffect(() => {
     const fetchSolicitud = async () => {
       setLoading(true);
+      try {
+        const token = JSON.parse(localStorage.getItem("accessToken"));
+        const response = await fetch(`${IP}/api/pedidos-compra/${id}`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
 
-      // Mock de datos de las solicitudes
-      const solicitudesMock = {
-        1: {
-          nro: 1,
-          producto: "Televisor",
-          proveedor: "Proveedor A",
-          fecha: "2025-01-20",
-          estado: "Presupuestada",
-          progreso: 1,
-        },
-        2: {
-          nro: 2,
-          producto: "Laptop",
-          proveedor: "Proveedor B",
-          fecha: "2025-01-18",
-          estado: "Comprometida",
-          progreso: 2,
-        },
-        3: {
-          nro: 3,
-          producto: "Celular",
-          proveedor: "Proveedor C",
-          fecha: "2025-01-15",
-          estado: "Finalizada",
-          progreso: 4,
-        },
-      };
-
-      // Obtener la solicitud correspondiente
-      const solicitudData = solicitudesMock[id];
-      if (solicitudData) {
-        setSolicitud(solicitudData);
-        setActiveStep(solicitudData.progreso);
+        if (data.AuthErr) {
+          tokenError(data.MENSAJE);
+        } else if (data.ERROR || data.ServErr) {
+          Swal.fire({ title: "Error", icon: "error", text: data.MENSAJE });
+        } else {
+          console.log(data.pedido);
+          setPedido(data.pedido);
+          // Setear el paso activo según el estado
+          setActiveStep(data.pedido.estado || 0);
+        }
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          title: "Error en la carga de datos",
+          icon: "error",
+          text: "Hubo un problema al conectar con el servidor.",
+        });
       }
       setLoading(false);
     };
 
     fetchSolicitud();
-  }, [id]);
+  }, [id, IP, tokenError]);
 
   if (loading) {
     return (
@@ -80,7 +80,7 @@ const DetalleSolicitud = () => {
     );
   }
 
-  if (!solicitud) {
+  if (!pedido) {
     return (
       <Typography variant="h6" align="center" color="error">
         Solicitud no encontrada.
@@ -107,10 +107,10 @@ const DetalleSolicitud = () => {
                 StepIconProps={{
                   sx: {
                     "&.Mui-active": {
-                      color: "#1976d2", // Color azul para el paso activo
+                      color: "#1976d2",
                     },
                     "&.Mui-completed": {
-                      color: "#388e3c", // Color verde para pasos completados
+                      color: "#388e3c",
                     },
                   },
                 }}
@@ -128,19 +128,17 @@ const DetalleSolicitud = () => {
           Información de la Solicitud
         </Typography>
         <Typography>
-          <strong>N° Solicitud:</strong> {solicitud.nro}
+          <strong>N° Solicitud:</strong> {pedido.codigo}
         </Typography>
         <Typography>
-          <strong>Producto:</strong> {solicitud.producto}
+          <strong>Cantidad solicitada:</strong> {pedido.cantidad}
         </Typography>
         <Typography>
-          <strong>Proveedor:</strong> {solicitud.proveedor}
+          <strong>Precio Unitario:</strong>{" "}
+          {pedido.precio_unitario || "No disponible"}
         </Typography>
         <Typography>
-          <strong>Fecha:</strong> {solicitud.fecha}
-        </Typography>
-        <Typography>
-          <strong>Estado:</strong> {solicitud.estado}
+          <strong>Producto ID:</strong> {pedido.producto_id}
         </Typography>
       </Paper>
     </Box>
