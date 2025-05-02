@@ -10,70 +10,60 @@ import {
   Paper,
   IconButton,
 } from "@mui/material";
-import { useNavigate, useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useState, useEffect, useContext } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Swal from "sweetalert2";
+import { Context } from "../../context/Context";
 
-// Componente VisualizarProducto
 const VisualizarProducto = () => {
   const { codigo } = useParams();
-  const [producto, setProducto] = useState(null);
+  const location = useLocation();
+  const producto = location.state?.producto || null;
+
   const [compras, setCompras] = useState([]);
   const navigate = useNavigate();
+  const { IP } = useContext(Context);
 
   const handleListarProductos = () => {
     navigate("/productos");
   };
-  useEffect(() => {
-    // Simulando la obtención de datos de un producto
-    const fetchProducto = async () => {
-      try {
-        const productosMock = [
-          {
-            codigo: "P001",
-            nombre: "Televisor",
-            descripcion: "Televisor Samsung QLED 55 pulgadas",
-            // Otros campos del producto...
-          },
-        ];
-        const productoEncontrado = productosMock.find(
-          (p) => p.codigo === codigo
-        );
-        setProducto(productoEncontrado);
-      } catch (error) {
-        Swal.fire({
-          title: "Error",
-          text: "No se pudo cargar el producto",
-          icon: "error",
-        });
-      }
-    };
 
+  useEffect(() => {
     const fetchCompras = async () => {
       try {
-        const comprasMock = [
+        const token = JSON.parse(localStorage.getItem("accessToken"));
+        const response = await fetch(
+          `${IP}/api/productos/historialcompra?codigo=${codigo}`,
           {
-            proveedor: "Proveedor A",
-            fechaCompra: "12/01/2023",
-            cantidad: 5,
-            precioCompra: 800,
-          },
-          // Otras compras...
-        ];
-        setCompras(comprasMock);
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const data = await response.json();
+
+        if (data.ERROR) {
+          Swal.fire(
+            "Error",
+            "No se pudo cargar el historial de compras",
+            "error"
+          );
+        } else {
+          setCompras(data.ListaProd || []);
+          console.log(data);
+        }
       } catch (error) {
-        Swal.fire({
-          title: "Error",
-          text: "No se pudieron cargar las compras",
-          icon: "error",
-        });
+        Swal.fire(
+          "Error",
+          "No se pudo cargar el historial de compras",
+          "error"
+        );
+        console.log(error);
       }
     };
 
-    fetchProducto();
     fetchCompras();
-  }, [codigo]);
+  }, [codigo, IP]);
 
   return (
     <Box sx={{ padding: 4, backgroundColor: "#e6e2d5", borderRadius: 5 }}>
@@ -88,6 +78,7 @@ const VisualizarProducto = () => {
       >
         <ArrowBackIcon />
       </IconButton>
+
       {producto ? (
         <>
           <Typography
@@ -101,166 +92,69 @@ const VisualizarProducto = () => {
           >
             Detalles del Producto
           </Typography>
-          <Typography
-            variant="h6"
-            sx={{
-              marginBottom: 2,
-              color: "#333",
-            }}
-          >
+          <Typography variant="h6" sx={{ marginBottom: 2, color: "#333" }}>
             <strong>Código:</strong> {producto.codigo}
           </Typography>
-          <Typography
-            variant="h6"
-            sx={{
-              marginBottom: 2,
-              color: "#333",
-            }}
-          >
+          <Typography variant="h6" sx={{ marginBottom: 2, color: "#333" }}>
             <strong>Nombre:</strong> {producto.nombre}
           </Typography>
-          <Typography
-            variant="h6"
-            sx={{
-              marginBottom: 4,
-              color: "#333",
-            }}
-          >
+          <Typography variant="h6" sx={{ marginBottom: 4, color: "#333" }}>
             <strong>Descripción:</strong> {producto.descripcion}
           </Typography>
 
-          <Typography
-            variant="h4"
-            sx={{
-              marginBottom: 4,
-              color: "#333",
-              textAlign: "center",
-              fontWeight: "bold",
-            }}
-          >
-            Compras Realizadas
+          <Typography variant="h5" sx={{ mt: 4, mb: 2, color: "#333" }}>
+            Historial de Compras
           </Typography>
-          <TableContainer
-            component={Paper}
-            sx={{
-              marginBottom: 4,
-              borderRadius: 5,
-            }}
-          >
-            <Table
-              sx={{
-                fontSize: "1.5rem",
-                "& .MuiTableCell-root": {
-                  borderColor: "black",
-                  borderWidth: "1px",
-                },
-              }}
-            >
-              <TableHead>
-                <TableRow>
-                  <TableCell
-                    sx={{
-                      fontWeight: "bold",
-                      fontSize: "1.4rem",
-                      borderColor: "black",
-                      textAlign: "center",
-                      backgroundColor: "#ffeb3b",
-                    }}
-                  >
-                    Proveedor
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      fontWeight: "bold",
-                      fontSize: "1.4rem",
-                      borderColor: "black",
-                      textAlign: "center",
-                      backgroundColor: "#ffeb3b",
-                    }}
-                  >
-                    Fecha de Compra
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      fontWeight: "bold",
-                      fontSize: "1.4rem",
-                      borderColor: "black",
-                      textAlign: "center",
-                      backgroundColor: "#ffeb3b",
-                    }}
-                  >
-                    Cantidad
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      fontWeight: "bold",
-                      fontSize: "1.4rem",
-                      borderColor: "black",
-                      textAlign: "center",
-                      backgroundColor: "#ffeb3b",
-                    }}
-                  >
-                    Precio de Compra
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {compras.map((compra, index) => (
-                  <TableRow key={index}>
-                    <TableCell
-                      sx={{
-                        fontSize: "1.1rem",
-                        borderColor: "black",
-                        textAlign: "center",
-                        backgroundColor: "#e0e0e0",
-                      }}
-                    >
-                      {compra.proveedor}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        fontSize: "1.1rem",
-                        borderColor: "black",
-                        textAlign: "center",
-                        backgroundColor: "#e0e0e0",
-                      }}
-                    >
-                      {compra.fechaCompra}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        fontSize: "1.1rem",
-                        borderColor: "black",
-                        textAlign: "center",
-                        backgroundColor: "#e0e0e0",
-                      }}
-                    >
-                      {compra.cantidad}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        fontSize: "1.1rem",
-                        borderColor: "black",
-                        textAlign: "center",
-                        backgroundColor: "#e0e0e0",
-                      }}
-                    >
-                      {compra.precioCompra}
-                    </TableCell>
+
+          {compras.length > 0 ? (
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Fecha</TableCell>
+                    <TableCell>Proveedor</TableCell>
+                    <TableCell>Cantidad</TableCell>
+                    <TableCell>Precio Unitario</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {compras.map((compra, index) => {
+                    const fechaFormateada = new Date(
+                      compra.fecha_hora
+                    ).toLocaleDateString("es-AR", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    });
+
+                    const razon = compra.proveedor?.Razon || "—";
+                    const cuit = compra.proveedor?.Cuit || "";
+
+                    return (
+                      <TableRow key={index}>
+                        <TableCell>{fechaFormateada}</TableCell>
+                        <TableCell>
+                          {razon} <br />
+                          <span style={{ fontSize: "0.85rem", color: "#666" }}>
+                            {cuit}
+                          </span>
+                        </TableCell>
+                        <TableCell>{compra.cantidad}</TableCell>
+                        <TableCell>${compra.precio_unitario}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Typography>
+              No hay historial de compras para este producto.
+            </Typography>
+          )}
         </>
       ) : (
-        <Typography
-          variant="h5"
-          sx={{
-            color: "red",
-            textAlign: "center",
-          }}
-        >
+        <Typography variant="h5" sx={{ color: "red", textAlign: "center" }}>
           No se encontró el producto.
         </Typography>
       )}

@@ -19,6 +19,7 @@ const steps = [
   "Presupuestada",
   "Comprometida",
   "Ingresada",
+  
   "Finalizada",
 ];
 
@@ -53,7 +54,6 @@ const DetalleSolicitud = () => {
         } else if (data.ERROR || data.ServErr) {
           Swal.fire({ title: "Error", icon: "error", text: data.MENSAJE });
         } else {
-          console.log(data.pedido);
           setPedido(data.pedido);
           // Setear el paso activo según el estado
           setActiveStep(data.pedido.estado || 0);

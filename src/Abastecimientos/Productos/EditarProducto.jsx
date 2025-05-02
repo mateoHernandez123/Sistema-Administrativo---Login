@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import {
   TextField,
   Button,
@@ -104,6 +104,7 @@ const EditarProducto = () => {
         "Hubo un problema al conectar con el servidor.",
         "error"
       );
+      console.log(error);
     }
   };
 

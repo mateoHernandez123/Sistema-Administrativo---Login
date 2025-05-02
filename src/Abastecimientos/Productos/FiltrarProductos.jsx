@@ -56,7 +56,7 @@ const FiltrarProductos = () => {
 
   const [filtroTexto, setFiltroTexto] = useState("");
 
-  const [anchorEl, setAnchorEl] = useState(null); // Estado del Popover
+  const [anchorEl, setAnchorEl] = useState(null); 
   const [selectedColumns, setSelectedColumns] = useState([
     "Código",
     "Nombre",
@@ -111,8 +111,8 @@ const FiltrarProductos = () => {
           });
         } else {
           setProductosOriginales(data.ListaProd);
-          setProductos(data.ListaProd); // Establecer los productos
-          setPaginas(data.TotalPaginas); //Establecer las paginas que se van a mostrar
+          setProductos(data.ListaProd);
+          setPaginas(data.TotalPaginas); 
         }
       } catch (error) {
         console.error(error);
@@ -157,7 +157,7 @@ const FiltrarProductos = () => {
 
     try {
       const response = await fetch(endpoint, {
-        method: activo ? "DELETE" : "PUT", // DELETE para desactivar, PUT para activar
+        method: activo ? "DELETE" : "PUT", 
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -179,8 +179,6 @@ const FiltrarProductos = () => {
           confirmButtonColor: "#3085d6",
         });
       }
-
-      // Actualizar el estado de los productos
       setProductos((prevProductos) =>
         prevProductos.map((prov) =>
           prov.codigo === codigo ? { ...prov, activo: !activo } : prov
@@ -223,7 +221,6 @@ const FiltrarProductos = () => {
     );
   };
 
-  // Mapeo de columnas a propiedades del producto
   const columnToProperty = {
     Código: "codigo",
     "Código de Barras": "codigo_barra",
@@ -355,7 +352,6 @@ const FiltrarProductos = () => {
                     sx={{ margin: 1 }}
                   >
                     <LocalShippingIcon />
-                           
                   </Button>
                 </TableCell>
               </TableRow>

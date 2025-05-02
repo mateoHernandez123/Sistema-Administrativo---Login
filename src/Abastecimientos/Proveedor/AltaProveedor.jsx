@@ -258,7 +258,12 @@ const AltaProveedor = () => {
       </IconButton>
       <Typography
         variant="h4"
-        sx={{ marginBottom: 2, color: "#333", textAlign: "center" }}
+        sx={{
+          marginBottom: 2,
+          color: "#333",
+          textAlign: "center",
+          fontWeight: "bold",
+        }}
       >
         Alta de Proveedor
       </Typography>

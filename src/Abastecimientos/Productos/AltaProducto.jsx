@@ -25,14 +25,11 @@ const AltaProducto = () => {
     modelo: "",
     descripcion: "",
     precioVenta: "",
-    //precioCompra: "",
     ivaPorcentaje: "",
-    //stockActual: "",
     stockMaximo: "",
     stockMinimo: "",
     puntoReposicion: "",
     categoria: "",
-    // proveedor: "",
     almacen: "",
     url: "url.hola",
   });
@@ -59,13 +56,11 @@ const AltaProducto = () => {
     "Seguridad",
   ];
 
-  //const proveedores = ["Proveedor A", "Proveedor B", "Proveedor C"];
   const almacenes = ["Taller Mecanico", "Primer piso", "Planta baja"];
 
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
 
-    // Validar que los valores numéricos sean positivos
     if (type === "number" && value < 0) {
       Swal.fire({
         title: "Error",
@@ -92,10 +87,9 @@ const AltaProducto = () => {
       nombre,
       marca,
       modelo,
-      descripcion, // Nuevo campo
+      descripcion,
       precioVenta,
       ivaPorcentaje,
-      stockActual,
       stockMinimo,
       stockMaximo,
       puntoReposicion,
@@ -110,7 +104,6 @@ const AltaProducto = () => {
       !modelo ||
       !descripcion ||
       !precioVenta ||
-      //!precioCompra ||
       !ivaPorcentaje
     ) {
       Swal.fire({
@@ -130,7 +123,6 @@ const AltaProducto = () => {
         modelo: modelo || null,
         descripcion: descripcion || null,
         precioVenta: precioVenta || null,
-        // precioCompra: precioCompra || null,
         ivaPorcentaje: ivaPorcentaje || null,
         stockActual: 0,
         stockMinimo: stockMinimo || null,
@@ -181,7 +173,6 @@ const AltaProducto = () => {
           text: "El producto ha sido registrado con éxito.",
           icon: "success",
         });
-        // console.log("Datos del producto:", formData);
         handleListarProductos();
       }
     } catch (error) {
@@ -222,7 +213,12 @@ const AltaProducto = () => {
 
       <Typography
         variant="h4"
-        sx={{ marginBottom: 2, color: "#333", textAlign: "center" }}
+        sx={{
+          marginBottom: 2,
+          color: "#333",
+          textAlign: "center",
+          fontWeight: "bold",
+        }}
       >
         Alta de Producto
       </Typography>
@@ -284,19 +280,6 @@ const AltaProducto = () => {
           margin="normal"
           required
         />
-        {/*
-        <TextField
-          fullWidth
-          label="Precio de Compra"
-          name="precioCompra"
-          type="number"
-          inputProps={{ min: 0 }}
-          value={formData.precioCompra}
-          onChange={handleInputChange}
-          margin="normal"
-          required
-        /> 
-        */}
         <TextField
           fullWidth
           label="IVA %"
@@ -312,18 +295,6 @@ const AltaProducto = () => {
 
       <Typography variant="h6">Stock</Typography>
       <Box mb={3}>
-        {/*
-        <TextField
-          fullWidth
-          label="Stock Actual"
-          name="stockActual"
-          type="number"
-          inputProps={{ min: 0 }}
-          value={formData.stockActual}
-          onChange={handleInputChange}
-          margin="normal"
-        />
-        */}
         <TextField
           fullWidth
           label="Stock Máximo"
@@ -358,18 +329,6 @@ const AltaProducto = () => {
 
       <Typography variant="h6">Otros</Typography>
       <Box mb={3}>
-        {/*}
-        <TextField
-          fullWidth
-          label="Fecha de Alta"
-          name="fechaAlta"
-          type="date"
-          value={formData.fechaAlta}
-          onChange={handleInputChange}
-          InputLabelProps={{ shrink: true }}
-          margin="normal"
-        />
-        */}
         <FormControl fullWidth margin="normal">
           <InputLabel>Categoría</InputLabel>
           <Select
@@ -384,22 +343,6 @@ const AltaProducto = () => {
             ))}
           </Select>
         </FormControl>
-        {/*
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Proveedor</InputLabel>
-          <Select
-            name="proveedor"
-            value={formData.proveedor}
-            onChange={handleInputChange}
-          >
-            {proveedores.map((proveedor) => (
-              <MenuItem key={proveedor} value={proveedor}>
-                {proveedor}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        */}
         <FormControl fullWidth margin="normal">
           <InputLabel>Almacén</InputLabel>
           <Select
