@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Box,
   Typography,
@@ -15,36 +15,89 @@ import PrintIcon from "@mui/icons-material/Print";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import autoTable from "jspdf-autotable";
+import { useNavigate } from "react-router-dom";
+import { Context } from "../../context/Context";
+import Swal from "sweetalert2";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const ListadoPresupuestos = () => {
   const [presupuestos, setPresupuestos] = useState([]);
+  const { IP, tokenError } = useContext(Context);
+  const navigate = useNavigate();
+
+  const handleListarPresupuesto = () => {
+    navigate("/presupuesto");
+  };
+
+  const formatearFechaYHora = (fechaISO) => {
+    const fecha = new Date(fechaISO);
+    const opcionesFecha = { day: "2-digit", month: "2-digit", year: "numeric" };
+    const opcionesHora = {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "America/Argentina/Buenos_Aires",
+    };
+
+    const fechaFormateada = fecha.toLocaleDateString("es-AR", opcionesFecha);
+    const horaFormateada = fecha.toLocaleTimeString("es-AR", opcionesHora);
+
+    return { fechaFormateada, horaFormateada };
+  };
 
   useEffect(() => {
-    const data = [
-      {
-        id: 1,
-        proveedor: "Proveedor A",
-        codigo: "LAP123",
-        fecha: "08/03/2025",
-        hora: "20:45",
-      },
-      {
-        id: 2,
-        proveedor: "Proveedor B",
-        codigo: "MOU456",
-        fecha: "07/03/2025",
-        hora: "15:04",
-      },
-      {
-        id: 3,
-        proveedor: "Proveedor A",
-        codigo: "TEC789",
-        fecha: "06/03/2025",
-        hora: "10:00",
-      },
-    ];
-    setPresupuestos(data);
-  }, []);
+    const fetchPresupuestos = async () => {
+      try {
+        const token = JSON.parse(localStorage.getItem("accessToken"));
+        const response = await fetch(`${IP}/api/presupuestos/v2/listar`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.AuthErr) {
+          tokenError(data.MENSAJE);
+        } else if (data.ServErr || data.ERROR) {
+          Swal.fire({
+            title: "Error",
+            icon: "error",
+            text: data.MENSAJE,
+            color: "#fff",
+            background: "#333",
+            confirmButtonColor: "#3085d6",
+          });
+        } else {
+          setPresupuestos(
+            data.presupuestos.map((p) => {
+              const { fechaFormateada, horaFormateada } = formatearFechaYHora(
+                p.fecha_presupuesto
+              );
+              return {
+                ...p,
+                fecha: fechaFormateada,
+                hora: horaFormateada,
+              };
+            })
+          );
+          console.log(data.presupuestos);
+        }
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          title: "Error en la carga de datos",
+          icon: "error",
+          text: "Hubo un problema al conectar con el servidor.",
+          color: "#fff",
+          background: "#333",
+          confirmButtonColor: "#3085d6",
+        });
+      }
+    };
+    fetchPresupuestos();
+  }, [IP, tokenError]);
 
   const handleReimprimir = (presupuesto) => {
     const doc = new jsPDF();
@@ -53,7 +106,7 @@ const ListadoPresupuestos = () => {
     doc.setFontSize(16);
     doc.text("Presupuesto de Productos", 14, 20);
     doc.setFontSize(12);
-    doc.text(`Proveedor: ${presupuesto.proveedor}`, 14, 30);
+    doc.text(`Proveedor: ${presupuesto.razon_proveedor}`, 14, 30);
     doc.text(`Fecha: ${presupuesto.fecha}`, 14, 40);
     doc.text(`Hora: ${presupuesto.hora}`, 14, 50);
     doc.text(`Número de Presupuesto: ${numeroPresupuesto}`, 14, 60);
@@ -61,18 +114,31 @@ const ListadoPresupuestos = () => {
     autoTable(doc, {
       startY: 70,
       head: [["Código", "Fecha", "Hora"]],
-      body: [[presupuesto.codigo, presupuesto.fecha, presupuesto.hora]],
+      body: [
+        [presupuesto.codigo_presupuesto, presupuesto.fecha, presupuesto.hora],
+      ],
     });
 
-    doc.save(`Presupuesto_${presupuesto.proveedor}.pdf`);
+    doc.save(`Presupuesto_${presupuesto.razon_proveedor}.pdf`);
   };
 
   return (
     <Box sx={{ padding: 4, backgroundColor: "#e6e2d5", borderRadius: 5 }}>
+      <IconButton
+        color="primary"
+        onClick={handleListarPresupuesto}
+        sx={{
+          backgroundColor: "#ffeb3b",
+          "&:hover": { backgroundColor: "#fdd835" },
+          color: "#333",
+        }}
+      >
+        <ArrowBackIcon />
+      </IconButton>
       <Typography
         variant="h4"
         sx={{
-          marginBottom: 4,
+          margin: 4,
           color: "#333",
           textAlign: "center",
           fontWeight: "bold",
@@ -108,8 +174,8 @@ const ListadoPresupuestos = () => {
                 key={presupuesto.id}
                 sx={{ backgroundColor: "#e0e0e0" }}
               >
-                <TableCell>{presupuesto.proveedor}</TableCell>
-                <TableCell>{presupuesto.codigo}</TableCell>
+                <TableCell>{presupuesto.razon_proveedor}</TableCell>
+                <TableCell>{presupuesto.codigo_presupuesto}</TableCell>
                 <TableCell>{presupuesto.fecha}</TableCell>
                 <TableCell>{presupuesto.hora}</TableCell>
                 <TableCell>

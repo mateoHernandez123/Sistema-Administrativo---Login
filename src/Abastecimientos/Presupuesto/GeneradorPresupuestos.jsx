@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Box,
   Typography,
@@ -13,6 +13,8 @@ import {
   Button,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { Context } from "../../context/Context";
+import Swal from "sweetalert2";
 
 const GeneradorPresupuestos = () => {
   const [pedidos, setPedidos] = useState([]);
@@ -20,45 +22,54 @@ const GeneradorPresupuestos = () => {
   const [seleccionarTodos, setSeleccionarTodos] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Simulación de datos obtenidos de una API
-    const data = {
-      pedidos: [
-        {
-          id: "p1",
-          codigo: "LAP123",
-          nombre: "Laptop",
-          marca: "Dell",
-          modelo: "XPS 15",
-          descripcion: "Core i7, 16GB RAM, SSD 1TB",
-          cantidad: 2,
-          proveedores: ["Proveedor A", "Proveedor B"],
-        },
-        {
-          id: "p2",
-          codigo: "MOU456",
-          nombre: "Mouse",
-          marca: "Logitech",
-          modelo: "M705",
-          descripcion: "Inalámbrico, ergonómico",
-          cantidad: 5,
-          proveedores: ["Proveedor A"],
-        },
-        {
-          id: "p3",
-          codigo: "TEC789",
-          nombre: "Teclado",
-          marca: "Genius",
-          modelo: "KB-110",
-          descripcion: "Inalámbrico, silencioso",
-          cantidad: 3,
-          proveedores: ["Proveedor B"],
-        },
-      ],
-    };
+  const { IP, tokenError } = useContext(Context);
 
-    setPedidos(data.pedidos);
-  }, []);
+  useEffect(() => {
+    const fetchPresupuestos = async () => {
+      try {
+        const token = JSON.parse(localStorage.getItem("accessToken"));
+        const response = await fetch(`${IP}/api/pedidos-compra/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.AuthErr) {
+          tokenError(data.MENSAJE);
+        } else if (data.ServErr || data.ERROR) {
+          Swal.fire({
+            title: "Error",
+            icon: "error",
+            text: data.MENSAJE,
+            color: "#fff",
+            background: "#333",
+            confirmButtonColor: "#3085d6",
+          });
+        } else {
+          const pedidosConID = data.pedidos.map((pedido, index) => ({
+            ...pedido,
+            id: pedido.id ?? `${pedido.codigopedido || "P"}-${index}`, // Generamos un id si no existe
+          }));
+          setPedidos(pedidosConID);
+          console.log(pedidosConID);
+        }
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          title: "Error en la carga de datos",
+          icon: "error",
+          text: "Hubo un problema al conectar con el servidor.",
+          color: "#fff",
+          background: "#333",
+          confirmButtonColor: "#3085d6",
+        });
+      }
+    };
+    fetchPresupuestos();
+  }, [IP, tokenError]);
 
   const handleListar = () => {
     navigate("/listar-presupuesto");
@@ -79,31 +90,62 @@ const GeneradorPresupuestos = () => {
     setSeleccionarTodos(!seleccionarTodos);
   };
 
-  const generarPresupuestos = () => {
+  const generarPresupuestos = async () => {
     const pedidosSeleccionados = pedidos.filter((p) =>
       seleccionados.includes(p.id)
     );
 
-    const agrupadosPorProveedor = {};
-    pedidosSeleccionados.forEach((pedido) => {
-      pedido.proveedores.forEach((proveedor) => {
-        if (!agrupadosPorProveedor[proveedor]) {
-          agrupadosPorProveedor[proveedor] = [];
+    try {
+      const token = JSON.parse(localStorage.getItem("accessToken"));
+      const response = await fetch(
+        `${IP}/api/presupuestos/v2/generar-pre-presupuestos`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            arrayCodigos: pedidosSeleccionados.map((p) => p.codigopedido),
+          }),
         }
-        agrupadosPorProveedor[proveedor].push({
-          id: pedido.id,
-          codigo: pedido.codigo,
-          nombre: pedido.nombre,
-          marca: pedido.marca,
-          modelo: pedido.modelo,
-          cantidad: pedido.cantidad,
-        });
-      });
-    });
+      );
 
-    navigate("/presupuestos", {
-      state: { presupuestos: Object.entries(agrupadosPorProveedor) },
-    });
+      const data = await response.json();
+
+      if (data.AuthErr) {
+        tokenError(data.MENSAJE);
+      } else if (data.ServErr || data.ERROR) {
+        Swal.fire({
+          title: "Error",
+          icon: "error",
+          text: data.MENSAJE,
+          color: "#fff",
+          background: "#333",
+          confirmButtonColor: "#3085d6",
+        });
+      } else {
+        Swal.fire({
+          title: "Presupuestos generados",
+          text: "Se generaron correctamente los presupuestos.",
+          icon: "success",
+        });
+        console.log(data.presupuestos);
+        navigate("/presupuestos", {
+          state: { presupuestos: data.presupuestos },
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        title: "Error en la carga de datos",
+        icon: "error",
+        text: "Hubo un problema al conectar con el servidor.",
+        color: "#fff",
+        background: "#333",
+        confirmButtonColor: "#3085d6",
+      });
+    }
   };
 
   return (
@@ -140,28 +182,28 @@ const GeneradorPresupuestos = () => {
         <Table>
           <TableHead>
             <TableRow sx={{ backgroundColor: "#ffeb3b" }}>
-              <TableCell>
+              <TableCell sx={{ textAlign: "center" }}>
                 <Checkbox
                   checked={seleccionarTodos}
                   onChange={toggleSeleccionarTodos}
                 />
               </TableCell>
-              <TableCell>
+              <TableCell sx={{ textAlign: "center" }}>
                 <b>Código</b>
               </TableCell>
-              <TableCell>
+              <TableCell sx={{ textAlign: "center" }}>
                 <b>Nombre</b>
               </TableCell>
-              <TableCell>
+              <TableCell sx={{ textAlign: "center" }}>
                 <b>Marca</b>
               </TableCell>
-              <TableCell>
+              <TableCell sx={{ textAlign: "center" }}>
                 <b>Modelo</b>
               </TableCell>
-              <TableCell>
+              <TableCell sx={{ textAlign: "center" }}>
                 <b>Descripción</b>
               </TableCell>
-              <TableCell>
+              <TableCell sx={{ textAlign: "center" }}>
                 <b>Cantidad</b>
               </TableCell>
             </TableRow>
@@ -169,18 +211,30 @@ const GeneradorPresupuestos = () => {
           <TableBody>
             {pedidos.map((pedido) => (
               <TableRow key={pedido.id} sx={{ backgroundColor: "#e0e0e0" }}>
-                <TableCell>
+                <TableCell sx={{ textAlign: "center" }}>
                   <Checkbox
                     checked={seleccionados.includes(pedido.id)}
                     onChange={() => toggleSeleccion(pedido.id)}
                   />
                 </TableCell>
-                <TableCell>{pedido.codigo}</TableCell>
-                <TableCell>{pedido.nombre}</TableCell>
-                <TableCell>{pedido.marca}</TableCell>
-                <TableCell>{pedido.modelo}</TableCell>
-                <TableCell>{pedido.descripcion}</TableCell>
-                <TableCell>{pedido.cantidad}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>
+                  {pedido.codigopedido}
+                </TableCell>
+                <TableCell sx={{ textAlign: "center" }}>
+                  {pedido.nombre}
+                </TableCell>
+                <TableCell sx={{ textAlign: "center" }}>
+                  {pedido.marca}
+                </TableCell>
+                <TableCell sx={{ textAlign: "center" }}>
+                  {pedido.modelo}
+                </TableCell>
+                <TableCell sx={{ textAlign: "center" }}>
+                  {pedido.descripcion}
+                </TableCell>
+                <TableCell sx={{ textAlign: "center" }}>
+                  {pedido.cantidad}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
