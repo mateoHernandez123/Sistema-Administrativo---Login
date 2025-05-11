@@ -228,11 +228,18 @@ const FormularioSolicitudCompra = () => {
                         handleChange(index, "codigo", e.target.value)
                       }
                     >
-                      {productos.map((prod) => (
-                        <MenuItem key={prod.codigo} value={prod.codigo}>
-                          {prod.nombre}
-                        </MenuItem>
-                      ))}
+                      {productos
+                        .filter(
+                          (prod) =>
+                            !formData.Pedidos.some(
+                              (p, i) => i !== index && p.codigo === prod.codigo
+                            )
+                        )
+                        .map((prod) => (
+                          <MenuItem key={prod.codigo} value={prod.codigo}>
+                            {prod.nombre}
+                          </MenuItem>
+                        ))}
                     </Select>
                   </FormControl>
                 </TableCell>

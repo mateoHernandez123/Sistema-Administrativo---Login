@@ -34,7 +34,7 @@ const PresupuestoDetalle = () => {
   }, {});
 
   const [seleccionados, setSeleccionados] = useState({});
-  const [cantidades, setCantidades] = useState({});
+  const [cantidades, setCantidades] = useState({}); 
   const [modalOpen, setModalOpen] = useState(false);
 
   const navigate = useNavigate();
@@ -52,10 +52,9 @@ const PresupuestoDetalle = () => {
       if (index !== -1) {
         nuevos[proveedor].splice(index, 1);
       } else {
-        nuevos[proveedor].push({
-          ...producto,
-          cantidad: cantidades[id] || producto.cantidad_pedido || 1,
-        });
+        const cantidadActual =
+          cantidades[proveedor]?.[id] || producto.cantidad_pedido || 1;
+        nuevos[proveedor].push({ ...producto, cantidad: cantidadActual });
       }
       return nuevos;
     });
@@ -68,27 +67,37 @@ const PresupuestoDetalle = () => {
 
     setSeleccionados((prev) => {
       const nuevos = { ...prev };
-      nuevos[proveedor] = todosSeleccionados
-        ? []
-        : productosArray.map((p) => ({
-            ...p,
-            cantidad: cantidades[getProductoId(p)] || p.cantidad_pedido || 1,
-          }));
+      if (todosSeleccionados) {
+        nuevos[proveedor] = [];
+      } else {
+        nuevos[proveedor] = productosArray.map((p) => {
+          const id = getProductoId(p);
+          const cantidadActual =
+            cantidades[proveedor]?.[id] || p.cantidad_pedido || 1;
+          return { ...p, cantidad: cantidadActual };
+        });
+      }
       return nuevos;
     });
   };
 
-  const actualizarCantidad = (productoId, nuevaCantidad) => {
-    setCantidades((prev) => ({ ...prev, [productoId]: nuevaCantidad }));
+  const actualizarCantidad = (proveedor, productoId, nuevaCantidad) => {
+    setCantidades((prev) => ({
+      ...prev,
+      [proveedor]: {
+        ...prev[proveedor],
+        [productoId]: nuevaCantidad,
+      },
+    }));
     setSeleccionados((prev) => {
       const nuevos = { ...prev };
-      Object.keys(nuevos).forEach((proveedor) => {
+      if (nuevos[proveedor]) {
         nuevos[proveedor] = nuevos[proveedor].map((p) =>
           getProductoId(p) === productoId
             ? { ...p, cantidad: nuevaCantidad }
             : p
         );
-      });
+      }
       return nuevos;
     });
   };
@@ -100,7 +109,6 @@ const PresupuestoDetalle = () => {
   const generarPDFs = () => {
     Object.entries(seleccionados).forEach(([proveedor, productos]) => {
       if (!productos.length) return;
-
       const doc = new jsPDF();
       const fecha = new Date().toLocaleDateString();
       const numeroPresupuesto = Math.floor(1000 + Math.random() * 9000);
@@ -120,7 +128,7 @@ const PresupuestoDetalle = () => {
           p.nombre_producto || p.nombre,
           p.marca_producto || p.marca,
           p.modelo_producto || p.modelo,
-          p.cantidad_pedido || p.cantidad,
+          p.cantidad,
         ]),
       });
 
@@ -179,8 +187,8 @@ const PresupuestoDetalle = () => {
           body: JSON.stringify({ presupuestos: presupuestosBody }), // Asegúrate de enviar como array
         }
       );
-      console.log("Envio al back:", presupuestosBody);
-      console.log(response.status);
+      // console.log("Envio al back:", presupuestosBody);
+      // console.log(response.status);
       if (response.status === 200) {
         setModalOpen(true);
 
@@ -249,8 +257,6 @@ const PresupuestoDetalle = () => {
         const productosArray = Array.isArray(productos) ? productos : [];
         const todosSeleccionados =
           seleccionados[proveedor]?.length === productosArray.length;
-        console.log(presupuestos);
-        console.log(productosArray);
         return (
           <TableContainer
             component={Paper}
@@ -299,6 +305,10 @@ const PresupuestoDetalle = () => {
               <TableBody>
                 {productosArray.map((producto) => {
                   const id = getProductoId(producto);
+                  const valor =
+                    cantidades[proveedor]?.[id] ||
+                    producto.cantidad_pedido ||
+                    1;
                   return (
                     <TableRow key={id} sx={{ backgroundColor: "#e0e0e0" }}>
                       <TableCell padding="checkbox">
@@ -326,11 +336,9 @@ const PresupuestoDetalle = () => {
                       <TableCell>
                         <TextField
                           type="number"
-                          value={
-                            cantidades[id] || producto.cantidad_pedido || 1
-                          }
+                          value={valor}
                           onChange={(e) =>
-                            actualizarCantidad(id, e.target.value)
+                            actualizarCantidad(proveedor, id, e.target.value)
                           }
                           inputProps={{ min: 1 }}
                           size="small"

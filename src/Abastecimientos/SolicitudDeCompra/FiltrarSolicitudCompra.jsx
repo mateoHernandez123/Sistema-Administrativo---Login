@@ -52,7 +52,7 @@ const ListadoSolicitudes = () => {
             producto: pedido.nombre,
             cantidad: pedido.cantidad,
             proveedor: pedido.marca,
-            estado: pedido.estado === 1 ? "Abierta" : "Cerrada",
+            estado: pedido.estado <= 2 ? "Abierta" : "Cerrada",
           }));
           setSolicitudes(solicitudesAdaptadas);
         }
@@ -140,7 +140,7 @@ const ListadoSolicitudes = () => {
           control={
             <Checkbox checked={filtroAbiertas} onChange={handleFiltroCambio} />
           }
-          label="Mostrar solo abiertas"
+          label={filtroAbiertas ? "Mostrar Cerradas" : "Mostrar Abiertas"}
           sx={{ marginLeft: 2 }}
         />
 

@@ -51,7 +51,7 @@ const GeneradorPresupuestos = () => {
         } else {
           const pedidosConID = data.pedidos.map((pedido, index) => ({
             ...pedido,
-            id: pedido.id ?? `${pedido.codigopedido || "P"}-${index}`, 
+            id: pedido.id ?? `${pedido.codigopedido || "P"}-${index}`,
           }));
           setPedidos(pedidosConID);
           console.log(pedidosConID);
@@ -130,7 +130,6 @@ const GeneradorPresupuestos = () => {
           text: "Se generaron correctamente los presupuestos.",
           icon: "success",
         });
-        console.log(data.presupuestos);
         navigate("/presupuestos", {
           state: { presupuestos: data.presupuestos },
         });

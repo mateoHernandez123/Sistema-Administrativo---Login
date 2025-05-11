@@ -47,7 +47,6 @@ const FormularioOrdenCompra = () => {
   const [total, setTotal] = useState(0);
   const [formaPago, setFormaPago] = useState("");
   const [plazoPago, setPlazoPago] = useState("");
-  const [envio, setEnvio] = useState("");
   const [fechaEntrega, setFechaEntrega] = useState("");
   const [lugarEntrega, setLugarEntrega] = useState("");
   const [observacion, setObservacion] = useState("");
@@ -97,9 +96,9 @@ const FormularioOrdenCompra = () => {
       } else {
         setProveedor(data.razon_proveedor);
         setCuit(data.cuit_proveedor);
-        console.log("PRODUCTOS QUE LLEGAN:", data.productos);
         const productosFormateados = data.productos.map((prod) => ({
           codigo: prod.codigo,
+          codigo_pedido: prod.codigo_pedido,
           producto: prod.nombre,
           descripcion: `${prod.marca} - ${prod.modelo}`,
           cantidad: prod.cantidad_pedido,
@@ -108,7 +107,7 @@ const FormularioOrdenCompra = () => {
         }));
 
         setProductos(productosFormateados);
-        // console.log(data.productos);
+        console.log("DATA:", data);
       }
     } catch (error) {
       console.error(error);
@@ -176,7 +175,6 @@ const FormularioOrdenCompra = () => {
               };
             })
           );
-          // console.log(data.presupuestos);
         }
       } catch (error) {
         console.error(error);
@@ -207,19 +205,38 @@ const FormularioOrdenCompra = () => {
       );
     }
   };
-  console.log(productos);
+  // console.log(productos);
+
+  const resetForm = () => {
+    setProveedor("");
+    setPresupuesto("");
+    setCuit("");
+    setNoPedidos([]);
+    setProductos([
+      { producto: "", descripcion: "", cantidad: 0, precio: 0, total: 0 },
+    ]);
+    setSubtotal(0);
+    setIva(0);
+    setTotal(0);
+    setFormaPago("");
+    setPlazoPago("");
+    setFechaEntrega("");
+    setLugarEntrega("");
+    setObservacion("");
+    setUsarEnvio(false);
+  };
   const generarOrdenCompra = async () => {
     try {
       const token = JSON.parse(localStorage.getItem("accessToken"));
 
       const pedidosSi = productos.map((p) => ({
-        codigo: p.codigo,
+        codigo: p.codigo_pedido,
         cantidad: Number(p.cantidad),
         precioUnitario: Number(p.precio),
       }));
 
       const pedidosNo = noPedidos.map((p) => ({
-        codigo: p.codigo,
+        codigo: p.codigo_pedido,
       }));
 
       const orden = {
@@ -228,7 +245,7 @@ const FormularioOrdenCompra = () => {
         total,
         formaPago,
         plazoPago,
-        envio: usarEnvio ? envio : null,
+        envio: usarEnvio ? usarEnvio : false,
         fechaEntrega: usarEnvio ? fechaEntrega : null,
         lugarEntrega: usarEnvio ? lugarEntrega : null,
         observaciones: observacion,
@@ -269,6 +286,7 @@ const FormularioOrdenCompra = () => {
           title: "Orden de Compra Creada",
           text: "La orden de compra se ha generado correctamente.",
         });
+        resetForm();
       }
     } catch (error) {
       console.error(error);
@@ -556,14 +574,14 @@ const FormularioOrdenCompra = () => {
 
       {usarEnvio && (
         <Grid container spacing={2} sx={{ marginTop: 2 }}>
-          <Grid item xs={12} sm={4}>
+          {/* <Grid item xs={12} sm={4}>
             <TextField
               fullWidth
               label="Método de Envío"
               value={envio}
               onChange={(e) => setEnvio(e.target.value)}
             />
-          </Grid>
+          </Grid> */}
           <Grid item xs={12} sm={4}>
             <TextField
               fullWidth
