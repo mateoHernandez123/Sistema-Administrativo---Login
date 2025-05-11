@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -17,23 +17,28 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Swal from "sweetalert2";
-
+import { Context } from "../../context/Context";
+import { format } from "date-fns";
 const FormularioOrdenCompra = () => {
-  const today = new Date().toISOString().split("T")[0];
-  const [numeroOrden, setNumeroOrden] = useState("OC-2024-001");
-  const [fechaOrden, setFechaOrden] = useState(today);
+  // const today = new Date().toISOString().split("T")[0];
+  // const [numeroOrden, setNumeroOrden] = useState("OC-2024-001");
+  // const [fechaOrden, setFechaOrden] = useState(today);
   const [proveedor, setProveedor] = useState("");
   const [presupuesto, setPresupuesto] = useState("");
+  const [presupuestos, setPresupuestos] = useState([]);
   const [cuit, setCuit] = useState("");
-  const [direccionProveedor, setDireccionProveedor] = useState("");
-  const [telefonoProveedor, setTelefonoProveedor] = useState("");
-  const [correoProveedor, setCorreoProveedor] = useState("");
-  const [solicitante, setSolicitante] = useState("");
-  const [departamento, setDepartamento] = useState("");
+  const [noPedidos, setNoPedidos] = useState([]); // Pedidos eliminados
+  // const [direccionProveedor, setDireccionProveedor] = useState("");
+  // const [telefonoProveedor, setTelefonoProveedor] = useState("");
+  // const [correoProveedor, setCorreoProveedor] = useState("");
+  // const [solicitante, setSolicitante] = useState("");
+  // const [departamento, setDepartamento] = useState("");
   const [productos, setProductos] = useState([
     { producto: "", descripcion: "", cantidad: 0, precio: 0, total: 0 },
   ]);
@@ -46,32 +51,154 @@ const FormularioOrdenCompra = () => {
   const [fechaEntrega, setFechaEntrega] = useState("");
   const [lugarEntrega, setLugarEntrega] = useState("");
   const [observacion, setObservacion] = useState("");
+  const [usarEnvio, setUsarEnvio] = useState(false);
+  const mañana = format(
+    new Date(Date.now() + 24 * 60 * 60 * 1000),
+    "yyyy-MM-dd"
+  );
+  const { IP, tokenError } = useContext(Context);
 
-  const proveedoresList = [
-    "Papelería Universal S.A.",
-    "Oficina Fácil",
-    "Almacenes del Norte",
-  ];
+  // const agregarProducto = () => {
+  //   setProductos([
+  //     ...productos,
+  //     { producto: "", descripcion: "", cantidad: 0, precio: 0, total: 0 },
+  //   ]);
+  // };
 
-  const presupuestosDisponibles = [
-    "Presupuesto A",
-    "Presupuesto B",
-    "Presupuesto C",
-  ];
+  const handlePresupuestoChange = async (e) => {
+    const codigo = e.target.value;
+    setPresupuesto(codigo);
 
-  const departamentosList = ["Almacén", "Ventas", "Administración"];
+    try {
+      const token = JSON.parse(localStorage.getItem("accessToken"));
+      const response = await fetch(
+        `${IP}/api/presupuestos/v2/listar/${codigo}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-  const agregarProducto = () => {
-    setProductos([
-      ...productos,
-      { producto: "", descripcion: "", cantidad: 0, precio: 0, total: 0 },
-    ]);
+      const data = await response.json();
+
+      if (data.AuthErr) {
+        tokenError(data.MENSAJE);
+      } else if (data.ServErr || data.ERROR) {
+        Swal.fire({
+          title: "Error",
+          icon: "error",
+          text: data.MENSAJE,
+          color: "#fff",
+          background: "#333",
+          confirmButtonColor: "#3085d6",
+        });
+      } else {
+        setProveedor(data.razon_proveedor);
+        setCuit(data.cuit_proveedor);
+        console.log("PRODUCTOS QUE LLEGAN:", data.productos);
+        const productosFormateados = data.productos.map((prod) => ({
+          codigo: prod.codigo,
+          producto: prod.nombre,
+          descripcion: `${prod.marca} - ${prod.modelo}`,
+          cantidad: prod.cantidad_pedido,
+          precio: 0,
+          total: 0,
+        }));
+
+        setProductos(productosFormateados);
+        // console.log(data.productos);
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        title: "Error",
+        icon: "error",
+        text: "No se pudo cargar el presupuesto.",
+        color: "#fff",
+        background: "#333",
+        confirmButtonColor: "#3085d6",
+      });
+    }
   };
+
+  const formatearFechaYHora = (fechaISO) => {
+    const fecha = new Date(fechaISO);
+    const opcionesFecha = { day: "2-digit", month: "2-digit", year: "numeric" };
+    const opcionesHora = {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "America/Argentina/Buenos_Aires",
+    };
+
+    const fechaFormateada = fecha.toLocaleDateString("es-AR", opcionesFecha);
+    const horaFormateada = fecha.toLocaleTimeString("es-AR", opcionesHora);
+
+    return { fechaFormateada, horaFormateada };
+  };
+
+  useEffect(() => {
+    const fetchPresupuestos = async () => {
+      try {
+        const token = JSON.parse(localStorage.getItem("accessToken"));
+        const response = await fetch(`${IP}/api/presupuestos/v2/listar`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.AuthErr) {
+          tokenError(data.MENSAJE);
+        } else if (data.ServErr || data.ERROR) {
+          Swal.fire({
+            title: "Error",
+            icon: "error",
+            text: data.MENSAJE,
+            color: "#fff",
+            background: "#333",
+            confirmButtonColor: "#3085d6",
+          });
+        } else {
+          setPresupuestos(
+            data.presupuestos.map((p) => {
+              const { fechaFormateada, horaFormateada } = formatearFechaYHora(
+                p.fecha_presupuesto
+              );
+              return {
+                ...p,
+                fecha: fechaFormateada,
+                hora: horaFormateada,
+              };
+            })
+          );
+          // console.log(data.presupuestos);
+        }
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          title: "Error en la carga de datos",
+          icon: "error",
+          text: "Hubo un problema al conectar con el servidor.",
+          color: "#fff",
+          background: "#333",
+          confirmButtonColor: "#3085d6",
+        });
+      }
+    };
+    fetchPresupuestos();
+  }, [IP, tokenError]);
 
   const eliminarProducto = (index) => {
     if (productos.length > 1) {
+      const productoEliminado = productos[index];
       const nuevosProductos = productos.filter((_, i) => i !== index);
       setProductos(nuevosProductos);
+      setNoPedidos([...noPedidos, productoEliminado]);
     } else {
       Swal.fire(
         "Error",
@@ -79,6 +206,88 @@ const FormularioOrdenCompra = () => {
         "error"
       );
     }
+  };
+  console.log(productos);
+  const generarOrdenCompra = async () => {
+    try {
+      const token = JSON.parse(localStorage.getItem("accessToken"));
+
+      const pedidosSi = productos.map((p) => ({
+        codigo: p.codigo,
+        cantidad: Number(p.cantidad),
+        precioUnitario: Number(p.precio),
+      }));
+
+      const pedidosNo = noPedidos.map((p) => ({
+        codigo: p.codigo,
+      }));
+
+      const orden = {
+        subtotal,
+        iva,
+        total,
+        formaPago,
+        plazoPago,
+        envio: usarEnvio ? envio : null,
+        fechaEntrega: usarEnvio ? fechaEntrega : null,
+        lugarEntrega: usarEnvio ? lugarEntrega : null,
+        observaciones: observacion,
+      };
+
+      const body = {
+        orden,
+        presupuesto,
+        pedidosSi,
+        pedidosNo,
+      };
+      console.log(body);
+      const response = await fetch(`${IP}/api/orden-compra/alta`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+
+      if (data.AuthErr) {
+        tokenError(data.MENSAJE);
+      } else if (data.ServErr || data.ERROR) {
+        Swal.fire({
+          title: "Error",
+          icon: "error",
+          text: data.MENSAJE,
+          color: "#fff",
+          background: "#333",
+          confirmButtonColor: "#3085d6",
+        });
+      } else {
+        Swal.fire({
+          icon: "success",
+          title: "Orden de Compra Creada",
+          text: "La orden de compra se ha generado correctamente.",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        title: "Error en la carga de datos",
+        icon: "error",
+        text: "Hubo un problema al conectar con el servidor.",
+        color: "#fff",
+        background: "#333",
+        confirmButtonColor: "#3085d6",
+      });
+    }
+  };
+
+  const restaurarProducto = (index) => {
+    const productoRestaurado = noPedidos[index];
+    setProductos([...productos, productoRestaurado]);
+    const nuevosNoPedidos = noPedidos.filter((_, i) => i !== index);
+    setNoPedidos(nuevosNoPedidos);
   };
 
   const handleProductoChange = (index, name, value) => {
@@ -101,14 +310,6 @@ const FormularioOrdenCompra = () => {
     setTotal(updatedSubtotal + updatedIva);
   };
 
-  const enviarOrdenCompra = () => {
-    Swal.fire({
-      icon: "success",
-      title: "Orden de Compra Creada",
-      text: "La orden de compra se ha generado correctamente.",
-    });
-  };
-
   return (
     <Box
       sx={{
@@ -125,7 +326,7 @@ const FormularioOrdenCompra = () => {
         Orden de Compra
       </Typography>
 
-      <Typography variant="h6" sx={{ marginBottom: 2 }}>
+      <Typography variant="h5" sx={{ marginBottom: 2 }}>
         Presupuesto
       </Typography>
       <Grid container spacing={2} sx={{ marginBottom: 3 }}>
@@ -134,12 +335,13 @@ const FormularioOrdenCompra = () => {
             <InputLabel>Presupuestos Disponibles</InputLabel>
             <Select
               value={presupuesto}
-              onChange={(e) => setPresupuesto(e.target.value)}
+              onChange={handlePresupuestoChange}
               required
             >
-              {presupuestosDisponibles.map((presupuesto, index) => (
-                <MenuItem key={index} value={presupuesto}>
-                  {presupuesto}
+              {presupuestos.map((presupuesto, index) => (
+                <MenuItem key={index} value={presupuesto.codigo_presupuesto}>
+                  {presupuesto.codigo_presupuesto} -{" "}
+                  {presupuesto.razon_proveedor}
                 </MenuItem>
               ))}
             </Select>
@@ -148,91 +350,34 @@ const FormularioOrdenCompra = () => {
       </Grid>
 
       {/* Información del proveedor */}
-      <Typography variant="h6" sx={{ marginBottom: 2 }}>
+      <Typography variant="h5" sx={{ marginBottom: 2 }}>
         Información del Proveedor
       </Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
+          <Typography variant="h6">Razon Social</Typography>
           <FormControl fullWidth>
-            <InputLabel>Proveedor</InputLabel>
-            <Select
+            <TextField
               value={proveedor}
               onChange={(e) => setProveedor(e.target.value)}
-            >
-              {proveedoresList.map((proveedor, index) => (
-                <MenuItem key={index} value={proveedor}>
-                  {proveedor}
-                </MenuItem>
-              ))}
-            </Select>
+              fullWidth
+              disabled
+            />
           </FormControl>
         </Grid>
         <Grid item xs={12} sm={6}>
+          <Typography variant="h6">Cuit</Typography>
           <TextField
-            label="CUIT"
             value={cuit}
             onChange={(e) => setCuit(e.target.value)}
             fullWidth
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            label="Dirección"
-            value={direccionProveedor}
-            onChange={(e) => setDireccionProveedor(e.target.value)}
-            fullWidth
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            label="Teléfono"
-            value={telefonoProveedor}
-            onChange={(e) => setTelefonoProveedor(e.target.value)}
-            fullWidth
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            label="Correo Electrónico"
-            value={correoProveedor}
-            onChange={(e) => setCorreoProveedor(e.target.value)}
-            fullWidth
+            disabled
           />
         </Grid>
       </Grid>
-
-      {/* Información del solicitante */}
-      {/* <Typography variant="h6" sx={{ marginTop: 3, marginBottom: 2 }}>
-        Información del Solicitante
-      </Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            label="Nombre"
-            value={solicitante}
-            onChange={(e) => setSolicitante(e.target.value)}
-            fullWidth
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <FormControl fullWidth>
-            <InputLabel>Departamento</InputLabel>
-            <Select
-              value={departamento}
-              onChange={(e) => setDepartamento(e.target.value)}
-            >
-              {departamentosList.map((departamento, index) => (
-                <MenuItem key={index} value={departamento}>
-                  {departamento}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-      </Grid>
-        </Grid> */}
 
       {/* Detalle del pedido */}
-      <Typography variant="h6" sx={{ marginTop: 3, marginBottom: 2 }}>
+      <Typography variant="h5" sx={{ marginTop: 3, marginBottom: 2 }}>
         Detalle del Pedido
       </Typography>
       <TableContainer
@@ -253,31 +398,20 @@ const FormularioOrdenCompra = () => {
           <TableBody>
             {productos.map((producto, index) => (
               <TableRow key={index}>
-                <TableCell>
-                  <TextField
-                    value={producto.producto}
-                    onChange={(e) =>
-                      handleProductoChange(index, "producto", e.target.value)
-                    }
-                    fullWidth
-                  />
-                </TableCell>
-                <TableCell>
-                  <TextField
-                    value={producto.descripcion}
-                    onChange={(e) =>
-                      handleProductoChange(index, "descripcion", e.target.value)
-                    }
-                    fullWidth
-                  />
-                </TableCell>
+                <TableCell>{producto.producto}</TableCell>
+                <TableCell>{producto.descripcion}</TableCell>
                 <TableCell>
                   <TextField
                     type="number"
                     value={producto.cantidad}
                     onChange={(e) =>
-                      handleProductoChange(index, "cantidad", e.target.value)
+                      handleProductoChange(
+                        index,
+                        "cantidad",
+                        Math.max(1, parseInt(e.target.value, 10) || 1)
+                      )
                     }
+                    inputProps={{ min: 1 }}
                     fullWidth
                   />
                 </TableCell>
@@ -286,18 +420,20 @@ const FormularioOrdenCompra = () => {
                     type="number"
                     value={producto.precio}
                     onChange={(e) =>
-                      handleProductoChange(index, "precio", e.target.value)
+                      handleProductoChange(
+                        index,
+                        "precio",
+                        Math.max(1, parseFloat(e.target.value) || 1)
+                      )
                     }
+                    inputProps={{ min: 1 }}
                     fullWidth
                   />
                 </TableCell>
                 <TableCell>{producto.total}</TableCell>
                 <TableCell>
-                  <IconButton
-                    color="error"
-                    onClick={() => eliminarProducto(index)}
-                  >
-                    <DeleteIcon />
+                  <IconButton onClick={() => eliminarProducto(index)}>
+                    <DeleteIcon sx={{ color: "red" }} />
                   </IconButton>
                 </TableCell>
               </TableRow>
@@ -306,7 +442,52 @@ const FormularioOrdenCompra = () => {
         </Table>
       </TableContainer>
 
-      <Box sx={{ textAlign: "center", marginBottom: 4 }}>
+      {/* Listados de pedidos cancelados */}
+      {noPedidos.length > 0 && (
+        <>
+          <Typography variant="h5" sx={{ marginTop: 3 }}>
+            Pedidos Cancelados
+          </Typography>
+          <TableContainer
+            component={Paper}
+            sx={{
+              backgroundColor: "#f44336",
+              marginTop: 3,
+              borderRadius: 5,
+            }}
+          >
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell align="center">Producto</TableCell>
+                  <TableCell align="center">Descripción</TableCell>
+                  <TableCell align="center">Cantidad</TableCell>
+                  <TableCell align="center">Acción</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {noPedidos.map((producto, index) => (
+                  <TableRow key={index}>
+                    <TableCell align="center">{producto.producto}</TableCell>
+                    <TableCell align="center">{producto.descripcion}</TableCell>
+                    <TableCell align="center">{producto.cantidad}</TableCell>
+                    <TableCell align="center">
+                      <IconButton
+                        // color="success"
+                        onClick={() => restaurarProducto(index)}
+                      >
+                        <AddIcon sx={{ color: "green" }} />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </>
+      )}
+
+      {/* <Box sx={{ textAlign: "center", marginBottom: 4 }}>
         <Button
           variant="outlined"
           color="primary"
@@ -321,10 +502,10 @@ const FormularioOrdenCompra = () => {
         >
           <AddIcon /> Agregar Producto
         </Button>
-      </Box>
+      </Box> */}
 
       {/* Resumen de la Orden */}
-      <Grid container spacing={2}>
+      <Grid container spacing={2} sx={{ marginTop: 3 }}>
         <Grid item xs={12} sm={6}>
           <TextField label="Subtotal" value={subtotal} fullWidth readOnly />
         </Grid>
@@ -336,9 +517,9 @@ const FormularioOrdenCompra = () => {
         </Grid>
       </Grid>
 
-      {/* Condiciones de la Orden */}
-      <Typography variant="h6" sx={{ marginTop: 3, marginBottom: 2 }}>
-        Condiciones de la Orden
+      {/* Forma de Pago de la Orden */}
+      <Typography variant="h5" sx={{ marginTop: 3, marginBottom: 2 }}>
+        Forma de Pago de la Orden
       </Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
@@ -357,34 +538,56 @@ const FormularioOrdenCompra = () => {
             fullWidth
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            label="Envío"
-            value={envio}
-            onChange={(e) => setEnvio(e.target.value)}
-            fullWidth
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            label="Fecha de Entrega"
-            value={fechaEntrega}
-            onChange={(e) => setFechaEntrega(e.target.value)}
-            fullWidth
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            label="Lugar de Entrega"
-            value={lugarEntrega}
-            onChange={(e) => setLugarEntrega(e.target.value)}
-            fullWidth
-          />
-        </Grid>
       </Grid>
+
+      {/* Envio de la Orden */}
+      <Typography variant="h5" sx={{ marginTop: 3 }}>
+        Envío (Opcional)
+      </Typography>
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={usarEnvio}
+            onChange={(e) => setUsarEnvio(e.target.checked)}
+          />
+        }
+        label="¿Incluir información de envío?"
+      />
+
+      {usarEnvio && (
+        <Grid container spacing={2} sx={{ marginTop: 2 }}>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="Método de Envío"
+              value={envio}
+              onChange={(e) => setEnvio(e.target.value)}
+            />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              type="date"
+              label="Fecha de Entrega"
+              InputLabelProps={{ shrink: true }}
+              value={fechaEntrega}
+              onChange={(e) => setFechaEntrega(e.target.value)}
+              inputProps={{ min: mañana }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="Lugar de Entrega"
+              value={lugarEntrega}
+              onChange={(e) => setLugarEntrega(e.target.value)}
+            />
+          </Grid>
+        </Grid>
+      )}
       {/* Observaciones */}
       <Typography
-        variant="h4"
+        variant="h5"
         sx={{
           color: "#333",
           fontSize: "1.6rem",
@@ -408,7 +611,7 @@ const FormularioOrdenCompra = () => {
         <Button
           variant="contained"
           color="success"
-          onClick={enviarOrdenCompra}
+          onClick={generarOrdenCompra}
           fullWidth
           sx={{ backgroundColor: "#3b3a31", color: "#ffff", marginTop: 2 }}
         >

@@ -51,7 +51,7 @@ const GeneradorPresupuestos = () => {
         } else {
           const pedidosConID = data.pedidos.map((pedido, index) => ({
             ...pedido,
-            id: pedido.id ?? `${pedido.codigopedido || "P"}-${index}`, // Generamos un id si no existe
+            id: pedido.id ?? `${pedido.codigopedido || "P"}-${index}`, 
           }));
           setPedidos(pedidosConID);
           console.log(pedidosConID);

@@ -82,7 +82,7 @@ const ListadoPresupuestos = () => {
               };
             })
           );
-          console.log(data.presupuestos);
+          // console.log(data.presupuestos);
         }
       } catch (error) {
         console.error(error);
@@ -99,9 +99,71 @@ const ListadoPresupuestos = () => {
     fetchPresupuestos();
   }, [IP, tokenError]);
 
-  const handleReimprimir = (presupuesto) => {
+  const fetchImprimirPresupuesto = async (codigo) => {
+    try {
+      const token = JSON.parse(localStorage.getItem("accessToken"));
+      const response = await fetch(
+        `${IP}/api/presupuestos/v2/listar/${codigo}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.AuthErr) {
+        tokenError(data.MENSAJE);
+        return [];
+      } else if (data.ServErr || data.ERROR) {
+        Swal.fire({
+          title: "Error",
+          icon: "error",
+          text: data.MENSAJE,
+          color: "#fff",
+          background: "#333",
+          confirmButtonColor: "#3085d6",
+        });
+        return [];
+      } else {
+        // console.log(data.productos);
+        return data.productos;
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        title: "Error en la carga de datos",
+        icon: "error",
+        text: "Hubo un problema al conectar con el servidor.",
+        color: "#fff",
+        background: "#333",
+        confirmButtonColor: "#3085d6",
+      });
+      return [];
+    }
+  };
+
+  const handleReimprimir = async (presupuesto) => {
     const doc = new jsPDF();
     const numeroPresupuesto = Math.floor(1000 + Math.random() * 9000);
+
+    // Esperamos la respuesta del fetch y guardamos los productos
+    const productos = await fetchImprimirPresupuesto(
+      presupuesto.codigo_presupuesto
+    );
+    if (!productos || productos.length === 0) {
+      Swal.fire({
+        title: "Error",
+        icon: "error",
+        text: "No se encontraron productos para este presupuesto.",
+        color: "#fff",
+        background: "#333",
+        confirmButtonColor: "#3085d6",
+      });
+      return;
+    }
 
     doc.setFontSize(16);
     doc.text("Presupuesto de Productos", 14, 20);
@@ -117,6 +179,19 @@ const ListadoPresupuestos = () => {
       body: [
         [presupuesto.codigo_presupuesto, presupuesto.fecha, presupuesto.hora],
       ],
+    });
+
+    doc.setFontSize(16);
+    doc.text("Productos", 14, 100);
+    autoTable(doc, {
+      startY: 105,
+      head: [["Producto", "Marca", "Modelo", "Cantidad"]],
+      body: productos.map((p) => [
+        p.nombre,
+        p.marca,
+        p.modelo,
+        p.cantidad_pedido,
+      ]),
     });
 
     doc.save(`Presupuesto_${presupuesto.razon_proveedor}.pdf`);

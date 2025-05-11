@@ -120,7 +120,7 @@ const PresupuestoDetalle = () => {
           p.nombre_producto || p.nombre,
           p.marca_producto || p.marca,
           p.modelo_producto || p.modelo,
-          p.cantidad,
+          p.cantidad_pedido || p.cantidad,
         ]),
       });
 
@@ -135,22 +135,18 @@ const PresupuestoDetalle = () => {
     const presupuestosBody = Object.entries(seleccionados)
       .map(([proveedor, productos]) => {
         if (!productos.length) return null;
-
-        // Buscar el presupuesto original para obtener el cuit_proveedor
         const presupuestoOriginal = presupuestosRaw.find(
           (p) => p.proveedor?.razon_proveedor === proveedor
         );
         const cuitProveedor =
           presupuestoOriginal?.proveedor?.cuit_proveedor || null;
-
-        // Asegurarse de que el cuerpo de la petición siga la estructura correcta
         return {
           cuit_proveedor: cuitProveedor,
           pedidos: productos
-            .filter((p) => p.codigo_pedido || p.codigo) // Filtrar productos que tengan código
+            .filter((p) => p.codigo_pedido || p.codigo)
             .map((p) => ({
-              codigo_pedido: p.codigo_pedido || p.codigo, // Mapear código de pedido
-              cantidad_pedido: parseInt(p.cantidad), // Asegurarse de que la cantidad sea un número
+              codigo_pedido: p.codigo_pedido || p.codigo,
+              cantidad_pedido: parseInt(p.cantidad),
             })),
         };
       })
@@ -184,7 +180,7 @@ const PresupuestoDetalle = () => {
         }
       );
       console.log("Envio al back:", presupuestosBody);
-      console.log(response);
+      console.log(response.status);
       if (response.status === 200) {
         setModalOpen(true);
 
@@ -389,7 +385,7 @@ const PresupuestoDetalle = () => {
                     <TableRow key={getProductoId(p)}>
                       <TableCell>{p.codigo_producto || p.codigo}</TableCell>
                       <TableCell>{p.nombre_producto || p.nombre}</TableCell>
-                      <TableCell>{p.cantidad}</TableCell>
+                      <TableCell>{p.cantidad_producto || p.cantidad}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

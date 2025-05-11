@@ -69,8 +69,6 @@ const AltaProducto = () => {
       });
       return;
     }
-
-    // Manejar cambios en el formulario
     setFormData({
       ...formData,
       [name]: value,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import {
   Box,
   Table,
@@ -12,47 +12,89 @@ import {
   TextField,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import { Context } from "../../context/Context";
 
 const OrdenesCompraList = () => {
   const navigate = useNavigate();
+  const { IP, tokenError } = useContext(Context);
+  const [ordenCompra, setOrdenCompra] = useState([]);
 
-  // Datos simulados de órdenes de compra
-  const ordenesCompra = [
-    {
-      codigo: "OC-1001",
-      proveedor: "Proveedor A",
-      productos: [
-        { id: "P001", nombre: "Producto 1", descripcion: "Descripción 1" },
-        { id: "P002", nombre: "Producto 2", descripcion: "Descripción 2" },
-      ],
-    },
-    {
-      codigo: "OC-1002",
-      proveedor: "Proveedor B",
-      productos: [
-        { id: "P003", nombre: "Producto 3", descripcion: "Descripción 3" },
-        { id: "P004", nombre: "Producto 4", descripcion: "Descripción 4" },
-      ],
-    },
-    {
-      codigo: "OC-1003",
-      proveedor: "Proveedor A",
-      productos: [
-        { id: "P002", nombre: "Producto 2", descripcion: "Descripción 2" },
-        { id: "P005", nombre: "Producto 5", descripcion: "Descripción 5" },
-      ],
-    },
-  ];
+  useEffect(() => {
+    const fetchOrdenes = async () => {
+      try {
+        const token = JSON.parse(localStorage.getItem("accessToken"));
+        const response = await fetch(`${IP}/api/orden-compra/listar`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.AuthErr) {
+          tokenError(data.MENSAJE);
+        } else if (data.ServErr || data.ERROR) {
+          Swal.fire({
+            title: "Error",
+            icon: "error",
+            text: data.MENSAJE,
+            color: "#fff",
+            background: "#333",
+            confirmButtonColor: "#3085d6",
+          });
+        } else {
+          const agrupadoPorOrden = data.lista.reduce((acc, item) => {
+            const existente = acc.find((o) => o.codigo === item.codigo_orden);
+            const producto = {
+              id: item.codigo_producto,
+              nombre: item.nombre_producto,
+              descripcion: item.descripcion_producto,
+            };
+
+            if (existente) {
+              existente.productos.push(producto);
+            } else {
+              acc.push({
+                codigo: item.codigo_orden,
+                proveedor: `${item.razon_social_proveedor} (${item.cuit_proveedor})`,
+                productos: [producto],
+              });
+            }
+
+            return acc;
+          }, []);
+
+          setOrdenCompra(agrupadoPorOrden);
+
+          console.log(data.lista);
+        }
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          title: "Error en la carga de datos",
+          icon: "error",
+          text: "Hubo un problema al conectar con el servidor.",
+          color: "#fff",
+          background: "#333",
+          confirmButtonColor: "#3085d6",
+        });
+      }
+    };
+    fetchOrdenes();
+  }, [IP, tokenError]);
 
   // Estados para los filtros
   const [filtroProveedor, setFiltroProveedor] = useState("");
   const [filtroProducto, setFiltroProducto] = useState("");
 
   // Filtrar órdenes de compra
-  const ordenesFiltradas = ordenesCompra.filter((orden) => {
+  const ordenesFiltradas = ordenCompra.filter((orden) => {
     const coincideProveedor = orden.proveedor
-      .toLowerCase()
+      ?.toLowerCase()
       .includes(filtroProveedor.toLowerCase());
+
     const coincideProducto = orden.productos.some((producto) =>
       producto.nombre.toLowerCase().includes(filtroProducto.toLowerCase())
     );
@@ -92,38 +134,62 @@ const OrdenesCompraList = () => {
         <Table>
           <TableHead sx={{ backgroundColor: "#ffeb3b" }}>
             <TableRow>
-              <TableCell><b>Código de Orden</b></TableCell>
-              <TableCell><b>Proveedor</b></TableCell>
-              <TableCell><b>Código de Producto</b></TableCell>
-              <TableCell><b>Nombre de Producto</b></TableCell>
-              <TableCell><b>Descripción</b></TableCell>
-              <TableCell><b>Acciones</b></TableCell>
+              <TableCell>
+                <b>Código de Orden</b>
+              </TableCell>
+              <TableCell>
+                <b>Proveedor</b>
+              </TableCell>
+              <TableCell>
+                <b>Código de Producto</b>
+              </TableCell>
+              <TableCell>
+                <b>Nombre de Producto</b>
+              </TableCell>
+              <TableCell>
+                <b>Descripción</b>
+              </TableCell>
+              <TableCell>
+                <b>Acciones</b>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {ordenesFiltradas.flatMap((orden) =>
-              orden.productos.map((producto, index) => (
-                <TableRow key={`${orden.codigo}-${producto.id}`} sx={{ backgroundColor: "#e0e0e0" }}>
-                  <TableCell>{orden.codigo}</TableCell>
-                  <TableCell>{orden.proveedor}</TableCell>
-                  <TableCell>{producto.id}</TableCell>
-                  <TableCell>{producto.nombre}</TableCell>
-                  <TableCell>{producto.descripcion}</TableCell>
-                  {index === 0 && ( // Solo mostrar el botón en la primera fila del grupo
-                    <TableCell rowSpan={orden.productos.length}>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => manejarSeleccion(orden)}
-                      >
-                        Seleccionar
-                      </Button>
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))
-            )}
-            {ordenesFiltradas.length === 0 && (
+            {ordenesFiltradas.length > 0 ? (
+              ordenesFiltradas.map((orden) =>
+                orden.productos.map((producto, indexProducto) => (
+                  <TableRow
+                    key={`${orden.codigo}-${producto.id}`}
+                    sx={{ backgroundColor: "#e0e0e0" }}
+                  >
+                    {indexProducto === 0 && (
+                      <>
+                        <TableCell rowSpan={orden.productos.length}>
+                          {orden.codigo}
+                        </TableCell>
+                        <TableCell rowSpan={orden.productos.length}>
+                          {orden.proveedor}
+                        </TableCell>
+                      </>
+                    )}
+                    <TableCell>{producto.id}</TableCell>
+                    <TableCell>{producto.nombre}</TableCell>
+                    <TableCell>{producto.descripcion}</TableCell>
+                    {indexProducto === 0 && (
+                      <TableCell rowSpan={orden.productos.length}>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => manejarSeleccion(orden)}
+                        >
+                          Seleccionar
+                        </Button>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))
+              )
+            ) : (
               <TableRow>
                 <TableCell colSpan={6} style={{ textAlign: "center" }}>
                   No se encontraron órdenes de compra.
