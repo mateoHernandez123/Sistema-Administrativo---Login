@@ -49,7 +49,9 @@ const GeneradorPresupuestos = () => {
             confirmButtonColor: "#3085d6",
           });
         } else {
-          const pedidosConID = data.pedidos.map((pedido, index) => ({
+          const pedidosConID = data.pedidos
+          .filter(pedido => pedido.estado < 3) //Filtra solo los pedidos con estado menor a 3
+          .map((pedido, index) => ({
             ...pedido,
             id: pedido.id ?? `${pedido.codigopedido || "P"}-${index}`,
           }));

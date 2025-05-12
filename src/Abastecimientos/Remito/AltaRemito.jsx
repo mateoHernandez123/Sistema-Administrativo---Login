@@ -46,6 +46,7 @@ const AltaRemito = () => {
             text: data.MENSAJE,
           });
         }
+        console.log(data )
         const orden = data.orden[0];
         setCodigoOrden(orden.codigo);
         setProveedor(ordenSeleccionada.proveedor);

@@ -65,10 +65,7 @@ const OrdenesCompraList = () => {
 
             return acc;
           }, []);
-
           setOrdenCompra(agrupadoPorOrden);
-
-          console.log(data.lista);
         }
       } catch (error) {
         console.error(error);
