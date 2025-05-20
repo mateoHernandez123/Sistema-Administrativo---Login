@@ -33,32 +33,20 @@ const VisualizarProducto = () => {
     const fetchCompras = async () => {
       try {
         const token = JSON.parse(localStorage.getItem("accessToken"));
-        const response = await fetch(
-          `${IP}/api/productos/historialcompra?codigo=${codigo}`,
-          {
-            method: "GET",
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const response = await fetch(`${IP}/api/productos/historialcompra?codigo=${codigo}`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const data = await response.json();
 
         if (data.ERROR) {
-          Swal.fire(
-            "Error",
-            "No se pudo cargar el historial de compras",
-            "error"
-          );
+          Swal.fire("Error", "No se pudo cargar el historial de compras", "error");
         } else {
           setCompras(data.ListaProd || []);
           console.log(data);
         }
       } catch (error) {
-        Swal.fire(
-          "Error",
-          "No se pudo cargar el historial de compras",
-          "error"
-        );
-        console.log(error);
+        Swal.fire("Error", "No se pudo cargar el historial de compras", "error");
       }
     };
 
@@ -119,14 +107,14 @@ const VisualizarProducto = () => {
                 </TableHead>
                 <TableBody>
                   {compras.map((compra, index) => {
-                    const fechaFormateada = new Date(
-                      compra.fecha_hora
-                    ).toLocaleDateString("es-AR", {
+                    // Formatear fecha
+                    const fechaFormateada = new Date(compra.fecha_hora).toLocaleDateString("es-AR", {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
                     });
 
+                    // Obtener proveedor
                     const razon = compra.proveedor?.Razon || "—";
                     const cuit = compra.proveedor?.Cuit || "";
 
@@ -135,9 +123,7 @@ const VisualizarProducto = () => {
                         <TableCell>{fechaFormateada}</TableCell>
                         <TableCell>
                           {razon} <br />
-                          <span style={{ fontSize: "0.85rem", color: "#666" }}>
-                            {cuit}
-                          </span>
+                          <span style={{ fontSize: "0.85rem", color: "#666" }}>{cuit}</span>
                         </TableCell>
                         <TableCell>{compra.cantidad}</TableCell>
                         <TableCell>${compra.precio_unitario}</TableCell>
@@ -145,12 +131,11 @@ const VisualizarProducto = () => {
                     );
                   })}
                 </TableBody>
+
               </Table>
             </TableContainer>
           ) : (
-            <Typography>
-              No hay historial de compras para este producto.
-            </Typography>
+            <Typography>No hay historial de compras para este producto.</Typography>
           )}
         </>
       ) : (

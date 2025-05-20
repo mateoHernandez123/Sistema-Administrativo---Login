@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   TextField,
   Button,
@@ -9,11 +9,14 @@ import {
   Typography,
   Box,
   IconButton,
+  FormControlLabel,
+  Checkbox
 } from "@mui/material";
 import Swal from "sweetalert2";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Context } from "../../context/Context";
+import SelectCategoria from "./SelectCategoria";
 
 const EditarProducto = () => {
   const { codigo } = useParams();
@@ -23,43 +26,32 @@ const EditarProducto = () => {
   const producto = location.state?.producto || {};
   const [formData, setFormData] = useState({
     codigo: producto.codigo || "",
-    codigoBarra: producto.codigo_barra || "",
+    // razon_social: producto.razon_social || "",
+    codigo_barra: producto.codigo_barra || "",
     nombre: producto.nombre || "",
     marca: producto.marca || "",
     categoria: producto.categoria || "",
     modelo: producto.modelo || "",
-    puntoReposicion: producto.punto_reposicion || 0,
-    almacen: producto.almacen || "",
-    urlImagen: producto.url_imagen || "",
     descripcion: producto.descripcion || "",
-    precioVenta: producto.precio_venta || 0,
-    stockActual: producto.stock_actual || 0,
-    stockMaximo: producto.stock_maximo || 0,
-    stockMinimo: producto.stock_minimo || 0,
-    ivaPorcentaje: producto.iva_porcentaje || 0,
+    punto_reposicion: producto.punto_reposicion || 0,
+    almacen: producto.almacen || "",
+    url_imagen: producto.url_imagen || "",
+    precio_venta: producto.precio_venta || 0,
+    stock_actual: producto.stock_actual || 0,
+    stock_maximo: producto.stock_maximo || 0,
+    stock_minimo: producto.stock_minimo || 0,
+    iva_porcentaje: producto.iva_porcentaje || 0,
+    activo: producto.activo ?? true, // 👈 Nuevo campo
+
   });
 
-  const categorias = [
-    "Accesorios",
-    "Cubiertas",
-    "Lubricantes",
-    "Filtros de aire",
-    "Frenos",
-    "Suspensión",
-    "Escape",
-    "Escape Deportivo",
-    "Iluminación",
-    "Baterías",
-    "Transmisión",
-    "Embrague",
-    "Indumentaria",
-    "Cascos",
-    "Guantes",
-    "Botas",
-    "Protección",
-    "Seguridad",
-  ];
+
   const almacenes = ["Taller Mecanico", "Primer piso", "Planta baja"];
+
+  const handleCheckboxChange = (e) => {
+    setFormData({ ...formData, activo: e.target.checked });
+  };
+
 
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
@@ -75,6 +67,8 @@ const EditarProducto = () => {
   const handleListarProductos = () => navigate("/productos");
 
   const handleSave = async () => {
+    console.log("Datos que se envían al backend:", formData); // 👈 ACÁ
+
     try {
       const token = JSON.parse(localStorage.getItem("accessToken"));
       const response = await fetch(`${IP}/api/productos/modificacion`, {
@@ -104,7 +98,6 @@ const EditarProducto = () => {
         "Hubo un problema al conectar con el servidor.",
         "error"
       );
-      console.log(error);
     }
   };
 
@@ -191,8 +184,8 @@ const EditarProducto = () => {
         />
         <TextField
           label="Código de Barras"
-          name="codigoBarra"
-          value={formData.codigoBarra}
+          name="codigo_barra"
+          value={formData.codigo_barra}
           onChange={handleInputChange}
         />
         <TextField
@@ -221,47 +214,48 @@ const EditarProducto = () => {
         />
         <TextField
           label="Precio de Venta"
-          name="precioVenta"
+          name="precio_venta"
           type="number"
-          value={formData.precioVenta}
+          value={formData.precio_venta}
           onChange={handleInputChange}
         />
         <TextField
           label="IVA"
-          name="ivaPorcentaje"
+          name="iva_porcentaje"
           type="number"
-          value={formData.ivaPorcentaje}
+          value={formData.iva_porcentaje}
           onChange={handleInputChange}
         />
         <TextField
           label="Stock Maximo"
-          name="stockMaximo"
+          name="stock_maximo"
           type="number"
-          value={formData.stockMaximo}
+          value={formData.stock_maximo}
           onChange={handleInputChange}
         />
         <TextField
           label="Stock Minimo"
-          name="stockMinimo"
+          name="stock_minimo"
           type="number"
-          value={formData.stockMinimo}
+          value={formData.stock_minimo}
+          onChange={handleInputChange}
+        />
+        <TextField
+          fullWidth
+          label="Punto de Reposición"
+          name="puntoReposicion"
+          type="number"
+          inputProps={{ min: 0 }}
+          value={formData.punto_reposicion}
+          onChange={handleInputChange}
+          margin="normal"
+        />
+
+        <SelectCategoria
+          value={formData.categoria}
           onChange={handleInputChange}
         />
 
-        <FormControl>
-          <InputLabel>Categoría</InputLabel>
-          <Select
-            name="categoria"
-            value={formData.categoria}
-            onChange={handleInputChange}
-          >
-            {categorias.map((cat, i) => (
-              <MenuItem key={i} value={cat}>
-                {cat}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
 
         <FormControl>
           <InputLabel>Almacén</InputLabel>
@@ -277,6 +271,19 @@ const EditarProducto = () => {
             ))}
           </Select>
         </FormControl>
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={formData.activo}
+              onChange={handleCheckboxChange}
+              name="activo"
+              color="primary"
+            />
+          }
+          label={formData.activo ? "Activo" : "Inactivo"}
+        />
+
 
         <Button
           variant="contained"
